@@ -3,12 +3,46 @@ import 'package:sva_data/src/database/sva_database.dart';
 import 'package:sva_data/src/ids.dart';
 import 'package:sva_data/src/repositories/repository.dart';
 
-/// A `YYYY-MM-DD` date or a `YYYY-MM` month.
+/// A `YYYY-MM-DD` day or, for month columns, a `YYYY-MM` month.
 final _date = RegExp(r'^\d{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12]\d|3[01]))?$');
 
 void _checkDate(String value, {bool monthOnly = false}) {
-  final ok = _date.hasMatch(value) && (!monthOnly || value.length == 7);
+  var ok = _date.hasMatch(value) && value.length == (monthOnly ? 7 : 10);
+  if (ok && value.length == 10) {
+    // Reject days that do not exist, such as 2026-02-31.
+    final parsed = DateTime.parse('${value}T00:00:00Z');
+    ok = parsed.toIso8601String().startsWith(value);
+  }
   if (!ok) throw ArgumentError.value(value, 'date');
+}
+
+/// Checks the date and month columns present in [columns]: an invalid
+/// value throws [ArgumentError] before anything is written.
+void _checkDates(
+  Map<String, Expression<Object>> columns, {
+  Set<String> days = const {},
+  Set<String> months = const {},
+}) {
+  for (final MapEntry(:key, :value) in columns.entries) {
+    if (!days.contains(key) && !months.contains(key)) continue;
+    if (value is! Variable<Object>) continue;
+    final text = value.value;
+    if (text == null) continue;
+    if (text is! String) throw ArgumentError.value(text, key);
+    _checkDate(text, monthOnly: months.contains(key));
+  }
+}
+
+/// Throws [ArgumentError] unless [value] (when present) is in [allowed].
+void _checkOneOf(String name, Object? value, Set<String> allowed) {
+  if (value != null && !allowed.contains(value)) {
+    throw ArgumentError.value(value, name);
+  }
+}
+
+String? _text(Map<String, Expression<Object>> columns, String key) {
+  final value = columns[key];
+  return value is Variable<Object> ? value.value as String? : null;
 }
 
 /// Each physical piece of gear a user owns, with its history.
@@ -28,11 +62,52 @@ class GearPieceRepository extends Repository<$GearPiecesTable, GearPiece> {
     'retired_on',
   };
 
+  static const _months = {'made_on', 'bought_on'};
+  static const categories = {
+    'cam',
+    'nut',
+    'hex',
+    'tricam',
+    'sling',
+    'alpine_draw',
+    'quickdraw',
+    'carabiner',
+    'locker',
+    'belay_device',
+    'nut_tool',
+    'rope',
+    'harness',
+    'helmet',
+    'ice_screw',
+    'ice_tool',
+    'crampons',
+    'aider',
+    'hook',
+    'cam_hook',
+    'daisy',
+  };
+
+  void _validate(Map<String, Expression<Object>> columns) {
+    _checkDates(columns, months: _months);
+    _checkOneOf('category', _text(columns, 'category'), categories);
+  }
+
+  @override
+  Future<void> update(
+    String id,
+    Insertable<GearPiece> changes, {
+    required String userId,
+  }) {
+    _validate(changes.toColumns(true));
+    return super.update(id, changes, userId: userId);
+  }
+
   /// Adds a piece for [userId]. Returns the new id.
   Future<String> create(
     GearPiecesCompanion draft, {
     required String userId,
   }) async {
+    _validate(draft.toColumns(true));
     final id = newId();
     final now = clock();
     await insert(
@@ -75,9 +150,16 @@ class GearPieceRepository extends Repository<$GearPiecesTable, GearPiece> {
     _checkDate(date);
     return db.transaction(() async {
       final month = date.substring(0, 7);
+      await checkWritable(pieceId, userId);
+      final piece = (await get(pieceId))!;
+      // An older event logged late never moves the month backwards.
+      bool later(String? current) =>
+          current == null || month.compareTo(current) > 0;
       await writeChecked(pieceId, userId, {
-        if (kind == 'reslung') 'reslung_on': Variable(month),
-        if (kind == 'retired') 'retired_on': Variable(month),
+        if (kind == 'reslung' && later(piece.reslungOn))
+          'reslung_on': Variable(month),
+        if (kind == 'retired' && later(piece.retiredOn))
+          'retired_on': Variable(month),
       });
       final id = newId();
       final now = clock();
@@ -134,8 +216,28 @@ class ShoeRepository extends Repository<$ShoesTable, Shoe> {
   @override
   RowAccess get access => RowAccess.owned;
 
+  void _validate(Map<String, Expression<Object>> columns) {
+    _checkDates(columns, months: {'bought_on', 'retired_on'});
+    _checkOneOf('closure', _text(columns, 'closure'), {
+      'velcro',
+      'lace',
+      'slipper',
+    });
+  }
+
+  @override
+  Future<void> update(
+    String id,
+    Insertable<Shoe> changes, {
+    required String userId,
+  }) {
+    _validate(changes.toColumns(true));
+    return super.update(id, changes, userId: userId);
+  }
+
   /// Adds shoes for [userId]. Returns the new id.
   Future<String> create(ShoesCompanion draft, {required String userId}) async {
+    _validate(draft.toColumns(true));
     final id = newId();
     final now = clock();
     await insert(
@@ -234,6 +336,14 @@ class BenchmarkDefRepository
     BenchmarkDefsCompanion draft, {
     required String userId,
   }) async {
+    _checkOneOf('unit', draft.unit.value, {
+      'pct_bw',
+      'kg',
+      's',
+      'reps',
+      'cm',
+      'deg',
+    });
     final id = newId();
     final now = clock();
     await insert(
@@ -247,6 +357,19 @@ class BenchmarkDefRepository
     );
     return id;
   }
+
+  /// Soft-deletes one of [userId]'s own tests with its results.
+  @override
+  Future<void> softDelete(String id, {required String userId}) =>
+      db.transaction(() async {
+        await checkWritable(id, userId);
+        await markDeleted(table, table.id, [id]);
+        await markDeleted(
+          db.benchmarkResults,
+          db.benchmarkResults.benchmarkId,
+          [id],
+        );
+      });
 
   /// The standard tests and [userId]'s own, by name.
   Stream<List<BenchmarkDef>> watchAvailable({required String userId}) {
@@ -275,13 +398,39 @@ class BenchmarkResultRepository
     'benchmark_id',
   };
 
+  static void _validate(Map<String, Expression<Object>> columns) {
+    _checkDates(columns, days: {'performed_on'});
+    for (final key in ['value', 'bodyweight_kg', 'added_kg', 'edge_mm']) {
+      final value = columns[key];
+      if (value is Variable<Object> && value.value is double) {
+        final number = value.value! as double;
+        if (!number.isFinite || (key != 'value' && number < 0)) {
+          throw ArgumentError.value(number, key);
+        }
+      }
+    }
+  }
+
+  @override
+  Future<void> update(
+    String id,
+    Insertable<BenchmarkResult> changes, {
+    required String userId,
+  }) {
+    _validate(changes.toColumns(true));
+    return super.update(id, changes, userId: userId);
+  }
+
   /// Adds a result for [userId] on a test they can see. Returns the new id.
   Future<String> create(
     BenchmarkResultsCompanion draft, {
     required String userId,
   }) {
+    if (!draft.benchmarkId.present || !draft.performedOn.present) {
+      throw ArgumentError.value(draft, 'draft', 'needs a test and a date');
+    }
     checkVisibility(draft.visibility.value);
-    _checkDate(draft.performedOn.value);
+    _validate(draft.toColumns(true));
     final benchmarkId = draft.benchmarkId.value;
     return db.transaction(() async {
       final def =
@@ -336,11 +485,59 @@ class ProjectRepository extends Repository<$ProjectsTable, Project> {
 
   /// A project is about one route.
   @override
-  Set<String> get protectedColumns => {...super.protectedColumns, 'route_id'};
+  Set<String> get protectedColumns => {
+    ...super.protectedColumns,
+    'route_id',
+    'sent_ascent_id',
+  };
+
+  static const statuses = {'active', 'sent', 'paused', 'abandoned'};
+
+  static void _validate(Map<String, Expression<Object>> columns) {
+    _checkDates(columns, days: {'started_on'});
+    _checkOneOf('status', _text(columns, 'status'), statuses);
+  }
+
+  @override
+  Future<void> update(
+    String id,
+    Insertable<Project> changes, {
+    required String userId,
+  }) {
+    _validate(changes.toColumns(true));
+    return super.update(id, changes, userId: userId);
+  }
+
+  /// Marks a project sent by one of [userId]'s live ascents of its route.
+  Future<void> markSent(
+    String projectId,
+    String ascentId, {
+    required String userId,
+  }) => db.transaction(() async {
+    await checkWritable(projectId, userId);
+    final project = (await get(projectId))!;
+    final ascent =
+        await (db.select(db.ascents)..where(
+              (a) =>
+                  a.id.equals(ascentId) &
+                  a.ownerId.equals(userId) &
+                  a.routeId.equals(project.routeId) &
+                  a.deletedAt.isNull(),
+            ))
+            .getSingleOrNull();
+    if (ascent == null) throw ArgumentError.value(ascentId, 'ascentId');
+    await writeChecked(projectId, userId, {
+      'status': const Variable('sent'),
+      'sent_ascent_id': Variable(ascentId),
+    });
+  });
 
   /// Starts a project on a route [userId] can see. Returns the new id.
   Future<String> create(ProjectsCompanion draft, {required String userId}) {
-    _checkDate(draft.startedOn.value);
+    if (!draft.routeId.present || !draft.startedOn.present) {
+      throw ArgumentError.value(draft, 'draft', 'needs a route and a date');
+    }
+    _validate(draft.toColumns(true));
     final routeId = draft.routeId.value;
     return db.transaction(() async {
       final route =
@@ -362,6 +559,7 @@ class ProjectRepository extends Repository<$ProjectsTable, Project> {
           updatedAt: Value(now),
           deletedAt: const Value(null),
           ownerId: Value(userId),
+          sentAscentId: const Value(null),
         ),
       );
       return id;
@@ -391,9 +589,35 @@ class GoalRepository extends Repository<$GoalsTable, Goal>
   @override
   RowAccess get access => RowAccess.owned;
 
+  static void _validate(Map<String, Expression<Object>> columns) {
+    _checkDates(columns, days: {'deadline', 'achieved_on'});
+    _checkOneOf('kind', _text(columns, 'kind'), {
+      'grade',
+      'count',
+      'first',
+      'benchmark',
+    });
+    _checkOneOf('status', _text(columns, 'status'), {
+      'active',
+      'achieved',
+      'abandoned',
+    });
+  }
+
+  @override
+  Future<void> update(
+    String id,
+    Insertable<Goal> changes, {
+    required String userId,
+  }) {
+    _validate(changes.toColumns(true));
+    return super.update(id, changes, userId: userId);
+  }
+
   /// Adds a goal for [userId]. Returns the new id.
   Future<String> create(GoalsCompanion draft, {required String userId}) async {
     checkVisibility(draft.visibility.value);
+    _validate(draft.toColumns(true));
     final id = newId();
     final now = clock();
     await insert(

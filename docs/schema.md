@@ -392,6 +392,8 @@ Categories: `cam`, `nut`, `hex`, `tricam`, `sling`, `alpine_draw`, `quickdraw`, 
 
 Pieces are grouped by model in the UI, so two #1 cams show as "×2" but keep their own resling dates.
 
+`reslung_on` and `retired_on` on a piece follow its `gear_events`: logging a `reslung` or `retired` event sets them to the latest such month, so reminders come from the history.
+
 **gear_events**: `id`, `owner_id`, `piece_id`, `kind` (`reslung`, `inspected`, `fall_held`, `lent`, `retired`), `date`, `notes`.
 
 **shoes**: `id`, `owner_id`, `brand`, `model`, `size_label`, `colour_hex`, `closure` (`velcro`, `lace`, `slipper`), `default_for` (json array: `gym`, `sport`, `boulder`, `trad`, `ice`), `bought_on`, `resole_after_days`, `retired_on`, `notes`.

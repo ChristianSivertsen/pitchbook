@@ -340,4 +340,105 @@ void main() {
       throwsArgumentError,
     );
   });
+
+  test('M1-5: values are checked and links stay with the owner', () async {
+    expect(
+      () => gear.create(
+        const GearPiecesCompanion(
+          category: Value('cam'),
+          label: Value('Cam'),
+          madeOn: Value('2018-13'),
+        ),
+        userId: 'me',
+      ),
+      throwsArgumentError,
+    );
+    final pieceId = await cam();
+    expect(
+      () => gear.update(
+        pieceId,
+        const GearPiecesCompanion(category: Value('spaceship')),
+        userId: 'me',
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => gear.logEvent(pieceId, 'inspected', '2026-02-31', userId: 'me'),
+      throwsArgumentError,
+      reason: 'no 31 February',
+    );
+    await gear.logEvent(pieceId, 'reslung', '2026-10-14', userId: 'me');
+    await gear.logEvent(pieceId, 'reslung', '2021-01-10', userId: 'me');
+    expect((await gear.get(pieceId))!.reslungOn, '2026-10', reason: 'latest');
+
+    final standard = await standardTest();
+    expect(
+      () => result(standard, '2026-10-01', double.nan),
+      throwsArgumentError,
+    );
+    final own = await benchmarks.create(
+      const BenchmarkDefsCompanion(
+        key: Value('lock_off'),
+        name: Value('Lock-off'),
+        unit: Value('s'),
+        higherIsBetter: Value(true),
+      ),
+      userId: 'me',
+    );
+    final resultId = await result(own, '2026-10-01', 9);
+    await benchmarks.softDelete(own, userId: 'me');
+    expect(await results.get(resultId), isNull, reason: 'results go too');
+
+    final routeId = await route();
+    final projectId = await projects.create(
+      ProjectsCompanion(
+        routeId: Value(routeId),
+        startedOn: const Value('2026-09-12'),
+        status: const Value('active'),
+      ),
+      userId: 'me',
+    );
+    expect(
+      () => projects.update(
+        projectId,
+        const ProjectsCompanion(sentAscentId: Value('theirs')),
+        userId: 'me',
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => projects.update(
+        projectId,
+        const ProjectsCompanion(status: Value('crushed')),
+        userId: 'me',
+      ),
+      throwsArgumentError,
+    );
+    await expectLater(
+      projects.markSent(projectId, 'missing', userId: 'me'),
+      throwsArgumentError,
+    );
+    await db
+        .into(db.ascents)
+        .insert(
+          AscentsCompanion.insert(
+            id: 'send',
+            createdAt: DateTime.utc(2026),
+            updatedAt: DateTime.utc(2026),
+            ownerId: 'me',
+            visibility: 'friends',
+            sessionId: 'session',
+            routeId: routeId,
+            ordinal: 1,
+            ascentType: 'lead',
+            style: 'redpoint',
+            tries: 5,
+            setting: 'outdoor',
+            discipline: 'sport',
+          ),
+        );
+    await projects.markSent(projectId, 'send', userId: 'me');
+    final sent = (await projects.get(projectId))!;
+    expect((sent.status, sent.sentAscentId), ('sent', 'send'));
+  });
 }
