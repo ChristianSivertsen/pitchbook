@@ -1,8 +1,10 @@
-# Pitchbook
+# Sva
 
-An app for iPhone and Android for logging climbing in detail, outdoors and in the gym, and turning that log into insights and a climbing CV. Friends can follow, give kudos, comment and share sessions.
+Sva is an app for iPhone and Android for logging climbing in detail, outdoors and in the gym, and turning that log into insights and a climbing CV. Friends can follow, give kudos, comment and share sessions.
 
 - [Implementation plan](docs/PLAN.md): milestones, decisions and how work is reviewed
+- [Testing strategy](docs/TESTING.md): test layers and the one-test-per-requirement rule
+- [Design language](docs/DESIGN.md): colours, type, components and writing for Sva
 - [Prototype](prototype/index.html): clickable HTML prototype of the screens (open it in a browser)
 - Issues: one issue per pull request, grouped into milestones M0 to M16
 
