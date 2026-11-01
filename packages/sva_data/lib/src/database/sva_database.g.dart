@@ -6319,7 +6319,7 @@ class PitchesCompanion extends UpdateCompanion<Pitch> {
 }
 
 class $GradeSystemsTable extends GradeSystems
-    with TableInfo<$GradeSystemsTable, GradeSystem> {
+    with TableInfo<$GradeSystemsTable, GradeSystemRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -6444,7 +6444,7 @@ class $GradeSystemsTable extends GradeSystems
   static const String $name = 'grade_systems';
   @override
   VerificationContext validateIntegrity(
-    Insertable<GradeSystem> instance, {
+    Insertable<GradeSystemRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -6526,9 +6526,9 @@ class $GradeSystemsTable extends GradeSystems
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  GradeSystem map(Map<String, dynamic> data, {String? tablePrefix}) {
+  GradeSystemRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return GradeSystem(
+    return GradeSystemRow(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -6578,7 +6578,7 @@ class $GradeSystemsTable extends GradeSystems
   }
 }
 
-class GradeSystem extends DataClass implements Insertable<GradeSystem> {
+class GradeSystemRow extends DataClass implements Insertable<GradeSystemRow> {
   /// UUIDv7, generated on the device.
   final String id;
   final DateTime createdAt;
@@ -6596,7 +6596,7 @@ class GradeSystem extends DataClass implements Insertable<GradeSystem> {
   final String gradeType;
   final int sort;
   final String? region;
-  const GradeSystem({
+  const GradeSystemRow({
     required this.id,
     required this.createdAt,
     required this.updatedAt,
@@ -6651,12 +6651,12 @@ class GradeSystem extends DataClass implements Insertable<GradeSystem> {
     );
   }
 
-  factory GradeSystem.fromJson(
+  factory GradeSystemRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return GradeSystem(
+    return GradeSystemRow(
       id: serializer.fromJson<String>(json['id']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -6686,7 +6686,7 @@ class GradeSystem extends DataClass implements Insertable<GradeSystem> {
     };
   }
 
-  GradeSystem copyWith({
+  GradeSystemRow copyWith({
     String? id,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -6697,7 +6697,7 @@ class GradeSystem extends DataClass implements Insertable<GradeSystem> {
     String? gradeType,
     int? sort,
     Value<String?> region = const Value.absent(),
-  }) => GradeSystem(
+  }) => GradeSystemRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -6709,8 +6709,8 @@ class GradeSystem extends DataClass implements Insertable<GradeSystem> {
     sort: sort ?? this.sort,
     region: region.present ? region.value : this.region,
   );
-  GradeSystem copyWithCompanion(GradeSystemsCompanion data) {
-    return GradeSystem(
+  GradeSystemRow copyWithCompanion(GradeSystemsCompanion data) {
+    return GradeSystemRow(
       id: data.id.present ? data.id.value : this.id,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -6726,7 +6726,7 @@ class GradeSystem extends DataClass implements Insertable<GradeSystem> {
 
   @override
   String toString() {
-    return (StringBuffer('GradeSystem(')
+    return (StringBuffer('GradeSystemRow(')
           ..write('id: $id, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -6757,7 +6757,7 @@ class GradeSystem extends DataClass implements Insertable<GradeSystem> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is GradeSystem &&
+      (other is GradeSystemRow &&
           other.id == this.id &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -6770,7 +6770,7 @@ class GradeSystem extends DataClass implements Insertable<GradeSystem> {
           other.region == this.region);
 }
 
-class GradeSystemsCompanion extends UpdateCompanion<GradeSystem> {
+class GradeSystemsCompanion extends UpdateCompanion<GradeSystemRow> {
   final Value<String> id;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -6814,7 +6814,7 @@ class GradeSystemsCompanion extends UpdateCompanion<GradeSystem> {
        name = Value(name),
        gradeType = Value(gradeType),
        sort = Value(sort);
-  static Insertable<GradeSystem> custom({
+  static Insertable<GradeSystemRow> custom({
     Expression<String>? id,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -6928,7 +6928,7 @@ class GradeSystemsCompanion extends UpdateCompanion<GradeSystem> {
   }
 }
 
-class $GradesTable extends Grades with TableInfo<$GradesTable, Grade> {
+class $GradesTable extends Grades with TableInfo<$GradesTable, GradeRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -7067,7 +7067,7 @@ class $GradesTable extends Grades with TableInfo<$GradesTable, Grade> {
   static const String $name = 'grades';
   @override
   VerificationContext validateIntegrity(
-    Insertable<Grade> instance, {
+    Insertable<GradeRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -7153,9 +7153,9 @@ class $GradesTable extends Grades with TableInfo<$GradesTable, Grade> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Grade map(Map<String, dynamic> data, {String? tablePrefix}) {
+  GradeRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Grade(
+    return GradeRow(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -7209,7 +7209,7 @@ class $GradesTable extends Grades with TableInfo<$GradesTable, Grade> {
   }
 }
 
-class Grade extends DataClass implements Insertable<Grade> {
+class GradeRow extends DataClass implements Insertable<GradeRow> {
   /// UUIDv7, generated on the device.
   final String id;
   final DateTime createdAt;
@@ -7228,7 +7228,7 @@ class Grade extends DataClass implements Insertable<Grade> {
   final double? score;
   final double? scoreLow;
   final double? scoreHigh;
-  const Grade({
+  const GradeRow({
     required this.id,
     required this.createdAt,
     required this.updatedAt,
@@ -7294,12 +7294,12 @@ class Grade extends DataClass implements Insertable<Grade> {
     );
   }
 
-  factory Grade.fromJson(
+  factory GradeRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Grade(
+    return GradeRow(
       id: serializer.fromJson<String>(json['id']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -7331,7 +7331,7 @@ class Grade extends DataClass implements Insertable<Grade> {
     };
   }
 
-  Grade copyWith({
+  GradeRow copyWith({
     String? id,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -7343,7 +7343,7 @@ class Grade extends DataClass implements Insertable<Grade> {
     Value<double?> score = const Value.absent(),
     Value<double?> scoreLow = const Value.absent(),
     Value<double?> scoreHigh = const Value.absent(),
-  }) => Grade(
+  }) => GradeRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -7356,8 +7356,8 @@ class Grade extends DataClass implements Insertable<Grade> {
     scoreLow: scoreLow.present ? scoreLow.value : this.scoreLow,
     scoreHigh: scoreHigh.present ? scoreHigh.value : this.scoreHigh,
   );
-  Grade copyWithCompanion(GradesCompanion data) {
-    return Grade(
+  GradeRow copyWithCompanion(GradesCompanion data) {
+    return GradeRow(
       id: data.id.present ? data.id.value : this.id,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -7374,7 +7374,7 @@ class Grade extends DataClass implements Insertable<Grade> {
 
   @override
   String toString() {
-    return (StringBuffer('Grade(')
+    return (StringBuffer('GradeRow(')
           ..write('id: $id, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -7407,7 +7407,7 @@ class Grade extends DataClass implements Insertable<Grade> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Grade &&
+      (other is GradeRow &&
           other.id == this.id &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -7421,7 +7421,7 @@ class Grade extends DataClass implements Insertable<Grade> {
           other.scoreHigh == this.scoreHigh);
 }
 
-class GradesCompanion extends UpdateCompanion<Grade> {
+class GradesCompanion extends UpdateCompanion<GradeRow> {
   final Value<String> id;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -7467,7 +7467,7 @@ class GradesCompanion extends UpdateCompanion<Grade> {
        systemKey = Value(systemKey),
        label = Value(label),
        sort = Value(sort);
-  static Insertable<Grade> custom({
+  static Insertable<GradeRow> custom({
     Expression<String>? id,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -29794,17 +29794,17 @@ class $$GradeSystemsTableTableManager
         RootTableManager<
           _$SvaDatabase,
           $GradeSystemsTable,
-          GradeSystem,
+          GradeSystemRow,
           $$GradeSystemsTableFilterComposer,
           $$GradeSystemsTableOrderingComposer,
           $$GradeSystemsTableAnnotationComposer,
           $$GradeSystemsTableCreateCompanionBuilder,
           $$GradeSystemsTableUpdateCompanionBuilder,
           (
-            GradeSystem,
-            BaseReferences<_$SvaDatabase, $GradeSystemsTable, GradeSystem>,
+            GradeSystemRow,
+            BaseReferences<_$SvaDatabase, $GradeSystemsTable, GradeSystemRow>,
           ),
-          GradeSystem,
+          GradeSystemRow,
           PrefetchHooks Function()
         > {
   $$GradeSystemsTableTableManager(_$SvaDatabase db, $GradeSystemsTable table)
@@ -29873,11 +29873,11 @@ class $$GradeSystemsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable<$GradeSystemsTable, GradeSystem>(table),
+                  e.readTable<$GradeSystemsTable, GradeSystemRow>(table),
                   BaseReferences<
                     _$SvaDatabase,
                     $GradeSystemsTable,
-                    GradeSystem
+                    GradeSystemRow
                   >(db, table, e),
                 ),
               )
@@ -29891,17 +29891,17 @@ typedef $$GradeSystemsTableProcessedTableManager =
     ProcessedTableManager<
       _$SvaDatabase,
       $GradeSystemsTable,
-      GradeSystem,
+      GradeSystemRow,
       $$GradeSystemsTableFilterComposer,
       $$GradeSystemsTableOrderingComposer,
       $$GradeSystemsTableAnnotationComposer,
       $$GradeSystemsTableCreateCompanionBuilder,
       $$GradeSystemsTableUpdateCompanionBuilder,
       (
-        GradeSystem,
-        BaseReferences<_$SvaDatabase, $GradeSystemsTable, GradeSystem>,
+        GradeSystemRow,
+        BaseReferences<_$SvaDatabase, $GradeSystemsTable, GradeSystemRow>,
       ),
-      GradeSystem,
+      GradeSystemRow,
       PrefetchHooks Function()
     >;
 typedef $$GradesTableCreateCompanionBuilder = GradesCompanion Function({
@@ -30111,14 +30111,14 @@ class $$GradesTableTableManager
         RootTableManager<
           _$SvaDatabase,
           $GradesTable,
-          Grade,
+          GradeRow,
           $$GradesTableFilterComposer,
           $$GradesTableOrderingComposer,
           $$GradesTableAnnotationComposer,
           $$GradesTableCreateCompanionBuilder,
           $$GradesTableUpdateCompanionBuilder,
-          (Grade, BaseReferences<_$SvaDatabase, $GradesTable, Grade>),
-          Grade,
+          (GradeRow, BaseReferences<_$SvaDatabase, $GradesTable, GradeRow>),
+          GradeRow,
           PrefetchHooks Function()
         > {
   $$GradesTableTableManager(_$SvaDatabase db, $GradesTable table)
@@ -30191,8 +30191,8 @@ class $$GradesTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable<$GradesTable, Grade>(table),
-                  BaseReferences<_$SvaDatabase, $GradesTable, Grade>(
+                  e.readTable<$GradesTable, GradeRow>(table),
+                  BaseReferences<_$SvaDatabase, $GradesTable, GradeRow>(
                     db,
                     table,
                     e,
@@ -30209,14 +30209,14 @@ typedef $$GradesTableProcessedTableManager =
     ProcessedTableManager<
       _$SvaDatabase,
       $GradesTable,
-      Grade,
+      GradeRow,
       $$GradesTableFilterComposer,
       $$GradesTableOrderingComposer,
       $$GradesTableAnnotationComposer,
       $$GradesTableCreateCompanionBuilder,
       $$GradesTableUpdateCompanionBuilder,
-      (Grade, BaseReferences<_$SvaDatabase, $GradesTable, Grade>),
-      Grade,
+      (GradeRow, BaseReferences<_$SvaDatabase, $GradesTable, GradeRow>),
+      GradeRow,
       PrefetchHooks Function()
     >;
 typedef $$RouteGradesTableCreateCompanionBuilder =
