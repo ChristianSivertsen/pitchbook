@@ -32,7 +32,7 @@ If the ticket is too large for one reviewable PR (roughly over 600 changed lines
 
 ## 3. Plan
 
-Write a short plan: files to add or change, tests to write, risks. Keep it in the session's task list. For logic in `sva_core`, write tests first.
+Write a short plan: files to add or change, risks, and a **test plan**: one line per "Done when" item naming the test and its layer from the ticket's Tests section and `docs/TESTING.md`. Search existing tests (`grep -rn "<ticket code>\|<behaviour>" packages app supabase`) and extend them instead of adding overlapping ones. Keep the plan in the session's task list. For logic in `sva_core`, write tests first.
 
 ## 4. Branch
 
@@ -61,7 +61,7 @@ flutter test        # in app/ and every touched package
 
 Plus, when relevant: build for Android (`flutter build apk --debug`), build for iOS (`flutter build ios --no-codesign`) if Xcode is available, Supabase tests (`supabase test db`). For UI tickets, run the app in a simulator or emulator and take screenshots of each new screen in light and dark.
 
-Check every item in the issue's "Done when" list. Anything not met is either fixed or explained.
+Check every item in the issue's "Done when" list. Each one has a passing test whose description starts with the ticket code, or is marked as a manual check with the reason. Anything not met is either fixed or explained.
 
 ## 7. Open the pull request
 
@@ -72,7 +72,7 @@ git push -u origin HEAD
 gh pr create --title "<type>(<scope>): <summary> (#<n>)" --body-file <file>
 ```
 
-The body follows `.github/pull_request_template.md`: summary, `Closes #<n>`, what changed, how to test, screenshots, "Done when" checklist with each item ticked or explained, new dependencies with reasons, follow-ups, and the Claude Code footer.
+The body follows `.github/pull_request_template.md`: summary, `Closes #<n>`, what changed, how to test, screenshots, "Done when" checklist with each item ticked and the test that covers it (or marked manual), new dependencies with reasons, follow-ups, and the Claude Code footer.
 
 Add the label `needs-user-review` if the merge policy in `CLAUDE.md` says so.
 

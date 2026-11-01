@@ -4,6 +4,7 @@ Sva is a Flutter app (iOS and Android) with a Supabase backend. Read these befor
 
 - [docs/PLAN.md](docs/PLAN.md): stack, API-first architecture, decisions, milestones
 - [docs/schema.md](docs/schema.md): the data model, shared by drift and Postgres
+- [docs/TESTING.md](docs/TESTING.md): test layers, one test per "Done when" item, how to avoid overlapping tests
 - [docs/DESIGN.md](docs/DESIGN.md): the Sva design language (colour, type, components, writing). Wins over the prototype on look and feel
 - [prototype/index.html](prototype/index.html): reference for screens and behaviour
 - `docs/API.md` once it exists (M11-1): the contract every client uses
@@ -66,7 +67,7 @@ After both review agents pass and CI is green:
 - `sva_ui` holds theme tokens, shared widgets and illustrations. No business logic.
 - `app/` holds screens, navigation and Riverpod providers.
 - Rules that also exist on the server (style and tries, gym route expiry) use shared JSON test cases run against both Dart and Postgres.
-- Every behaviour change has tests. Bug fixes start with a failing test.
+- Every behaviour change has tests, following `docs/TESTING.md`: each "Done when" item gets a test at the layer named in the ticket, with the ticket code at the start of the test description (`M1-4: ...`). Each behaviour is tested once, at the lowest layer that can test it. Bug fixes start with a failing test.
 - Units are SI in storage; convert only for display. Enumerations are stable keys such as `hold.crimp`.
 - UI follows `docs/DESIGN.md`: only theme tokens, never raw colours or font sizes in screens; one primary action per screen; writing rules for all text.
 - Accessibility: every interactive widget has a semantic label; respect text scaling.

@@ -18,7 +18,7 @@ Closes #
 
 ## Done when
 
-<!-- Copy the issue's "Done when" list. Tick each item or explain why it is not met. -->
+<!-- Copy the issue's "Done when" list. For each item: tick it and name the test that covers it (file and test name), or mark it as a manual check with the reason. -->
 
 - [ ]
 
@@ -37,7 +37,7 @@ None
 ## Checklist
 
 - [ ] Stays inside the ticket's scope
-- [ ] Tests added or updated, all passing
+- [ ] Every "Done when" item has a test named with the ticket code, at the layer in docs/TESTING.md, with no overlap
 - [ ] `dart format` and `flutter analyze` clean
 - [ ] No secrets, keys or personal data in code, config, tests or logs
 - [ ] Schema, security, sync or data-deletion changes are labelled `needs-user-review`

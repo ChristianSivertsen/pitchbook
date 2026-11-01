@@ -25,7 +25,7 @@ flutter analyze
 flutter test
 ```
 
-Run the app on an iOS simulator and an Android emulator and walk through each "Done when" item of the milestone's tickets. Note anything broken as a new issue (label `bug`, same milestone) and fix it with `ship-ticket` before releasing.
+Run the flow tests (`cd app && flutter test integration_test`) and check that every closed ticket in the milestone has tests named with its code (`grep -rn "M<m>-" packages app supabase`). Then run the app on an iOS simulator and an Android emulator and walk through the manual "Done when" items. Note anything broken as a new issue (label `bug`, same milestone) and fix it with `ship-ticket` before releasing.
 
 ## 3. Release notes
 
