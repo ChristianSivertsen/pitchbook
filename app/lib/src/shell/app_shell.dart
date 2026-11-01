@@ -38,7 +38,7 @@ class _TabBar extends StatelessWidget {
     final colors = context.svaColors;
     final tabs = [
       (l10n.tabFeed, LucideIcons.house),
-      ("", LucideIcons.chartColumn),
+      (l10n.tabHistory, LucideIcons.chartColumn),
       (l10n.tabCv, LucideIcons.circleUser),
       (l10n.tabTraining, LucideIcons.dumbbell),
     ];
