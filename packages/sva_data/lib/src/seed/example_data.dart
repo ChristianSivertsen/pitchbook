@@ -4,30 +4,40 @@ import 'package:sva_data/src/ids.dart';
 
 // EXAMPLE DATA FOR DEBUG BUILDS ONLY. A small slice of the prototype's
 // made-up history, so screens have something to show while they are built.
-// Every row id starts from `example:`, so it can be recognised and removed.
-// Never call these from a release build.
+// Row ids are derived from the user and an `example:` name, so
+// [exampleIds] can list them and [removeExampleData] remove them. Both
+// functions refuse to run where asserts are off (release builds), and sync
+// (M11-4) must never upload these rows.
 
-String _id(String name) => seedId('example:$name');
+/// Throws in builds without asserts, so example data never reaches a
+/// release build.
+void _debugOnly() {
+  var debug = false;
+  assert(debug = true, 'only checks that asserts are on');
+  if (!debug) throw StateError('Example data is for debug builds only');
+}
 
 /// Adds the example data for [userId] once; running it again changes
 /// nothing. Places and routes are [userId]'s private rows.
 Future<void> seedExampleData(SvaDatabase db, {required String userId}) async {
+  _debugOnly();
+  String exampleId(String name) => _exampleId(userId, name);
   final t = DateTime.utc(2026, 11);
-  // Rows written as the caller's own, with stable example ids.
-  Insertable<R> own<R>(Insertable<R> Function(String id) row, String name) =>
-      row(_id(name));
+  // Builds [row] with the example id for [name].
+  Insertable<R> withId<R>(Insertable<R> Function(String id) row, String name) =>
+      row(exampleId(name));
 
   await db.batch((b) {
     void area(String name, String type, {String? parent, String? rock}) =>
         b.insert(
           db.areas,
           AreasCompanion.insert(
-            id: _id(name),
+            id: exampleId(name),
             createdAt: t,
             updatedAt: t,
             visibility: 'private',
             createdBy: Value(userId),
-            parentId: Value(parent == null ? null : _id(parent)),
+            parentId: Value(parent == null ? null : exampleId(parent)),
             type: type,
             name: name,
             countryCode: 'NO',
@@ -44,12 +54,12 @@ Future<void> seedExampleData(SvaDatabase db, {required String userId}) async {
         b.insert(
           db.routes,
           RoutesCompanion.insert(
-            id: _id(name),
+            id: exampleId(name),
             createdAt: t,
             updatedAt: t,
             visibility: 'private',
             createdBy: Value(userId),
-            areaId: _id(area),
+            areaId: exampleId(area),
             kind: 'outdoor',
             name: Value(name),
             discipline: discipline,
@@ -59,11 +69,10 @@ Future<void> seedExampleData(SvaDatabase db, {required String userId}) async {
           ),
           mode: InsertMode.insertOrIgnore,
         );
-    route('Hjemmebane', 'Kolsås', 'sport', 'angle.vertical');
-    route('Skiferdiederet', 'Kolsås', 'trad', 'angle.vertical');
-    route('Kveldsløftet', 'Kolsås', 'sport', 'angle.vertical');
-    route('Varmen', 'Hanshelleren', 'sport', 'angle.overhang');
-    route('Nordlys', 'Hanshelleren', 'sport', 'angle.roof');
+    for (final MapEntry(key: name, value: (place, discipline, angle))
+        in _routes.entries) {
+      route(name, place, discipline, angle);
+    }
 
     // Sessions with climbs: (date, place, title, [(route, style, tries)]).
     final days = [
@@ -94,14 +103,14 @@ Future<void> seedExampleData(SvaDatabase db, {required String userId}) async {
     for (final (date, place, title, climbs) in days) {
       b.insert(
         db.sessions,
-        own(
+        withId(
           (id) => SessionsCompanion.insert(
             id: id,
             createdAt: t,
             updatedAt: t,
             ownerId: userId,
             visibility: 'friends',
-            areaId: Value(_id(place)),
+            areaId: Value(exampleId(place)),
             setting: 'outdoor',
             localDate: date,
             tz: 'Europe/Oslo',
@@ -114,21 +123,21 @@ Future<void> seedExampleData(SvaDatabase db, {required String userId}) async {
       for (final (i, (route, style, tries)) in climbs.indexed) {
         b.insert(
           db.ascents,
-          own(
+          withId(
             (id) => AscentsCompanion.insert(
               id: id,
               createdAt: t,
               updatedAt: t,
               ownerId: userId,
               visibility: 'friends',
-              sessionId: _id('session $date'),
-              routeId: _id(route),
+              sessionId: exampleId('session $date'),
+              routeId: exampleId(route),
               ordinal: i + 1,
               ascentType: 'lead',
               style: style,
               tries: tries,
               setting: 'outdoor',
-              discipline: route == 'Skiferdiederet' ? 'trad' : 'sport',
+              discipline: _routes[route]!.$2,
             ),
             'ascent $date $route',
           ),
@@ -144,7 +153,7 @@ Future<void> seedExampleData(SvaDatabase db, {required String userId}) async {
     ]) {
       b.insert(
         db.gearPieces,
-        own(
+        withId(
           (id) => GearPiecesCompanion.insert(
             id: id,
             createdAt: t,
@@ -166,7 +175,7 @@ Future<void> seedExampleData(SvaDatabase db, {required String userId}) async {
     ]) {
       b.insert(
         db.shoes,
-        own(
+        withId(
           (id) => ShoesCompanion.insert(
             id: id,
             createdAt: t,
@@ -183,7 +192,7 @@ Future<void> seedExampleData(SvaDatabase db, {required String userId}) async {
 
     b.insert(
       db.benchmarkDefs,
-      own(
+      withId(
         (id) => BenchmarkDefsCompanion.insert(
           id: id,
           createdAt: t,
@@ -206,14 +215,14 @@ Future<void> seedExampleData(SvaDatabase db, {required String userId}) async {
     ]) {
       b.insert(
         db.benchmarkResults,
-        own(
+        withId(
           (id) => BenchmarkResultsCompanion.insert(
             id: id,
             createdAt: t,
             updatedAt: t,
             ownerId: userId,
             visibility: 'friends',
-            benchmarkId: _id('benchmark max hang'),
+            benchmarkId: exampleId('benchmark max hang'),
             performedOn: date,
             value: value,
           ),
@@ -225,7 +234,7 @@ Future<void> seedExampleData(SvaDatabase db, {required String userId}) async {
 
     b.insert(
       db.goals,
-      own(
+      withId(
         (id) => GoalsCompanion.insert(
           id: id,
           createdAt: t,
@@ -244,8 +253,22 @@ Future<void> seedExampleData(SvaDatabase db, {required String userId}) async {
   });
 }
 
-/// The ids [seedExampleData] uses, for recognising and removing them.
-Set<String> exampleIds() => {
+/// Example routes: name → (place, discipline, angle). Ascents take their
+/// discipline cache from here, so the two cannot drift apart.
+const _routes = {
+  'Hjemmebane': ('Kolsås', 'sport', 'angle.vertical'),
+  'Skiferdiederet': ('Kolsås', 'trad', 'angle.vertical'),
+  'Kveldsløftet': ('Kolsås', 'sport', 'angle.vertical'),
+  'Varmen': ('Hanshelleren', 'sport', 'angle.overhang'),
+  'Nordlys': ('Hanshelleren', 'sport', 'angle.roof'),
+};
+
+String _exampleId(String userId, String name) =>
+    seedId('example:$userId:$name');
+
+/// The ids [seedExampleData] uses for [userId], for recognising and
+/// removing them.
+Set<String> exampleIds(String userId) => {
   for (final name in [
     'Kolsås',
     'Flatanger',
@@ -275,12 +298,13 @@ Set<String> exampleIds() => {
     for (final d in ['2025-11-10', '2026-04-02', '2026-10-01']) 'result $d',
     'goal offwidth',
   ])
-    _id(name),
+    _exampleId(userId, name),
 };
 
-/// Soft-deletes every example row, so a tester can start clean.
-Future<void> removeExampleData(SvaDatabase db) async {
-  final ids = exampleIds().toList();
+/// Soft-deletes [userId]'s example rows, so a tester can start clean.
+Future<void> removeExampleData(SvaDatabase db, {required String userId}) async {
+  _debugOnly();
+  final ids = exampleIds(userId).toList();
   final now = DateTime.now().toUtc();
   await db.transaction(() async {
     for (final table in db.allTables) {

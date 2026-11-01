@@ -42,14 +42,21 @@ void main() {
                   .get())
             row.read<String>('id'),
       ];
-      expect(all.toSet(), exampleIds(), reason: 'every row is marked example');
+      expect(all.toSet(), exampleIds('me'), reason: 'every row is listed');
 
-      await removeExampleData(db);
+      await seedExampleData(db, userId: 'them');
+      await removeExampleData(db, userId: 'me');
       expect(
         await SessionRepository(db).watchMine(userId: 'me').first,
         isEmpty,
       );
-      expect(await RouteRepository(db).search('', userId: 'me'), isEmpty);
+      expect(
+        (await RouteRepository(
+          db,
+        ).search('', userId: 'me')).map((r) => r.createdBy),
+        everyElement('them'),
+        reason: "another user's example rows stay",
+      );
     },
   );
 }
