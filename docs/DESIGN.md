@@ -1,6 +1,6 @@
 # Sva design language
 
-Sva is named after the smooth, sea-worn granite of the Norwegian coast. The brand comes from one scene: Lofoten granite rising straight out of the sea under the midnight sun. Read from left to right, the logo — low sun, a peak, a higher peak — is also a rising graph, because the app is about seeing your climbing grow.
+Sva is named after the smooth, sea-worn granite of the Norwegian coast. The brand comes from one scene: Lofoten granite rising straight out of the sea under the midnight sun. Read from left to right, the peaks rise like a graph, because the app is about seeing your climbing grow. A low midnight sun sits beside them at night and stands over them by day.
 
 Every screen should feel like that scene: calm and dark like a summer night by the sea, warm where it matters, and clear enough to read at a glance.
 
@@ -18,10 +18,12 @@ The clickable prototype in [`prototype/index.html`](../prototype/index.html) sho
 
 The mark is three shapes on a horizon line: the sun, a peak and a higher peak. The wordmark is always lowercase: **sva**.
 
+The sun tells the time of day. In Midnight sun it hangs low on the left, just above the horizon. In Daylight it stands high on the upper right of the higher peak. Wherever the theme changes, the sun rises or sets along an arc, slipping behind the summit (`SvaMotion.daybreak`, 900 ms), and the mark's colours fade with it. With reduce motion on, it moves straight to its new place.
+
 | Asset | File | Use |
 |---|---|---|
 | Mark, dark background | [`assets/brand/sva-mark-midnight.svg`](../assets/brand/sva-mark-midnight.svg) | Dark mode, splash, social |
-| Mark, light background | [`assets/brand/sva-mark-daylight.svg`](../assets/brand/sva-mark-daylight.svg) | Light mode, documents |
+| Mark, light background | [`assets/brand/sva-mark-daylight.svg`](../assets/brand/sva-mark-daylight.svg) | Light mode, documents (sun upper right) |
 | Mark, one colour | [`assets/brand/sva-mark-mono.svg`](../assets/brand/sva-mark-mono.svg) | Watermarks, embossing, single-colour print |
 | App icon | [`assets/brand/sva-app-icon.svg`](../assets/brand/sva-app-icon.svg) | 1024 × 1024 source for iOS and Android icons |
 | Lockup | [`assets/brand/sva-lockup-midnight.svg`](../assets/brand/sva-lockup-midnight.svg) | Splash screen, store listing, stickers |
@@ -30,7 +32,7 @@ Rules:
 
 - **Clear space** around the mark equals the sun's diameter.
 - **Minimum size:** 24 px for the mark with wordmark, 16 px for the mark alone.
-- **Do not** recolour the mark outside the palettes below, rotate it, add effects, or change the order of sun and peaks. The order is the progress story.
+- **Do not** recolour the mark outside the palettes below, rotate it, add effects, or change the order of the peaks. The rising peaks are the progress story; only the sun moves, and only between its two places.
 - The app icon is full-bleed and square; iOS and Android apply their own rounding.
 
 ## Colour
@@ -166,6 +168,7 @@ Depth comes from surface colour, not shadows: `surfaceSunk` < `background` < `su
 | Cards, list changes | 200 ms | ease out |
 | Sheets in and out | 300 ms | ease out / ease in |
 | A new personal best | 600 ms, once | spring; the only celebratory motion in the app |
+| The sun in the mark when the theme changes | 900 ms | ease in and out, along an arc |
 
 All motion respects the system's reduce-motion setting: transitions become fades or none.
 
