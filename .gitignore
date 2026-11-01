@@ -40,3 +40,8 @@ key.properties
 **/ios/Pods/
 **/ios/Flutter/Generated.xcconfig
 **/ios/Flutter/flutter_export_environment.sh
+
+# IDEs
+.idea/
+*.iml
+.vscode/
