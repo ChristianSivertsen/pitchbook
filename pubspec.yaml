@@ -1,0 +1,14 @@
+name: sva_workspace
+description: Workspace root for the Sva app and its packages.
+publish_to: none
+
+environment:
+  sdk: ^3.13.0
+
+workspace:
+  - app
+  - packages/sva_core
+  - packages/sva_data
+  - packages/sva_ui
+dev_dependencies:
+  very_good_analysis: ^11.0.0

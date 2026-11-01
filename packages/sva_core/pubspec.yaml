@@ -1,0 +1,10 @@
+name: sva_core
+description: Pure Dart rules, models, grade conversion and stats for Sva.
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dev_dependencies:
+  test: ^1.25.6

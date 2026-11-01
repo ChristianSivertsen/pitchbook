@@ -1,0 +1,28 @@
+# Shared analysis rules for the whole workspace: the app and every package
+# pick this file up because it is the closest analysis_options.yaml above
+# them. See README.md for how to run the checks.
+include: package:very_good_analysis/analysis_options.yaml
+
+formatter:
+  page_width: 80
+
+analyzer:
+  exclude:
+    - "**/build/**"
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "app/android/**"
+    - "app/ios/**"
+    - "prototype/**"
+  # Already set by very_good_analysis; repeated here so the strictness is
+  # explicit and survives a future change of lint package.
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+
+linter:
+  rules:
+    # Docs on every public member add noise in an app. Document what is not
+    # obvious; this can be turned back on per package later if needed.
+    public_member_api_docs: false

@@ -1,0 +1,14 @@
+name: sva_data
+description: Local database, repositories and sync for Sva.
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  sva_core:
+    path: ../sva_core
+
+dev_dependencies:
+  test: ^1.25.6

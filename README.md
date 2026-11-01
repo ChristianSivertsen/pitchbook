@@ -8,3 +8,16 @@ Sva is an app for iPhone and Android for logging climbing in detail, outdoors an
 - Issues: one issue per pull request, grouped into milestones M0 to M16
 
 Built with Flutter and Supabase. See the plan for the full stack and the API-first architecture.
+
+## Development
+
+Requires Flutter (stable channel). Building for iOS also needs Xcode; building for Android needs Android Studio.
+
+```bash
+flutter pub get          # resolve the workspace
+tool/check.sh            # formatting, analysis and all tests, as CI runs them
+dart format .            # fix formatting
+cd app && flutter run    # run the app on a simulator, emulator or device
+```
+
+Analysis rules live in the root `analysis_options.yaml` and apply to the app and every package.
