@@ -57,7 +57,9 @@ class GradeRepository {
   }
 
   /// Every system in use with its grades, easiest first. A system whose
-  /// grades are missing or unscored is skipped rather than half-loaded.
+  /// grades are missing, unscored or out of order, or whose key appears
+  /// twice, is skipped rather than half-loaded: wrong grades are worse than
+  /// a missing system.
   Future<List<GradeSystem>> systems() async {
     final systemRows =
         await (_db.select(_db.gradeSystems)
@@ -73,16 +75,21 @@ class GradeRepository {
     for (final row in gradeRows) {
       (bySystem[row.systemKey] ??= []).add(row);
     }
+    final keyCounts = <String, int>{};
+    for (final system in systemRows) {
+      keyCounts.update(system.key, (n) => n + 1, ifAbsent: () => 1);
+    }
     return [
       for (final system in systemRows)
-        if (_grades(bySystem[system.key]) case final grades?)
-          GradeSystem(
-            key: system.key,
-            name: system.name,
-            gradeType: system.gradeType,
-            region: system.region,
-            grades: grades,
-          ),
+        if (keyCounts[system.key] == 1)
+          if (_grades(bySystem[system.key]) case final grades?)
+            GradeSystem(
+              key: system.key,
+              name: system.name,
+              gradeType: system.gradeType,
+              region: system.region,
+              grades: grades,
+            ),
     ];
   }
 
@@ -98,6 +105,6 @@ class GradeRepository {
             : Grade(row.label, score),
       );
     }
-    return grades;
+    return isValidGradeList(grades) ? grades : null;
   }
 }

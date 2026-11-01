@@ -56,7 +56,7 @@ final class GradeSystem {
 
   /// The grade written as [label], or `null` when this system has none.
   ///
-  /// A slash grade between two neighbours, such as `7+/8-` or `6a/6a+`,
+  /// A slash grade such as `7+/8-` or `6a/6a+`, easier grade first,
   /// becomes a range from the first to the second.
   Grade? parse(String label) {
     final text = label.trim();
@@ -81,6 +81,56 @@ final class GradeSystem {
     }
     return best;
   }
+
+  /// The grade in this system that best matches [grade] from another
+  /// system: the one whose span is closest to [grade]'s span, then the one
+  /// that overlaps it most, then the one whose middle is nearest. On a full
+  /// tie the easier grade wins.
+  Grade nearestTo(Grade grade) {
+    (double, double, double) fit(Grade candidate) {
+      final gap = [
+        candidate.scoreLow - grade.scoreHigh,
+        grade.scoreLow - candidate.scoreHigh,
+        0.0,
+      ].reduce((a, b) => a > b ? a : b);
+      final overlap =
+          [
+            candidate.scoreHigh,
+            grade.scoreHigh,
+          ].reduce((a, b) => a < b ? a : b) -
+          [candidate.scoreLow, grade.scoreLow].reduce((a, b) => a > b ? a : b);
+      return (gap, -overlap, (candidate.score - grade.score).abs());
+    }
+
+    bool better((double, double, double) a, (double, double, double) b) =>
+        a.$1 != b.$1 ? a.$1 < b.$1 : (a.$2 != b.$2 ? a.$2 < b.$2 : a.$3 < b.$3);
+
+    var best = grades.first;
+    var bestFit = fit(best);
+    for (final candidate in grades.skip(1)) {
+      final candidateFit = fit(candidate);
+      if (better(candidateFit, bestFit)) {
+        best = candidate;
+        bestFit = candidateFit;
+      }
+    }
+    return best;
+  }
+}
+
+/// Whether [grades] can be a grade list: labels unique, every span the
+/// right way round, and each grade strictly harder than the one before.
+bool isValidGradeList(List<Grade> grades) {
+  final labels = <String>{};
+  double? previousHigh;
+  for (final grade in grades) {
+    if (!labels.add(grade.label)) return false;
+    if (!grade.scoreLow.isFinite || !grade.scoreHigh.isFinite) return false;
+    if (grade.scoreLow > grade.scoreHigh) return false;
+    if (previousHigh != null && grade.scoreLow <= previousHigh) return false;
+    previousHigh = grade.scoreHigh;
+  }
+  return grades.isNotEmpty;
 }
 
 /// Shows a stored grade in another system. The stored grade itself never
@@ -90,9 +140,9 @@ final class GradeSystem {
 /// Returns `null` when [label] is not a grade in [from], or the two systems
 /// grade different things.
 Grade? convertGrade(String label, GradeSystem from, GradeSystem to) {
-  if (from.gradeType != to.gradeType) return null;
+  if (from.gradeType != to.gradeType || to.grades.isEmpty) return null;
   final grade = from.parse(label);
   if (grade == null) return null;
-  if (identical(from, to) || from.key == to.key) return grade;
-  return to.nearest(grade.score);
+  if (from.key == to.key) return grade;
+  return to.nearestTo(grade);
 }

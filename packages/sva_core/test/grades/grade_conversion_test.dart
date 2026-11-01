@@ -36,12 +36,19 @@ void main() {
     });
   });
 
-  test('M1-3: round trips between systems land within one grade step', () {
+  test('M1-3: round trips between systems land within one step', () {
     for (final from in gradeSystems) {
       for (final to in gradeSystems.where(
         (s) => s.gradeType == from.gradeType,
       )) {
-        for (final grade in from.grades) {
+        // Grades beyond the other system's ends clamp; the edge-grade test
+        // covers those.
+        final covered = from.grades.where(
+          (g) =>
+              g.scoreHigh >= to.grades.first.scoreLow &&
+              g.scoreLow <= to.grades.last.scoreHigh,
+        );
+        for (final grade in covered) {
           final there = convertGrade(grade.label, from, to)!;
           final back = convertGrade(there.label, to, from)!;
           expect(
@@ -60,7 +67,9 @@ void main() {
     expect(convert('6a', french, norwegian), '6-');
     expect(convert('7a', french, yds), '5.11d');
     expect(convert('5.12a', yds, french), '7a+');
-    expect(convert('VII', uiaa, french), '6b+');
+    expect(convert('VII', uiaa, french), '6b');
+    expect(convert('X', uiaa, french), '8b');
+    expect(convert('XI', uiaa, french), '9a');
     expect(convert('7A', font, vScale), 'V6');
   });
 
@@ -74,6 +83,13 @@ void main() {
     expect(convert('9A', font, vScale), 'V17');
     expect(convert('7z', french, norwegian), isNull, reason: 'unknown grade');
     expect(convert('7a', french, font), isNull, reason: 'routes ≠ boulders');
+    const empty = GradeSystem(
+      key: 'empty',
+      name: 'Empty',
+      gradeType: 'free_route',
+      grades: [],
+    );
+    expect(convert('7a', french, empty), isNull);
     expect(convert(' 7- ', norwegian, norwegian), '7-', reason: 'trimmed');
     // On an exact tie the easier grade wins, so conversions never flatter.
     expect(vScale.nearest(13.25).label, 'V1');
@@ -89,27 +105,57 @@ void main() {
     final slash = norwegian.parse('7+/8-')!;
     expect((slash.scoreLow, slash.scoreHigh, slash.score), (20.0, 22.0, 21.0));
     expect(convert('7+/8-', norwegian, french), '7a');
-    expect(convert('6a/6a+', french, uiaa), 'VI', reason: 'tie: easier');
+    expect(convert('6a/6a+', french, uiaa), 'VI+', reason: 'tie: easier');
     expect(norwegian.parse('8-/7+'), isNull, reason: 'harder grade first');
     expect(norwegian.parse('7/x'), isNull);
   });
 
   test('M1-3: changing the display system never changes stored grades', () {
-    // An ascent stores the grade as logged: its system and label.
-    const stored = (system: 'nor', label: '7+/8-');
-    final logged = gradeSystems.firstWhere((s) => s.key == stored.system);
-
-    for (final display in gradeSystems.where(
-      (s) => s.gradeType == logged.gradeType,
-    )) {
-      convertGrade(stored.label, logged, display);
+    // Screens keep the grade as logged and only convert to display it. For
+    // every grade: shown in its own system it is exactly what was logged,
+    // and showing it in any other system leaves that grade unchanged.
+    for (final logged in gradeSystems) {
+      for (final grade in logged.grades) {
+        final before = logged.parse(grade.label)!;
+        for (final display in gradeSystems) {
+          convertGrade(grade.label, logged, display);
+        }
+        final after = convertGrade(grade.label, logged, logged)!;
+        expect(
+          (after.label, after.scoreLow, after.scoreHigh),
+          (before.label, before.scoreLow, before.scoreHigh),
+          reason: '${logged.key} ${grade.label}',
+        );
+        expect(
+          identical(
+            logged.grades.firstWhere((g) => g.label == grade.label),
+            grade,
+          ),
+          isTrue,
+        );
+      }
     }
+    expect(convert('7+/8-', norwegian, norwegian), '7+/8-');
+  });
 
-    expect(stored, (system: 'nor', label: '7+/8-'));
+  test('M1-3: only well-formed grade lists are valid', () {
+    for (final system in gradeSystems) {
+      expect(isValidGradeList(system.grades), isTrue, reason: system.key);
+    }
+    expect(isValidGradeList([]), isFalse);
     expect(
-      convert(stored.label, logged, norwegian),
-      '7+/8-',
-      reason: 'shown in its own system it is exactly what was logged',
+      isValidGradeList([const Grade('a', 2), const Grade('b', 1)]),
+      isFalse,
     );
+    expect(
+      isValidGradeList([const Grade('a', 1), const Grade('a', 2)]),
+      isFalse,
+    );
+    expect(isValidGradeList([const Grade.range('a', 2, 1)]), isFalse);
+    expect(
+      isValidGradeList([const Grade.range('a', 1, 3), const Grade('b', 2)]),
+      isFalse,
+    );
+    expect(isValidGradeList([const Grade('a', double.nan)]), isFalse);
   });
 }

@@ -67,4 +67,49 @@ void main() {
     final saxon = (await repo.systems()).singleWhere((s) => s.key == 'saxon');
     expect(convertGrade('VIIb', saxon, french)?.label, '6c');
   });
+
+  test('M1-3: malformed grade systems from the database are skipped', () async {
+    await repo.seed();
+    Future<void> system(String id, String key) => db
+        .into(db.gradeSystems)
+        .insert(
+          GradeSystemsCompanion.insert(
+            id: id,
+            createdAt: now,
+            updatedAt: now,
+            key: key,
+            name: key,
+            gradeType: 'free_route',
+            sort: 99,
+          ),
+        );
+    Future<void> grade(String system, int sort, String label, double? score) =>
+        db
+            .into(db.grades)
+            .insert(
+              GradesCompanion.insert(
+                id: '$system-$sort',
+                createdAt: now,
+                updatedAt: now,
+                systemKey: system,
+                label: label,
+                sort: sort,
+                score: Value(score),
+              ),
+            );
+
+    await system('backwards', 'backwards');
+    await grade('backwards', 0, 'hard', 20);
+    await grade('backwards', 1, 'easy', 10);
+    await system('unscored', 'unscored');
+    await grade('unscored', 0, 'a', null);
+    // A second row for a built-in key, as a bad sync could deliver.
+    await system('twin', 'nor');
+
+    final keys = (await repo.systems()).map((s) => s.key);
+    expect(keys, isNot(contains('backwards')));
+    expect(keys, isNot(contains('unscored')));
+    expect(keys, isNot(contains('nor')), reason: 'ambiguous, so skipped');
+    expect(keys, containsAll(['french', 'font']));
+  });
 }
