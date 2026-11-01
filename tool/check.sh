@@ -15,6 +15,9 @@ dart format --output=none --set-exit-if-changed .
 echo "==> Analyzing"
 flutter analyze
 
+echo "==> Checking design tokens"
+tool/check_tokens.sh
+
 for package in packages/sva_core packages/sva_data; do
   echo "==> Testing ${package}"
   (cd "${package}" && dart test)

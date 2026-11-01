@@ -1,6 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sva_ui/sva_ui.dart';
+
+/// Path of the debug-only screen that shows every design token.
+const tokenPreviewPath = '/debug/tokens';
 
 /// The app's router. Lives in a provider so each [ProviderScope] (the app,
 /// or a single test) gets its own instance, and so routes can later read
@@ -14,6 +19,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/',
         builder: (context, state) => const _PlaceholderScreen(),
       ),
+      if (kDebugMode)
+        GoRoute(
+          path: tokenPreviewPath,
+          builder: (context, state) =>
+              const Scaffold(body: SafeArea(child: SvaTokenPreview())),
+        ),
     ],
   );
   ref.onDispose(router.dispose);
@@ -25,6 +36,6 @@ class _PlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('sva')));
+    return const Scaffold(body: Center(child: SvaLockup()));
   }
 }

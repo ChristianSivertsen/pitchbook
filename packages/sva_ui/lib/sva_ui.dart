@@ -1,7 +1,14 @@
 /// Sva UI: theme tokens, shared widgets and illustrations.
 ///
-/// Placeholder until the theme tokens land in M0-4.
+/// Screens use these tokens instead of raw colours, font sizes or durations.
+/// See docs/DESIGN.md for the design language behind them.
 library;
 
-/// Name of this package, used by the placeholder test.
-const String packageName = 'sva_ui';
+export 'src/brand/sva_mark.dart';
+export 'src/debug/token_preview.dart';
+export 'src/theme/contrast.dart';
+export 'src/theme/font_licenses.dart';
+export 'src/theme/sva_colors.dart';
+export 'src/theme/sva_theme.dart';
+export 'src/theme/sva_tokens.dart';
+export 'src/theme/sva_typography.dart';
