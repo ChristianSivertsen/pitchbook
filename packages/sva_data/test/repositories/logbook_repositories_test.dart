@@ -3,6 +3,8 @@ import 'package:sva_core/sva_core.dart';
 import 'package:sva_data/sva_data.dart';
 import 'package:test/test.dart';
 
+import 'helpers.dart';
+
 void main() {
   late SvaDatabase db;
   late AreaRepository areas;
@@ -79,58 +81,6 @@ void main() {
     userId: 'me',
   );
 
-  /// Every value [stream] emits on one subscription while [act] runs.
-  Future<List<T>> emissions<T>(
-    Stream<T> stream,
-    Future<void> Function() act,
-  ) async {
-    final seen = <T>[];
-    final subscription = stream.listen(seen.add);
-    await pumpEventQueue();
-    await act();
-    await pumpEventQueue();
-    await subscription.cancel();
-    return seen;
-  }
-
-  /// Create, read, update, soft delete and watch one row of [repo].
-  Future<void> lifecycle<T extends Table, R>(
-    Repository<T, R> repo,
-    Future<String> Function() create,
-    Insertable<R> changes,
-    Object? Function(R row) changed,
-    Object? expected,
-  ) async {
-    final name = repo.table.actualTableName;
-    final id = await create();
-    Future<Object?> stamp() async =>
-        (await db
-                .customSelect(
-                  'SELECT updated_at FROM $name WHERE id = ?',
-                  variables: [Variable.withString(id)],
-                )
-                .getSingle())
-            .data['updated_at'];
-
-    final seen = await emissions(repo.watch(id), () async {
-      final before = await stamp();
-      await repo.update(id, changes, userId: 'me');
-      expect(changed((await repo.get(id)) as R), expected, reason: name);
-      expect(await stamp(), isNot(before), reason: '$name updated_at moves');
-      await repo.softDelete(id, userId: 'me');
-    });
-    expect(await repo.get(id), isNull, reason: name);
-    expect(seen.whereType<R>(), isNotEmpty, reason: name);
-    expect(seen.last, isNull, reason: '$name watchers see the delete');
-    final kept = await db
-        .customSelect(
-          'SELECT deleted_at FROM $name WHERE id = ?',
-          variables: [Variable.withString(id)],
-        )
-        .getSingle();
-    expect(kept.data['deleted_at'], isNotNull, reason: '$name rows are kept');
-  }
-
   test(
     'M1-5: each repository creates, reads, updates, soft-deletes and watches',
     () async {
@@ -139,6 +89,7 @@ void main() {
       final sessionId = await session();
 
       await lifecycle(
+        db,
         areas,
         crag,
         const AreasCompanion(name: Value('Kolsås vest')),
@@ -146,6 +97,7 @@ void main() {
         'Kolsås vest',
       );
       await lifecycle(
+        db,
         routes,
         () => route(cragId),
         const RoutesCompanion(name: Value('Bortebane')),
@@ -153,6 +105,7 @@ void main() {
         'Bortebane',
       );
       await lifecycle(
+        db,
         walls,
         () => walls.create(
           GymWallsCompanion(
@@ -167,6 +120,7 @@ void main() {
         4.5,
       );
       await lifecycle(
+        db,
         colours,
         () => colours.create(
           GymColourGradesCompanion(
@@ -182,6 +136,7 @@ void main() {
         15,
       );
       await lifecycle(
+        db,
         sessions,
         session,
         const SessionsCompanion(title: Value('Last warm evening')),
@@ -189,6 +144,7 @@ void main() {
         'Last warm evening',
       );
       await lifecycle(
+        db,
         ascents,
         () => ascent(sessionId, routeId),
         const AscentsCompanion(tries: Value(4)),

@@ -163,3 +163,17 @@ abstract class Repository<T extends Table, R> {
     if (!allowed) throw NotYourRow(table.actualTableName, id);
   }
 }
+
+/// For owned rows that others may see but that have no child rows to keep
+/// in step (goals, benchmark results): visibility changes only here.
+mixin ChangeVisibility<T extends Table, R> on Repository<T, R> {
+  /// Sets who can see one of [userId]'s rows.
+  Future<void> setVisibility(
+    String id,
+    String visibility, {
+    required String userId,
+  }) {
+    checkVisibility(visibility);
+    return writeChecked(id, userId, {'visibility': Variable(visibility)});
+  }
+}

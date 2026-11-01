@@ -59,3 +59,63 @@ final StreamProviderFamily<List<Route>, String> routesInAreaProvider =
           .watch(routeRepositoryProvider)
           .watchInArea(areaId, userId: ref.watch(currentUserIdProvider)),
     );
+
+final Provider<GearPieceRepository> gearPieceRepositoryProvider = Provider(
+  (ref) => GearPieceRepository(ref.watch(databaseProvider)),
+);
+final Provider<ShoeRepository> shoeRepositoryProvider = Provider(
+  (ref) => ShoeRepository(ref.watch(databaseProvider)),
+);
+final Provider<BenchmarkDefRepository> benchmarkDefRepositoryProvider =
+    Provider((ref) => BenchmarkDefRepository(ref.watch(databaseProvider)));
+final Provider<BenchmarkResultRepository> benchmarkResultRepositoryProvider =
+    Provider((ref) => BenchmarkResultRepository(ref.watch(databaseProvider)));
+final Provider<ProjectRepository> projectRepositoryProvider = Provider(
+  (ref) => ProjectRepository(ref.watch(databaseProvider)),
+);
+final Provider<GoalRepository> goalRepositoryProvider = Provider(
+  (ref) => GoalRepository(ref.watch(databaseProvider)),
+);
+
+/// The user's rack, live.
+final StreamProvider<List<GearPiece>> myGearProvider = StreamProvider(
+  (ref) => ref
+      .watch(gearPieceRepositoryProvider)
+      .watchMine(userId: ref.watch(currentUserIdProvider)),
+);
+
+/// The user's shoes, in use first, live.
+final StreamProvider<List<Shoe>> myShoesProvider = StreamProvider(
+  (ref) => ref
+      .watch(shoeRepositoryProvider)
+      .watchMine(userId: ref.watch(currentUserIdProvider)),
+);
+
+/// The standard tests and the user's own, live.
+final StreamProvider<List<BenchmarkDef>> benchmarksProvider = StreamProvider(
+  (ref) => ref
+      .watch(benchmarkDefRepositoryProvider)
+      .watchAvailable(userId: ref.watch(currentUserIdProvider)),
+);
+
+/// The user's results on one test, oldest first, live.
+final StreamProviderFamily<List<BenchmarkResult>, String>
+benchmarkResultsProvider = StreamProvider.autoDispose.family(
+  (ref, benchmarkId) => ref
+      .watch(benchmarkResultRepositoryProvider)
+      .watchFor(benchmarkId, userId: ref.watch(currentUserIdProvider)),
+);
+
+/// The user's active projects, live.
+final StreamProvider<List<Project>> activeProjectsProvider = StreamProvider(
+  (ref) => ref
+      .watch(projectRepositoryProvider)
+      .watchMine(userId: ref.watch(currentUserIdProvider), status: 'active'),
+);
+
+/// The user's active goals, soonest deadline first, live.
+final StreamProvider<List<Goal>> activeGoalsProvider = StreamProvider(
+  (ref) => ref
+      .watch(goalRepositoryProvider)
+      .watchMine(userId: ref.watch(currentUserIdProvider), status: 'active'),
+);
