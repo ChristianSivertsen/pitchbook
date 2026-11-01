@@ -54,3 +54,6 @@ key.properties
 .idea/
 *.iml
 .vscode/
+
+# Golden test failure output
+**/test/goldens/failures/
