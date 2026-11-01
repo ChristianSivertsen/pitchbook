@@ -30,7 +30,7 @@ func render(_ pixels: Int, to path: String) {
   svg.draw(in: NSRect(x: 0, y: 0, width: pixels, height: pixels))
   NSGraphicsContext.restoreGraphicsState()
 
-  // Flatten to opaque RGB in sRGB.
+  // Flatten to opaque RGB.
   let rgb = NSBitmapImageRep(
     bitmapDataPlanes: nil, pixelsWide: pixels, pixelsHigh: pixels,
     bitsPerSample: 8, samplesPerPixel: 3, hasAlpha: false, isPlanar: false,
