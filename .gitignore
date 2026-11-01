@@ -16,8 +16,17 @@ xcuserdata/
 *.p8
 *.mobileprovision
 *.cer
+*.p12
+*.pem
 .env
+.env.*
+!.env.example
+*service-account*.json
+google-services.json
+GoogleService-Info.plist
+secrets/
 supabase/.env
+supabase/.temp/
 
 # Flutter and Dart
 .dart_tool/
