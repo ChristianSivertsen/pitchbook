@@ -14,7 +14,7 @@
   --granite:#AC482F; --granite-light:#D4694C; --accent:#AC482F; --accent-ink:#FFFFFF; --sea:#2E6E7E;
   --os:#2E6E7E; --fl:#85590A; --rp:#AC482F; --att:#5B6185;
   --good:#2D764C; --warn:#85590A; --bad:#B33A30;
-  --desk:#EDE3D2; --foam:#F7E7CE; --scrim:rgba(27,34,64,.8);
+  --desk:#EDE3D2; --foam:#F7E7CE; --scrim:rgba(27,34,64,.8); --backdrop:rgba(14,19,40,.45);
   --f-display:"Fraunces",Georgia,"Times New Roman",serif;
   --f-body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 }
@@ -136,7 +136,7 @@ input[type=color]{width:38px;height:34px;border:1px solid var(--line);border-rad
 .mpend{display:flex;flex-direction:column;gap:4px;flex:none;width:96px}
 .mpend select{font-size:11px;padding:4px 6px;border-radius:8px}
 /* sheets */
-.sheet{position:absolute;inset:12px 0 0 0;background:var(--bg);z-index:20;display:flex;flex-direction:column;border-radius:24px 24px 0 0;overflow:hidden;box-shadow:0 -10px 30px -12px rgba(0,0,0,.45),0 0 0 100vmax rgba(14,19,40,.45);animation:up .3s ease-out}
+.sheet{position:absolute;inset:12px 0 0 0;background:var(--bg);z-index:20;display:flex;flex-direction:column;border-radius:24px 24px 0 0;overflow:hidden;box-shadow:0 -10px 30px -12px rgba(0,0,0,.45),0 0 0 100vmax var(--backdrop);animation:up .3s ease-out}
 @keyframes up{from{transform:translateY(32px);opacity:.6}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.sheet{animation:none}}
 .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px max(12px,env(safe-area-inset-left,0px)) 10px;border-bottom:1px solid var(--line);background:var(--surface)}
@@ -225,7 +225,7 @@ input[type=range]{width:100%;accent-color:var(--granite)}
 .gearicon{border-radius:8px;display:block}
 .due{font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;white-space:nowrap}
 .due.warn{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
-.due.bad{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.due.bad{background:color-mix(in srgb,var(--bad) 8%,transparent);color:var(--bad)}
 .due.ok{background:var(--sunk);color:var(--muted)}
 .gearrow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
 .gearrow:last-child{border-bottom:0}
@@ -1331,7 +1331,7 @@ function matrix(){
   const m=mineOut(),discs=['Sport','Trad','Multipitch','Alpine','Boulder'],rocks=DIMS.rock.all;
   const cnt=(r,d)=>m.filter(a=>C(a).rock===r&&R(a).disc===d).length;const mx=Math.max(...rocks.flatMap(r=>discs.map(d=>cnt(r,d))));
   return`<div style="overflow-x:auto"><table class="matrix"><thead><tr><th></th>${discs.map(d=>`<th>${d==='Multipitch'?'Multi':d}</th>`).join('')}</tr></thead><tbody>
-   ${rocks.map(r=>`<tr><td class="rk">${r}</td>${discs.map(d=>{const c=cnt(r,d);return c?`<td style="background:color-mix(in srgb,var(--granite) ${Math.round(15+70*c/mx)}%,transparent);color:${c/mx>.5?'var(--bg)':'var(--ink)'}">${c}</td>`:'<td class="none">–</td>'}).join('')}</tr>`).join('')}
+   ${rocks.map(r=>`<tr><td class="rk">${r}</td>${discs.map(d=>{const c=cnt(r,d);return c?`<td style="background:color-mix(in srgb,var(--granite) ${Math.round(15+40*c/mx)}%,transparent);color:var(--ink)">${c}</td>`:'<td class="none">–</td>'}).join('')}</tr>`).join('')}
   </tbody></table></div><p class="note">Hatched cells are combinations you have never logged.</p>`;
 }
 function experience(){
