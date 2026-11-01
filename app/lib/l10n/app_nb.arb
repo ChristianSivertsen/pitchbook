@@ -12,11 +12,14 @@
   "historyEmptyBody": "Dager ute, grader, pyramider og innsikt fylles ut etter hvert som du logger.",
   "cvTitle": "Klatre-CV",
   "cvEmptyTitle": "CV-en din bygger seg selv",
-  "cvEmptyBody": "Hver klatring du logger, bygger på nivåene dine, erfaringen din og viser hva du ikke har prøvd ennå.",
+  "cvEmptyBody": "Hver rute du logger, bygger opp nivåene og erfaringen din og viser hva du ikke har prøvd ennå.",
   "trainingTitle": "Trening",
-  "trainingEmptyTitle": "Følg styrke og bevegelighet",
-  "trainingEmptyBody": "Tester av fingerstyrke, trekk, kjerne og bevegelighet havner her, med fremgangen din over tid.",
+  "trainingEmptyTitle": "Hold oversikt over styrke og bevegelighet",
+  "trainingEmptyBody": "Tester av fingerstyrke, trekkraft, core og bevegelighet havner her, med fremgangen din over tid.",
   "logSheetTitle": "Logg en økt",
-  "logSheetBody": "Logging av klatring kommer i neste milepæl.",
-  "close": "Lukk"
+  "logSheetBody": "Snart kan du logge klatring her.",
+  "close": "Lukk",
+  "notFoundTitle": "Denne siden finnes ikke",
+  "notFoundBody": "Lenken kan være gammel eller feilskrevet.",
+  "notFoundAction": "Gå til feeden"
 }

@@ -54,29 +54,34 @@ class _TabBar extends StatelessWidget {
       );
     }
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.surfaceSunk,
-        border: Border(top: BorderSide(color: colors.line)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: SvaSpace.xs),
-          child: Row(
-            children: [
-              tab(0),
-              tab(1),
-              const Expanded(
-                child: Center(
-                  // Keep the bar only as tall as its content.
-                  heightFactor: 1,
-                  child: _LogButton(key: logButtonKey),
+    // Like system tab bars, the labels grow with the text size only up to a
+    // point; screen readers still get the full label.
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: 1.3,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.surfaceSunk,
+          border: Border(top: BorderSide(color: colors.line)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: SvaSpace.xs),
+            child: Row(
+              children: [
+                tab(0),
+                tab(1),
+                const Expanded(
+                  child: Center(
+                    // Keep the bar only as tall as its content.
+                    heightFactor: 1,
+                    child: _LogButton(key: logButtonKey),
+                  ),
                 ),
-              ),
-              tab(2),
-              tab(3),
-            ],
+                tab(2),
+                tab(3),
+              ],
+            ),
           ),
         ),
       ),

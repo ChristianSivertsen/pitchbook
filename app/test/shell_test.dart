@@ -6,6 +6,7 @@ import 'package:sva/src/router.dart';
 import 'package:sva/src/routes.dart';
 import 'package:sva/src/shell/app_shell.dart';
 import 'package:sva/src/shell/log_sheet.dart';
+import 'package:sva/src/shell/not_found_screen.dart';
 import 'package:sva/src/shell/tab_screens.dart';
 import 'package:sva_ui/sva_ui.dart';
 
@@ -97,16 +98,22 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(CvScreen), findsOneWidget);
 
-    container.read(routerProvider).go(Routes.log);
+    container.read(routerProvider).go(Routes.logLink);
     await tester.pumpAndSettle();
     expect(find.byType(LogSheet), findsOneWidget);
+    expect(find.byType(FeedScreen), findsOneWidget, reason: 'feed under sheet');
+
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(find.byType(LogSheet), findsNothing);
+    expect(find.byType(FeedScreen), findsOneWidget);
   });
 
   testWidgets('M0-5: an empty state action opens the log sheet', (
     tester,
   ) async {
     await startApp(tester);
-    await tester.tap(find.widgetWithText(FilledButton, 'Log a session'));
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Log a session'));
     await tester.pumpAndSettle();
     expect(find.byType(LogSheet), findsOneWidget);
   });
@@ -118,5 +125,64 @@ void main() {
     final screen = tester.getRect(find.byType(AppShell));
     final log = tester.getRect(find.byKey(logButtonKey));
     expect(screen.bottom - log.bottom, lessThan(SvaSpace.huge));
+  });
+
+  testWidgets('M0-5: an old link straight to /log still closes to a tab', (
+    tester,
+  ) async {
+    await startApp(tester);
+    container.read(routerProvider).go(Routes.log);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(find.byType(LogSheet), findsNothing);
+    expect(find.byType(FeedScreen), findsOneWidget);
+  });
+
+  testWidgets('M0-5: the log sheet opens over the tab you are on', (
+    tester,
+  ) async {
+    await startApp(tester);
+    await tester.tap(find.bySemanticsLabel('History'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(logButtonKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(LogSheet), findsOneWidget);
+    expect(find.byType(HistoryScreen), findsOneWidget);
+  });
+
+  testWidgets('M0-5: unknown links show a not-found page that leads home', (
+    tester,
+  ) async {
+    await startApp(tester);
+    container.read(routerProvider).go('/no-such-page?token=secret');
+    await tester.pumpAndSettle();
+    expect(find.byType(NotFoundScreen), findsOneWidget);
+    expect(find.textContaining('secret'), findsNothing);
+
+    await tester.tap(find.text('Go to the feed'));
+    await tester.pumpAndSettle();
+    expect(find.byType(FeedScreen), findsOneWidget);
+  });
+
+  testWidgets('M0-5: tab labels stay readable at 200 % text on a small phone', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await startApp(tester);
+    // Labels grow with the text size, but only up to 130 %.
+    for (final label in ['Feed', 'History', 'CV', 'Training']) {
+      final text = find.descendant(
+        of: find.bySemanticsLabel(label),
+        matching: find.text(label),
+      );
+      final scaler = MediaQuery.textScalerOf(tester.element(text));
+      expect(scaler.scale(10), closeTo(13, 0.01), reason: label);
+    }
+    expect(tester.takeException(), isNull);
   });
 }

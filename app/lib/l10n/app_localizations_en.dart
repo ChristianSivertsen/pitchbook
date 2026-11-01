@@ -49,7 +49,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cvEmptyBody =>
-      'Every climb you log adds to your levels, experience and the gaps you have not tried yet.';
+      'Every climb you log adds to your levels and experience, and shows what you have not tried yet.';
 
   @override
   String get trainingTitle => 'Training';
@@ -65,8 +65,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logSheetTitle => 'Log a session';
 
   @override
-  String get logSheetBody => 'Logging climbs comes in the next milestone.';
+  String get logSheetBody => 'Logging climbs is coming soon.';
 
   @override
   String get close => 'Close';
+
+  @override
+  String get notFoundTitle => 'This page doesn\'t exist';
+
+  @override
+  String get notFoundBody => 'The link may be old or mistyped.';
+
+  @override
+  String get notFoundAction => 'Go to the feed';
 }

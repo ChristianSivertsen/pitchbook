@@ -14,8 +14,15 @@ abstract final class Routes {
   static const cv = '/cv';
   static const training = '/training';
 
-  /// The log sheet. Opens over whichever tab is showing.
+  /// The log sheet, opened from inside the app with `push`. Opens over
+  /// whichever tab is showing.
   static const log = '/log';
+
+  /// The log sheet for links and notifications: opens over the feed.
+  static const logLink = '$feed/$logLinkSegment';
+
+  /// Path segment of [logLink] below [feed].
+  static const logLinkSegment = 'log';
 
   /// Debug builds only: every design token.
   static const tokenPreview = '/debug/tokens';

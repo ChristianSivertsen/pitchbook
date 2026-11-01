@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:sva/l10n/app_localizations.dart';
+import 'package:sva/src/routes.dart';
 import 'package:sva_ui/sva_ui.dart';
 
 /// The log sheet as a page, so `/log` works as a deep link and the system
@@ -35,6 +36,16 @@ class LogSheetPage extends CustomTransitionPage<void> {
       );
 }
 
+/// Closes the sheet. If it was opened as the first page (an old link to
+/// `/log`), there is nothing to go back to, so it opens the feed instead.
+void closeLogSheet(BuildContext context) {
+  if (context.canPop()) {
+    context.pop();
+  } else {
+    context.go(Routes.feed);
+  }
+}
+
 /// The log sheet. Logging itself arrives in M2-3.
 class LogSheet extends StatelessWidget {
   const new({super.key});
@@ -49,7 +60,8 @@ class LogSheet extends StatelessWidget {
       child: Align(
         alignment: Alignment.bottomCenter,
         child: Material(
-          color: colors.background,
+          color: colors.surface,
+          elevation: 8,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: SvaRadius.sheet),
           ),
@@ -71,7 +83,7 @@ class LogSheet extends StatelessWidget {
                     children: [
                       IconButton(
                         tooltip: l10n.close,
-                        onPressed: () => context.pop(),
+                        onPressed: () => closeLogSheet(context),
                         icon: Icon(LucideIcons.x, color: colors.text),
                       ),
                       Expanded(

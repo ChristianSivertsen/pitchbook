@@ -173,7 +173,7 @@ abstract class AppLocalizations {
   /// No description provided for @cvEmptyBody.
   ///
   /// In en, this message translates to:
-  /// **'Every climb you log adds to your levels, experience and the gaps you have not tried yet.'**
+  /// **'Every climb you log adds to your levels and experience, and shows what you have not tried yet.'**
   String get cvEmptyBody;
 
   /// No description provided for @trainingTitle.
@@ -203,7 +203,7 @@ abstract class AppLocalizations {
   /// No description provided for @logSheetBody.
   ///
   /// In en, this message translates to:
-  /// **'Logging climbs comes in the next milestone.'**
+  /// **'Logging climbs is coming soon.'**
   String get logSheetBody;
 
   /// No description provided for @close.
@@ -211,6 +211,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get close;
+
+  /// No description provided for @notFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This page doesn\'t exist'**
+  String get notFoundTitle;
+
+  /// No description provided for @notFoundBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The link may be old or mistyped.'**
+  String get notFoundBody;
+
+  /// No description provided for @notFoundAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the feed'**
+  String get notFoundAction;
 }
 
 class _AppLocalizationsDelegate

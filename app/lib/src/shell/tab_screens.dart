@@ -195,7 +195,9 @@ class _EmptyState extends StatelessWidget {
           ),
           if (actionLabel != null && onAction != null) ...[
             const SizedBox(height: SvaSpace.xl),
-            FilledButton(onPressed: onAction, child: Text(actionLabel!)),
+            // Secondary: the log button in the tab bar is the screen's one
+            // primary action (docs/DESIGN.md).
+            OutlinedButton(onPressed: onAction, child: Text(actionLabel!)),
           ],
         ],
       ),

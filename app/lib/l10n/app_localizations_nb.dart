@@ -49,24 +49,33 @@ class AppLocalizationsNb extends AppLocalizations {
 
   @override
   String get cvEmptyBody =>
-      'Hver klatring du logger, bygger på nivåene dine, erfaringen din og viser hva du ikke har prøvd ennå.';
+      'Hver rute du logger, bygger opp nivåene og erfaringen din og viser hva du ikke har prøvd ennå.';
 
   @override
   String get trainingTitle => 'Trening';
 
   @override
-  String get trainingEmptyTitle => 'Følg styrke og bevegelighet';
+  String get trainingEmptyTitle => 'Hold oversikt over styrke og bevegelighet';
 
   @override
   String get trainingEmptyBody =>
-      'Tester av fingerstyrke, trekk, kjerne og bevegelighet havner her, med fremgangen din over tid.';
+      'Tester av fingerstyrke, trekkraft, core og bevegelighet havner her, med fremgangen din over tid.';
 
   @override
   String get logSheetTitle => 'Logg en økt';
 
   @override
-  String get logSheetBody => 'Logging av klatring kommer i neste milepæl.';
+  String get logSheetBody => 'Snart kan du logge klatring her.';
 
   @override
   String get close => 'Lukk';
+
+  @override
+  String get notFoundTitle => 'Denne siden finnes ikke';
+
+  @override
+  String get notFoundBody => 'Lenken kan være gammel eller feilskrevet.';
+
+  @override
+  String get notFoundAction => 'Gå til feeden';
 }
