@@ -116,9 +116,9 @@ jobs:
         id: avd-cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
+          # Only the emulator; adb makes a fresh key each run, so its
+          # private key is never shared through the cache.
+          path: ~/.android/avd/*
           key: avd-${{ env.API_LEVEL }}-google_apis-x86_64
       - name: Create the emulator snapshot
         if: steps.avd-cache.outputs.cache-hit != 'true'
