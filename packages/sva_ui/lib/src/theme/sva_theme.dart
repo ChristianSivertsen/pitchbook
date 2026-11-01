@@ -35,24 +35,16 @@ abstract final class SvaTheme {
       outline: colors.line,
       outlineVariant: colors.line,
     );
-    final textTheme = TextTheme(
-      displaySmall: type.display,
-      headlineSmall: type.title,
-      titleMedium: type.headline,
-      bodyMedium: type.body,
-      bodyLarge: type.body,
-      labelLarge: type.label,
-      labelMedium: type.label,
-      bodySmall: type.caption,
-    );
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
       colorScheme: scheme,
       scaffoldBackgroundColor: colors.background,
-      fontFamily: SvaTypography.sansFamily,
-      fontFamilyFallback: const [SvaTypography.sansFamily],
-      textTheme: textTheme,
+      // Fonts bundled in a package are registered as packages/<name>/<family>.
+      fontFamily:
+          'packages/${SvaTypography.fontPackage}/${SvaTypography.sansFamily}',
+      textTheme: _textTheme(type),
+      primaryTextTheme: _textTheme(SvaTypography.withColor(colors.onSun)),
       dividerColor: colors.line,
       cardTheme: CardThemeData(
         color: colors.surface,
@@ -87,6 +79,26 @@ abstract final class SvaTheme {
       extensions: [colors, type],
     );
   }
+
+  /// Every Material slot gets an Sva style, so widgets that pick a slot
+  /// themselves (app bars, tabs, dialogs) still use the bundled fonts.
+  static TextTheme _textTheme(SvaTypography type) => TextTheme(
+    displayLarge: type.display,
+    displayMedium: type.display,
+    displaySmall: type.display,
+    headlineLarge: type.title,
+    headlineMedium: type.title,
+    headlineSmall: type.title,
+    titleLarge: type.title,
+    titleMedium: type.headline,
+    titleSmall: type.label,
+    bodyLarge: type.body,
+    bodyMedium: type.body,
+    bodySmall: type.caption,
+    labelLarge: type.label,
+    labelMedium: type.label,
+    labelSmall: type.caption,
+  );
 }
 
 /// Shortcuts for reading the Sva tokens from a widget.

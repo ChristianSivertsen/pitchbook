@@ -10,12 +10,12 @@ void main() {
   Brightness brightnessOf(WidgetTester tester) =>
       Theme.of(tester.element(find.byType(SvaLockup))).brightness;
 
-  testWidgets('app starts and shows the Sva lockup', (tester) async {
+  testWidgets('M0-4: the app starts with the Sva theme', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: SvaApp()));
     await tester.pumpAndSettle();
 
-    expect(find.byType(SvaLockup), findsOneWidget);
-    expect(find.bySemanticsLabel('Sva'), findsOneWidget);
+    final theme = Theme.of(tester.element(find.byType(SvaLockup)));
+    expect(theme.extension<SvaColors>(), isNotNull);
   });
 
   testWidgets('M0-4: follows the system setting by default', (tester) async {
@@ -52,6 +52,8 @@ void main() {
       SvaColors.midnight.background,
     );
 
+    // With the system in dark mode, choosing light must override it.
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
     container.read(themeModeProvider.notifier).select(ThemeMode.light);
     await tester.pumpAndSettle();
     expect(brightnessOf(tester), Brightness.light);

@@ -39,6 +39,44 @@ class SvaTokenPreview extends StatelessWidget {
         Text('Label', style: text.label),
         Text('Caption', style: text.caption),
         Text('1 234 m', style: text.number),
+        const SizedBox(height: SvaSpace.xxs),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: _Tag(label: '7a+', color: colors.text, textStyle: text.grade),
+        ),
+        const SizedBox(height: SvaSpace.xl),
+        Text('Spacing', style: text.title),
+        const SizedBox(height: SvaSpace.xs),
+        for (final (name, value) in _spacing)
+          Padding(
+            padding: const EdgeInsets.only(bottom: SvaSpace.xxs),
+            child: Row(
+              children: [
+                SizedBox(width: 72, child: Text(name, style: text.caption)),
+                Container(
+                  width: value,
+                  height: SvaSpace.sm,
+                  color: colors.granite,
+                ),
+              ],
+            ),
+          ),
+        const SizedBox(height: SvaSpace.xl),
+        Text('Radius', style: text.title),
+        const SizedBox(height: SvaSpace.xs),
+        Wrap(
+          spacing: SvaSpace.xs,
+          runSpacing: SvaSpace.xs,
+          children: [
+            for (final (name, radius) in _radii)
+              _RadiusSample(name: name, radius: radius),
+          ],
+        ),
+        const SizedBox(height: SvaSpace.xl),
+        Text('Motion', style: text.title),
+        const SizedBox(height: SvaSpace.xs),
+        for (final (name, duration) in _motion)
+          Text('$name: ${duration.inMilliseconds} ms', style: text.body),
         const SizedBox(height: SvaSpace.xl),
         Text('Components', style: text.title),
         const SizedBox(height: SvaSpace.xs),
@@ -72,6 +110,35 @@ class SvaTokenPreview extends StatelessWidget {
     ('success', c.success),
     ('warning', c.warning),
     ('danger', c.danger),
+    ('onSun', c.onSun),
+    ('onStyle', c.onStyle),
+  ];
+
+  static const List<(String, double)> _spacing = [
+    ('xxs 4', SvaSpace.xxs),
+    ('xs 8', SvaSpace.xs),
+    ('sm 12', SvaSpace.sm),
+    ('md 16', SvaSpace.md),
+    ('lg 20', SvaSpace.lg),
+    ('xl 24', SvaSpace.xl),
+    ('xxl 32', SvaSpace.xxl),
+    ('xxxl 40', SvaSpace.xxxl),
+    ('huge 48', SvaSpace.huge),
+  ];
+
+  static const List<(String, Radius)> _radii = [
+    ('badge', SvaRadius.badge),
+    ('small', SvaRadius.small),
+    ('card', SvaRadius.card),
+    ('large', SvaRadius.large),
+    ('sheet', SvaRadius.sheet),
+  ];
+
+  static const List<(String, Duration)> _motion = [
+    ('tap', SvaMotion.tap),
+    ('change', SvaMotion.change),
+    ('sheet', SvaMotion.sheet),
+    ('celebrate', SvaMotion.celebrate),
   ];
 }
 
@@ -106,10 +173,11 @@ class _Swatch extends StatelessWidget {
 }
 
 class _Tag extends StatelessWidget {
-  const new({required this.label, required this.color});
+  const new({required this.label, required this.color, this.textStyle});
 
   final String label;
   final Color color;
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -125,11 +193,40 @@ class _Tag extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: context.svaText.label.copyWith(
-            color: context.svaColors.onStyle,
+          style: (textStyle ?? context.svaText.label).copyWith(
+            color: color == context.svaColors.text
+                ? context.svaColors.background
+                : context.svaColors.onStyle,
           ),
         ),
       ),
+    );
+  }
+}
+
+class _RadiusSample extends StatelessWidget {
+  const new({required this.name, required this.radius});
+
+  final String name;
+  final Radius radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.svaColors;
+    return Column(
+      children: [
+        Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            color: colors.surface,
+            border: Border.all(color: colors.line),
+            borderRadius: BorderRadius.all(radius),
+          ),
+        ),
+        const SizedBox(height: SvaSpace.xxs),
+        Text(name, style: context.svaText.caption),
+      ],
     );
   }
 }

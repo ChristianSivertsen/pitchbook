@@ -63,9 +63,9 @@ Two palettes, one brand. Values are tokens in `packages/sva_ui` (ticket M0-4). S
 | `line` | `#E4D8C5` | Borders, dividers, chart grid |
 | `text` | `#1B2240` | Primary text (night) |
 | `textMuted` | `#5B6185` | Secondary text, labels |
-| `granite` | `#B84E34` | Brand colour, darkened for contrast on light |
+| `granite` | `#AC482F` | Brand colour, darkened for contrast on light |
 | `graniteLight` | `#D4694C` | Secondary brand fills and chart marks (3.3 : 1 on sand) |
-| `sun` | `#B84E34` | **Accent** (in daylight the sun is the coral one) |
+| `sun` | `#AC482F` | **Accent** (in daylight the sun is the coral one) |
 | `onSun` | `#FFFFFF` | Text and icons on the accent |
 | `sea` | `#2E6E7E` | Links, information |
 
@@ -75,12 +75,12 @@ These keep their meaning in both modes. Shades are adjusted per mode in the toke
 
 | Meaning | Midnight sun | Daylight |
 |---|---|---|
-| Success, OK | `#7CC49A` | `#2F7A4F` |
+| Success, OK | `#7CC49A` | `#2D764C` |
 | Warning, due soon | `#F2B544` | `#85590A` |
 | Danger, overdue, delete | `#F07A70` | `#B33A30` |
 | Onsight | `#6FB3C2` | `#2E6E7E` |
 | Flash | `#F2B544` | `#85590A` |
-| Redpoint | `#E07A5F` | `#B84E34` |
+| Redpoint | `#E07A5F` | `#AC482F` |
 | Repeat | `textMuted` | `textMuted` |
 | Attempt | outline in `textMuted` | outline in `textMuted` |
 
@@ -153,6 +153,7 @@ Depth comes from surface colour, not shadows: `surfaceSunk` < `background` < `su
 
 - Chart series in this order: `granite`, `sun`, `sea`, `graniteLight`, `textMuted`.
 - Ascent styles always use the climbing colours above, in the order onsight, flash, redpoint.
+- Charts sit on `background` or `surface`, never inside `surfaceSunk` wells (the lighter series would drop below 3 : 1 there).
 - Grid lines in `line`, axis labels in `textMuted` Caption, values in tabular figures.
 - The latest or best data point is emphasised (larger dot, label); everything else stays quiet.
 - Every chart has a text summary for screen readers.

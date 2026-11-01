@@ -7,7 +7,7 @@ Future<void> main() async {
     data: theme,
     child: Material(
       color: theme.scaffoldBackgroundColor,
-      child: const SizedBox(width: 420, height: 980, child: SvaTokenPreview()),
+      child: const SizedBox(width: 420, height: 1900, child: SvaTokenPreview()),
     ),
   );
 

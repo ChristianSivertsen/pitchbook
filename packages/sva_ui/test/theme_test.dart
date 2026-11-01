@@ -34,6 +34,37 @@ void main() {
       }
     });
 
+    test('M0-4: every Material text slot uses the bundled fonts', () {
+      for (final theme in [SvaTheme.midnight(), SvaTheme.daylight()]) {
+        for (final textTheme in [theme.textTheme, theme.primaryTextTheme]) {
+          final slots = {
+            'displayLarge': textTheme.displayLarge,
+            'displayMedium': textTheme.displayMedium,
+            'displaySmall': textTheme.displaySmall,
+            'headlineLarge': textTheme.headlineLarge,
+            'headlineMedium': textTheme.headlineMedium,
+            'headlineSmall': textTheme.headlineSmall,
+            'titleLarge': textTheme.titleLarge,
+            'titleMedium': textTheme.titleMedium,
+            'titleSmall': textTheme.titleSmall,
+            'bodyLarge': textTheme.bodyLarge,
+            'bodyMedium': textTheme.bodyMedium,
+            'bodySmall': textTheme.bodySmall,
+            'labelLarge': textTheme.labelLarge,
+            'labelMedium': textTheme.labelMedium,
+            'labelSmall': textTheme.labelSmall,
+          };
+          for (final MapEntry(:key, :value) in slots.entries) {
+            expect(
+              value?.fontFamily,
+              startsWith('packages/sva_ui/'),
+              reason: '${theme.brightness} $key',
+            );
+          }
+        }
+      }
+    });
+
     test('M0-4: numbers and grades use tabular figures', () {
       final type = SvaTypography.withColor(const Color(0xFF000000));
       for (final style in [type.number, type.grade]) {
