@@ -48,6 +48,8 @@ tool/check.sh                              # everything CI runs on every PR, exc
 cd app && flutter test integration_test    # flows, needs a simulator or emulator
 ```
 
+In CI, flows run in the "Flow tests" job on an Android emulator (API 34). The emulator snapshot is cached, so a warm run takes a few minutes. New flows go into `app/integration_test/` and run in the same job; do not add a job per flow. With several devices connected, pick one with `-d <device id>` (see `flutter devices`).
+
 ## Coverage
 
 `sva_core` aims for full branch coverage of its rules; other layers aim for the behaviours in each ticket rather than a percentage. A coverage report is added to CI with the first rules (M1).
