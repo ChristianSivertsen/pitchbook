@@ -1,0 +1,135 @@
+import 'package:flutter/material.dart';
+
+import 'package:sva_ui/src/brand/sva_mark.dart';
+import 'package:sva_ui/src/theme/sva_colors.dart';
+import 'package:sva_ui/src/theme/sva_theme.dart';
+import 'package:sva_ui/src/theme/sva_tokens.dart';
+
+/// Shows every Sva token in the current theme, for design review.
+/// Only reachable in debug builds.
+class SvaTokenPreview extends StatelessWidget {
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.svaColors;
+    final text = context.svaText;
+    return ListView(
+      padding: const EdgeInsets.all(SvaSpace.screen),
+      children: [
+        const Center(child: SvaLockup()),
+        const SizedBox(height: SvaSpace.xl),
+        Text('Colours', style: text.title),
+        const SizedBox(height: SvaSpace.xs),
+        Wrap(
+          spacing: SvaSpace.xs,
+          runSpacing: SvaSpace.xs,
+          children: [
+            for (final (name, color) in _swatches(colors))
+              _Swatch(name: name, color: color),
+          ],
+        ),
+        const SizedBox(height: SvaSpace.xl),
+        Text('Type', style: text.title),
+        const SizedBox(height: SvaSpace.xs),
+        Text('Display', style: text.display),
+        Text('Title', style: text.title),
+        Text('Headline', style: text.headline),
+        Text('Body text for running copy.', style: text.body),
+        Text('Label', style: text.label),
+        Text('Caption', style: text.caption),
+        Text('1 234 m', style: text.number),
+        const SizedBox(height: SvaSpace.xl),
+        Text('Components', style: text.title),
+        const SizedBox(height: SvaSpace.xs),
+        Wrap(
+          spacing: SvaSpace.xs,
+          runSpacing: SvaSpace.xs,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            FilledButton(onPressed: () {}, child: const Text('Save session')),
+            OutlinedButton(onPressed: () {}, child: const Text('Add climb')),
+            _Tag(label: 'Onsight', color: colors.onsight),
+            _Tag(label: 'Flash', color: colors.flash),
+            _Tag(label: 'Redpoint', color: colors.redpoint),
+          ],
+        ),
+      ],
+    );
+  }
+
+  static List<(String, Color)> _swatches(SvaColors c) => [
+    ('background', c.background),
+    ('surface', c.surface),
+    ('surfaceSunk', c.surfaceSunk),
+    ('line', c.line),
+    ('text', c.text),
+    ('textMuted', c.textMuted),
+    ('granite', c.granite),
+    ('graniteLight', c.graniteLight),
+    ('sun', c.sun),
+    ('sea', c.sea),
+    ('success', c.success),
+    ('warning', c.warning),
+    ('danger', c.danger),
+  ];
+}
+
+class _Swatch extends StatelessWidget {
+  const new({required this.name, required this.color});
+
+  final String name;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.svaColors;
+    return SizedBox(
+      width: 96,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 40,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: const BorderRadius.all(SvaRadius.small),
+              border: Border.all(color: colors.line),
+            ),
+          ),
+          const SizedBox(height: SvaSpace.xxs),
+          Text(name, style: context.svaText.caption),
+        ],
+      ),
+    );
+  }
+}
+
+class _Tag extends StatelessWidget {
+  const new({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: const BorderRadius.all(SvaRadius.badge),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: SvaSpace.xs,
+          vertical: SvaSpace.xxs,
+        ),
+        child: Text(
+          label,
+          style: context.svaText.label.copyWith(
+            color: context.svaColors.onStyle,
+          ),
+        ),
+      ),
+    );
+  }
+}

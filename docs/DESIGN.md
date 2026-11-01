@@ -64,7 +64,7 @@ Two palettes, one brand. Values are tokens in `packages/sva_ui` (ticket M0-4). S
 | `text` | `#1B2240` | Primary text (night) |
 | `textMuted` | `#5B6185` | Secondary text, labels |
 | `granite` | `#B84E34` | Brand colour, darkened for contrast on light |
-| `graniteLight` | `#E07A5F` | Secondary brand fills |
+| `graniteLight` | `#D4694C` | Secondary brand fills and chart marks (3.3 : 1 on sand) |
 | `sun` | `#B84E34` | **Accent** (in daylight the sun is the coral one) |
 | `onSun` | `#FFFFFF` | Text and icons on the accent |
 | `sea` | `#2E6E7E` | Links, information |

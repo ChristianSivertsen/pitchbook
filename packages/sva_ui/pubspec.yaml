@@ -11,5 +11,18 @@ dependencies:
     sdk: flutter
 
 dev_dependencies:
+  alchemist: ^0.14.1
   flutter_test:
     sdk: flutter
+
+flutter:
+  assets:
+    - fonts/OFL-Fraunces.txt
+    - fonts/OFL-Inter.txt
+  fonts:
+    - family: Fraunces
+      fonts:
+        - asset: fonts/Fraunces.ttf
+    - family: Inter
+      fonts:
+        - asset: fonts/Inter.ttf
