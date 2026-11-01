@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 import 'package:sva_data/src/database/tables/personal.dart';
 import 'package:sva_data/src/database/tables/places.dart';
 import 'package:sva_data/src/database/tables/routes.dart';
@@ -58,6 +59,9 @@ part 'sva_database.g.dart';
 )
 class SvaDatabase extends _$SvaDatabase {
   new(super.e);
+
+  /// A database that lives only in memory, for tests.
+  new inMemory() : this(NativeDatabase.memory());
 
   @override
   int get schemaVersion => 1;
