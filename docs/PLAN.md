@@ -119,14 +119,52 @@ These need you, because they involve your accounts and payment:
 
 **iPhone (TestFlight)**
 1. Install the full Xcode from the App Store, then run `sudo xcode-select -s /Applications/Xcode.app`. Flutter needs it to build for iOS on this Mac. This Mac currently points at the command-line tools only. Codemagic can build in the cloud instead.
-2. Join the Apple Developer Program at developer.apple.com/programs (paid yearly).
+2. Join the Apple Developer Program at developer.apple.com/programs ($99 a year).
 3. In App Store Connect, create the app record with a bundle ID such as `com.christiansivertsen.sva`. The store name must be unique, so "Sva" may need a variation.
 4. Add yourself as an internal tester in TestFlight.
 5. Create an App Store Connect API key for automated uploads (issue M0-6 lists the secrets).
 
 **Android (Google Play internal testing)**
-1. Create a Google Play Console developer account (one-time fee).
+1. Create a Google Play Console developer account ($25 once).
 2. Create the app with the package name `com.christiansivertsen.sva`.
 3. Create an upload key and a service account for automated uploads (issue M0-7 lists the secrets).
 
 Until the Play Console account exists, Android builds can be shared with friends as an APK file.
+
+Before the first release to Google Play, a new personal account needs at least 12 testers opted in to a closed test for 14 days in a row. Gather the testers early.
+
+## Running costs
+
+Prices checked in November 2026. Check the services' pricing pages before you pay for anything, since free tiers change.
+
+**Fixed costs**
+
+| What | Cost | Notes |
+|---|---|---|
+| Apple Developer Program | $99 a year | TestFlight and the App Store |
+| Google Play Console | $25 once | |
+| Domain (optional) | about $10–15 a year | The stores need a privacy policy and a support page. GitHub Pages hosts them for free |
+
+**Free tiers and when Sva outgrows them**
+
+| Service | Free tier | First limit Sva reaches | Paid plan |
+|---|---|---|---|
+| Supabase | 500 MB database, 1 GB file storage, 5 GB downloads a month, 50,000 monthly users. Pauses after a week without activity; no backups | File storage: 1 GB is about 3,000 photos or 50–100 short videos. The database lasts a few hundred active users | Pro, $25 a month: 8 GB database, 100 GB files, 250 GB downloads, daily backups |
+| PowerSync | 2 GB synced a month, 500 MB stored, 50 users connected at once. Switched off after about a week without activity | 50 users online at once, roughly a few hundred active users | Pro, $49 a month: 1,000 users online at once |
+| Open-Meteo | 10,000 calls a day, non-commercial use only | Fine for a free app if weather is stored per crag and day | Commercial use: $29 a month, or $99 a month for historical weather |
+| Maps | OpenStreetMap's own tiles do not allow heavy app use. MapTiler: 5,000 map loads a month for personal or non-commercial use | Decide when maps are built | MapTiler from $30 a month. Google's Maps SDK for phones is believed to be free; check before choosing |
+| Firebase Cloud Messaging, Crashlytics | Free | | |
+| Sentry (if chosen over Crashlytics) | 5,000 errors a month, one person | | Team, $26 a month |
+| GitHub Actions | Free for public repositories, macOS runners included | | |
+| Codemagic (optional) | 500 macOS build minutes a month, about 20–30 store builds | | $0.095 a minute |
+
+**Expected monthly cost**
+
+| Stage | Users | Cost a month |
+|---|---|---|
+| M0 to M10, no server | you and testers | $0, plus the developer accounts |
+| After M11 | up to about 100 testers | $0. Free projects pause and have no backups |
+| Real users | a few hundred | About $25: Supabase Pro, for backups and no pausing |
+| Growing | 1,000 to 5,000 | About $75–100: Supabase Pro, PowerSync Pro, and possibly a weather or map plan |
+
+To keep costs down, compress photos and limit video length, since storage is the biggest cost, and fetch weather once per crag and day in an Edge Function instead of from each phone.
