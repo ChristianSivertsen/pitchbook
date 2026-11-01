@@ -5,6 +5,16 @@ import 'package:sva_data/src/database/sva_database.dart';
 /// row that is still private (docs/schema.md, Ownership and Shared rows).
 enum RowAccess { owned, shared }
 
+/// Who can see a user's row (docs/schema.md, Visibility).
+const visibilities = {'public', 'friends', 'private'};
+
+/// Throws [ArgumentError] unless [visibility] is one of [visibilities].
+void checkVisibility(String visibility) {
+  if (!visibilities.contains(visibility)) {
+    throw ArgumentError.value(visibility, 'visibility');
+  }
+}
+
 /// Thrown when a user tries to change a row that is not theirs to change.
 class NotYourRow implements Exception {
   new(this.table, this.id);
@@ -29,14 +39,29 @@ abstract class Repository<T extends Table, R> {
   TableInfo<T, R> get table;
   RowAccess get access;
 
-  GeneratedColumn<String> _column(String name) =>
-      table.columnsByName[name]! as GeneratedColumn<String>;
+  /// Columns [update] never changes. Identity, ownership, timestamps and
+  /// visibility change only through dedicated methods (or, for shared rows,
+  /// moderated requests); subclasses add their own caches.
+  Set<String> get protectedColumns => const {
+    'id',
+    'owner_id',
+    'created_by',
+    'created_at',
+    'updated_at',
+    'deleted_at',
+    'visibility',
+    'merged_into_id',
+    'consensus_score',
+    'quality_avg',
+  };
 
-  GeneratedColumn<String> get _id => _column('id');
+  GeneratedColumn<String> get _id =>
+      table.columnsByName['id']! as GeneratedColumn<String>;
   GeneratedColumn<DateTime> get _deletedAt =>
       table.columnsByName['deleted_at']! as GeneratedColumn<DateTime>;
 
-  /// Live rows only: soft-deleted rows are invisible to screens.
+  /// For subclasses: live rows only. Soft-deleted rows are invisible to
+  /// screens.
   SimpleSelectStatement<T, R> live() =>
       db.select(table)..where((_) => _deletedAt.isNull());
 
@@ -53,17 +78,32 @@ abstract class Repository<T extends Table, R> {
   Future<void> insert(Insertable<R> row) => db.into(table).insert(row);
 
   /// Applies [changes] to a row [userId] may change, with a new
-  /// `updated_at`. Throws [NotYourRow] otherwise.
+  /// `updated_at`. Throws [ArgumentError] when [changes] touches a
+  /// [protectedColumns] column and [NotYourRow] when the row is not theirs.
   Future<void> update(
     String id,
     Insertable<R> changes, {
     required String userId,
-  }) => db.transaction(() async {
+  }) {
+    final columns = changes.toColumns(true);
+    final blocked = columns.keys.where(protectedColumns.contains).toList();
+    if (blocked.isNotEmpty) {
+      throw ArgumentError.value(blocked, 'changes', 'protected columns');
+    }
+    return writeChecked(id, userId, columns);
+  }
+
+  /// For subclasses: checks [userId] may change the row, then writes
+  /// [columns] with a new `updated_at` in one statement.
+  Future<void> writeChecked(
+    String id,
+    String userId,
+    Map<String, Expression<Object>> columns,
+  ) => db.transaction(() async {
     await checkWritable(id, userId);
-    final query = db.update(table)..where((_) => _id.equals(id));
-    await query.write(changes);
-    await query.write(
-      RawValuesInsertable<R>({'updated_at': Variable(clock())}),
+    if (columns.isEmpty) return;
+    await (db.update(table)..where((_) => _id.equals(id))).write(
+      RawValuesInsertable<R>({...columns, 'updated_at': Variable(clock())}),
     );
   });
 
@@ -72,34 +112,35 @@ abstract class Repository<T extends Table, R> {
   Future<void> softDelete(String id, {required String userId}) =>
       db.transaction(() async {
         await checkWritable(id, userId);
-        await markDeleted(table, [id]);
+        await markDeleted(table, _id, [id]);
       });
 
-  /// For subclasses: sets `deleted_at` on [ids] in any [table], for
-  /// cascades.
+  /// For subclasses: sets `deleted_at` on the live rows of [table] whose
+  /// [key] is in [keys], for cascades.
   Future<void> markDeleted(
     TableInfo<Table, Object?> table,
-    List<String> ids,
+    GeneratedColumn<String> key,
+    List<String> keys,
   ) async {
-    if (ids.isEmpty) return;
+    if (keys.isEmpty) return;
     final now = clock();
     await db.customUpdate(
-      // The table name comes from the generated table, never from input.
+      // Names come from the generated table, never from input.
       'UPDATE ${table.actualTableName} SET deleted_at = ?, updated_at = ? '
-      'WHERE id IN (${List.filled(ids.length, '?').join(', ')}) '
+      'WHERE ${key.name} IN (${List.filled(keys.length, '?').join(', ')}) '
       'AND deleted_at IS NULL',
       variables: [
         Variable<DateTime>(now),
         Variable<DateTime>(now),
-        for (final id in ids) Variable.withString(id),
+        for (final k in keys) Variable.withString(k),
       ],
       updates: {table},
       updateKind: UpdateKind.update,
     );
   }
 
-  /// Throws [NotYourRow] unless the live row exists and [userId] may
-  /// change it.
+  /// For subclasses: throws [NotYourRow] unless the live row exists and
+  /// [userId] may change it.
   Future<void> checkWritable(String id, String userId) async {
     final columns = access == RowAccess.owned
         ? ['owner_id']

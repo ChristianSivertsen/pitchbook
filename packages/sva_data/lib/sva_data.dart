@@ -1,6 +1,8 @@
 /// Sva data: local database, repositories and sync.
 library;
 
+export 'package:drift/drift.dart' show Value;
+
 export 'src/attributes/attribute_repository.dart';
 export 'src/database/sva_database.dart';
 export 'src/grades/grade_repository.dart';

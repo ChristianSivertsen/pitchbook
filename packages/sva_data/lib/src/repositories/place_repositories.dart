@@ -30,8 +30,10 @@ class AreaRepository extends Repository<$AreasTable, Area> {
         id: Value(id),
         createdAt: Value(now),
         updatedAt: Value(now),
+        deletedAt: const Value(null),
         createdBy: Value(userId),
         visibility: const Value('private'),
+        mergedIntoId: const Value(null),
       ),
     );
     return id;
@@ -95,8 +97,12 @@ class RouteRepository extends Repository<$RoutesTable, Route> {
         id: Value(id),
         createdAt: Value(now),
         updatedAt: Value(now),
+        deletedAt: const Value(null),
         createdBy: Value(userId),
         visibility: const Value('private'),
+        mergedIntoId: const Value(null),
+        consensusScore: const Value(null),
+        qualityAvg: const Value(null),
       ),
     );
     return id;
@@ -154,6 +160,7 @@ class GymWallRepository extends Repository<$GymWallsTable, GymWall> {
         id: Value(id),
         createdAt: Value(now),
         updatedAt: Value(now),
+        deletedAt: const Value(null),
         ownerId: Value(userId),
       ),
     );
@@ -194,6 +201,7 @@ class GymColourGradeRepository
         id: Value(id),
         createdAt: Value(now),
         updatedAt: Value(now),
+        deletedAt: const Value(null),
         ownerId: Value(userId),
       ),
     );

@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:sva_core/sva_core.dart';
 import 'package:sva_data/sva_data.dart';

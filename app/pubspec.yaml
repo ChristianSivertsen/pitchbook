@@ -24,7 +24,6 @@ dependencies:
     path: ../packages/sva_ui
 
 dev_dependencies:
-  drift: ^2.35.2
   flutter_test:
     sdk: flutter
   integration_test:

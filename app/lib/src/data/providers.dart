@@ -39,14 +39,14 @@ final StreamProvider<List<Session>> mySessionsProvider = StreamProvider(
 
 /// The climbs in one session, in order, live.
 final StreamProviderFamily<List<Ascent>, String> sessionAscentsProvider =
-    StreamProvider.family(
+    StreamProvider.autoDispose.family(
       (ref, sessionId) =>
           ref.watch(ascentRepositoryProvider).watchInSession(sessionId),
     );
 
 /// The places under one place (the top level for `null`), live.
 final StreamProviderFamily<List<Area>, String?> areaChildrenProvider =
-    StreamProvider.family(
+    StreamProvider.autoDispose.family(
       (ref, parentId) => ref
           .watch(areaRepositoryProvider)
           .watchChildren(parentId, userId: ref.watch(currentUserIdProvider)),
@@ -54,7 +54,7 @@ final StreamProviderFamily<List<Area>, String?> areaChildrenProvider =
 
 /// The routes in one place, live.
 final StreamProviderFamily<List<Route>, String> routesInAreaProvider =
-    StreamProvider.family(
+    StreamProvider.autoDispose.family(
       (ref, areaId) => ref
           .watch(routeRepositoryProvider)
           .watchInArea(areaId, userId: ref.watch(currentUserIdProvider)),
