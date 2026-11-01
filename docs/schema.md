@@ -8,7 +8,7 @@ Supported climbing: sport, trad, bouldering, multipitch, alpine, ice, mixed, aid
 
 | Rule | Detail |
 |---|---|
-| IDs | `id` is a UUIDv7, generated on the device. Works offline and sorts by creation time. Every table has a text `id` primary key, join tables included (PowerSync needs it) |
+| IDs | `id` is a UUIDv7, generated on the device. Works offline and sorts by creation time. Seeded shared rows (attribute definitions, grade systems) instead get a UUIDv5 from their stable key and a fixed namespace (`seedId` in `sva_data`), so every device and the server agree on them; the server never accepts client writes to those tables. Every table has a text `id` primary key, join tables included (PowerSync needs it) |
 | Ownership | `owner_id` on every user-owned row, child rows included (an ascent's pitches, attributes and gear carry the same owner), so sync rules and row-level security never need a join. Only the owner may change it. Shared rows have `created_by` instead |
 | Timestamps | `created_at`, `updated_at` in UTC. `deleted_at` for soft deletes; rows are never hard-deleted by clients |
 | Local dates | Sessions store `local_date` (`YYYY-MM-DD`) and `tz` (IANA name, for example `Europe/Oslo`) so a session abroad lands on the right day |
@@ -226,7 +226,7 @@ Columns: `id`, `key` (unique on the server), `name`, `grade_type`, `sort`, `regi
 
 A trad route might have `free_route` E3 + 5c, `danger` R and `commitment` III. An alpine route might have `alpine` D, `free_route` 5+ and `ice` WI3.
 
-**attribute_defs**: shared definitions for the long tail of details. `id`, `key` (unique on the server), `level` (`area`, `route`, `pitch`, `ascent`, `session`), `value_type` (`single`, `multi`, `number`, `bool`), `value_keys` (json array of allowed value keys; `values` is a reserved word in SQL), `sort`. Seeded with features (`feature.finger_crack`, `.hand_crack`, `.offwidth`, `.chimney`, `.corner`, `.arete`, `.tufa`, `.ice_pillar`, `.ice_curtain`, `.mixed_dry_tool`), holds, ascent tags (`tag.pumpy` …), conditions.
+**attribute_defs**: shared definitions for the long tail of details. `id`, `key` (unique on the server), `level` (`area`, `route`, `pitch`, `ascent`, `session`), `value_type` (`single`, `multi`, `number`, `bool`), `value_keys` (json array of allowed value keys; `values` is a reserved word in SQL), `sort`. Seeded with features (`feature.face`, `feature.finger_crack`, `.hand_crack`, `.offwidth`, `.chimney`, `.corner`, `.arete`, `.tufa`, `.ice_pillar`, `.ice_curtain`, `.mixed_dry_tool`), holds, ascent tags (`tag.pumpy` …), conditions.
 
 **route_attributes**: `id`, `route_id`, `attribute_key`, `value` (key, number or bool as text). One row per value, so multi-value attributes have several rows; unique on the three columns on the server.
 
