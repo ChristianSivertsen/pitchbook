@@ -57,3 +57,6 @@ key.properties
 
 # Golden test failure output
 **/test/goldens/failures/
+
+# Worktrees made by Claude Code agents
+.claude/worktrees/
