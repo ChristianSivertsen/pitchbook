@@ -11,6 +11,8 @@ The clickable prototype in [`prototype/index.html`](../prototype/index.html) is 
 - Every PR passes analysis, tests and both platform builds in CI before review.
 - Milestones are done in order. Within a milestone, issues are built in the order of their code (M2-1, M2-2, and so on) unless an issue says otherwise.
 - At the end of each milestone a build goes to TestFlight (iPhone) and Google Play internal testing (Android).
+- Claude works through tickets with the `ship-ticket` skill and reviews each PR with the `review-pr` skill: one agent reviews security, another reviews code quality. Routine PRs are merged by Claude once both reviews and CI pass. PRs that touch the schema, security, sync, data deletion, releases or native dependencies wait for your review. The full rules are in [CLAUDE.md](../CLAUDE.md).
+- The repository is public, so no secret may ever be committed.
 
 ## Tech stack
 
