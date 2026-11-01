@@ -82,6 +82,7 @@ flutter test                      # in app/ and each package
 tool/check.sh                     # everything CI runs (except flow tests)
 cd packages/sva_data && dart run build_runner build   # after changing drift tables
 cd packages/sva_data && dart run drift_dev make-migrations   # after bumping schemaVersion
+swift tool/render_app_icons.swift   # after changing assets/brand/sva-app-icon.svg (macOS)
 ```
 
 Add new commands here as tooling is set up.
