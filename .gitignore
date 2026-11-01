@@ -18,3 +18,25 @@ xcuserdata/
 *.cer
 .env
 supabase/.env
+
+# Flutter and Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+coverage/
+*.g.dart.tmp
+
+# Android
+.gradle/
+local.properties
+*.jks
+*.keystore
+key.properties
+
+# iOS (Flutter)
+**/ios/Pods/
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
