@@ -51,7 +51,7 @@ void main() {
     });
   });
 
-  test('attribute definitions accept only values of their type', () {
+  test('M1-2: attribute definitions accept only values of their type', () {
     const hold = AttributeDef(
       key: 'hold',
       level: AttributeLevel.route,
@@ -82,7 +82,10 @@ void main() {
     expect(feel.accepts(['feel.soft']), isTrue);
     expect(feel.accepts(['feel.soft', 'feel.hard']), isFalse);
     expect(rope.accepts(['60']), isTrue);
-    expect(rope.accepts(['sixty']), isFalse);
+    expect(rope.accepts(['60.5']), isTrue);
+    for (final bad in ['sixty', 'NaN', 'Infinity', ' 60', '0x10', '1e3']) {
+      expect(rope.accepts([bad]), isFalse, reason: bad);
+    }
     expect(tide.accepts(['true']), isTrue);
     expect(tide.accepts(['yes']), isFalse);
   });

@@ -31,14 +31,21 @@ void main() {
         ),
       );
 
-  Future<void> addRoute(String id, String areaId, {String? angle}) => db
+  // Routes are the test user's private routes unless said otherwise.
+  Future<void> addRoute(
+    String id,
+    String areaId, {
+    String? angle,
+    String visibility = 'private',
+  }) => db
       .into(db.routes)
       .insert(
         RoutesCompanion.insert(
           id: id,
           createdAt: now,
           updatedAt: now,
-          visibility: 'public',
+          visibility: visibility,
+          createdBy: const Value('me'),
           areaId: areaId,
           kind: 'outdoor',
           discipline: 'sport',
@@ -68,6 +75,9 @@ void main() {
         ),
       );
 
+  Future<void> setHolds(String routeId, List<String> holds, {String? by}) =>
+      repo.setRouteAttribute(routeId, 'hold', holds, userId: by ?? 'me');
+
   test('M1-2: seeded attribute definitions load', () async {
     await repo.seed();
     await repo.seed(); // seeding again updates instead of duplicating
@@ -80,34 +90,29 @@ void main() {
       expect(match.valueType, def.valueType, reason: def.key);
       expect(match.valueKeys, def.valueKeys, reason: def.key);
     }
-    final ids = await db.select(db.attributeDefs).get();
+    final rows = await db.select(db.attributeDefs).get();
     expect(
-      ids.map((row) => row.id),
+      rows.map((row) => row.id),
       containsAll(attributeSeed.map((d) => seedId('attribute_def:${d.key}'))),
       reason: 'seeded ids are the same on every device',
     );
-    expect(
-      (await repo.definitions(level: AttributeLevel.ascent)).map((d) => d.key),
-      ['feel', 'tag'],
-    );
+    final ascentDefs = await repo.definitions(level: AttributeLevel.ascent);
+    expect(ascentDefs.map((d) => d.key), ['feel', 'tag']);
   });
 
   test(
     'M1-2: an ascent resolves values from its crag, route and itself',
     () async {
       await repo.seed();
-      await addArea('crag', rock: 'rock.granite');
-      await addArea('sector', parentId: 'crag');
+      await addArea('crag', rock: 'rock.gneiss');
+      // The sector is nearer the route, so its rock wins over the crag's.
+      await addArea('sector', parentId: 'crag', rock: 'rock.granite');
       await addRoute('route', 'sector', angle: 'angle.overhang');
-      await repo.setRouteAttribute('route', 'hold', ['hold.pinch', 'hold.jug']);
+      await setHolds('route', ['hold.pinch', 'hold.jug']);
       await addAscent('ascent', 'route', feel: 'feel.hard');
-      await repo.setAscentAttribute(
-        'ascent',
-        'tag',
-        ['tag.pumpy'],
-        ownerId: 'me',
-        visibility: 'friends',
-      );
+      await repo.setAscentAttribute('ascent', 'tag', [
+        'tag.pumpy',
+      ], userId: 'me');
 
       expect(await repo.resolvedForAscent('ascent'), {
         'rock_type': ['rock.granite'],
@@ -136,24 +141,133 @@ void main() {
     final routeDefs = await repo.definitions(level: AttributeLevel.route);
     expect(routeDefs.last.key, 'surface');
 
-    await repo.setRouteAttribute('route', 'surface', ['surface.lichen']);
+    await repo.setRouteAttribute('route', 'surface', [
+      'surface.lichen',
+    ], userId: 'me');
     expect((await repo.resolvedForAscent('ascent'))['surface'], [
       'surface.lichen',
     ]);
 
     // The same checks guard new attributes as existing ones.
     expect(
-      () => repo.setRouteAttribute('route', 'surface', ['surface.mud']),
+      () => repo.setRouteAttribute('route', 'surface', [
+        'surface.mud',
+      ], userId: 'me'),
       throwsArgumentError,
     );
     expect(
-      () => repo.setRouteAttribute('route', 'angle', ['angle.slab']),
+      () => repo.setRouteAttribute('route', 'angle', [
+        'angle.slab',
+      ], userId: 'me'),
       throwsArgumentError,
       reason: 'typed columns are written with the route',
     );
     expect(
-      () => repo.setRouteAttribute('route', 'unknown', ['x']),
+      () => repo.setRouteAttribute('route', 'unknown', ['x'], userId: 'me'),
       throwsArgumentError,
     );
+  });
+
+  test('M1-2: changing values soft-deletes and revives rows', () async {
+    await repo.seed();
+    await addArea('crag');
+    await addRoute('route', 'crag');
+    Future<List<RouteAttribute>> rows() => db.select(db.routeAttributes).get();
+
+    await setHolds('route', ['hold.crimp', 'hold.jug']);
+    final first = await rows();
+    await setHolds('route', ['hold.jug']);
+    expect(
+      (await rows()).where((r) => r.deletedAt != null).map((r) => r.value),
+      ['hold.crimp'],
+    );
+    await setHolds('route', ['hold.jug', 'hold.crimp']);
+
+    final last = await rows();
+    expect(last, hasLength(2), reason: 'rows are never removed');
+    expect(
+      last.map((r) => r.id).toSet(),
+      first.map((r) => r.id).toSet(),
+      reason: 'a value that comes back keeps its id',
+    );
+    expect(last.every((r) => r.deletedAt == null), isTrue);
+  });
+
+  test('M1-2: only the owner writes, and only on private routes', () async {
+    await repo.seed();
+    await addArea('crag');
+    await addRoute('public', 'crag', visibility: 'public');
+    await addRoute('mine', 'crag');
+    await addAscent('ascent', 'mine');
+
+    expect(
+      () => setHolds('public', ['hold.jug']),
+      throwsStateError,
+      reason: 'public routes change through moderated requests',
+    );
+    expect(
+      () => setHolds('mine', ['hold.jug'], by: 'someone else'),
+      throwsStateError,
+    );
+    expect(
+      () => repo.setAscentAttribute('ascent', 'tag', [
+        'tag.pumpy',
+      ], userId: 'someone else'),
+      throwsStateError,
+    );
+
+    await repo.setAscentAttribute('ascent', 'tag', ['tag.pumpy'], userId: 'me');
+    final row = await db.select(db.ascentAttributes).getSingle();
+    expect((row.ownerId, row.visibility), ('me', 'friends'));
+  });
+
+  test('M1-2: bad definitions and area loops are handled', () async {
+    await repo.seed();
+    final count = (await repo.definitions()).length;
+    // A definition from a newer app version, one with broken value keys,
+    // and one the server deleted are all left out.
+    for (final (key, level, json, deleted) in [
+      ('galaxy', 'galaxy', '[]', null),
+      ('broken', 'route', '[1, 2]', null),
+      ('gone', 'route', '["a"]', now),
+    ]) {
+      await db
+          .into(db.attributeDefs)
+          .insert(
+            AttributeDefsCompanion.insert(
+              id: key,
+              createdAt: now,
+              updatedAt: now,
+              deletedAt: Value(deleted),
+              key: key,
+              level: level,
+              valueType: 'multi',
+              valueKeys: Value(json),
+              sort: 1,
+            ),
+          );
+    }
+    expect(await repo.definitions(), hasLength(count));
+
+    expect(
+      () => repo.seed([
+        const AttributeDef(
+          key: 'parking',
+          level: AttributeLevel.area,
+          valueType: AttributeValueType.bool,
+        ),
+      ]),
+      throwsArgumentError,
+      reason: 'areas have no attribute table yet',
+    );
+
+    // Two areas that are each other's parent still resolve.
+    await addArea('a', parentId: 'b', rock: 'rock.basalt');
+    await addArea('b', parentId: 'a');
+    await addRoute('route', 'a');
+    await addAscent('ascent', 'route');
+    expect((await repo.resolvedForAscent('ascent'))['rock_type'], [
+      'rock.basalt',
+    ]);
   });
 }

@@ -17,6 +17,9 @@ enum AttributeValueType {
   bool,
 }
 
+/// A plain decimal number: no spaces, exponents, hex, NaN or infinity.
+final _plainNumber = RegExp(r'^-?\d{1,12}(\.\d{1,6})?$');
+
 /// The definition of one detail that can be logged, such as hold types or
 /// ascent tags. Definitions are data, so a new detail needs no code: the
 /// log form and the Explorer list whatever definitions exist.
@@ -54,7 +57,7 @@ final class AttributeDef {
         values.toSet().length == values.length &&
             values.every(valueKeys.contains),
       AttributeValueType.number =>
-        values.length == 1 && num.tryParse(values.single) != null,
+        values.length == 1 && _plainNumber.hasMatch(values.single),
       AttributeValueType.bool =>
         values.length == 1 && const {'true', 'false'}.contains(values.single),
     };

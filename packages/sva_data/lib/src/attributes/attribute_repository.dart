@@ -16,6 +16,12 @@ class AttributeRepository {
   final SvaDatabase _db;
   final DateTime Function() _clock;
 
+  /// Levels with an attribute table for non-typed values.
+  static const Set<AttributeLevel> _stored = {
+    AttributeLevel.route,
+    AttributeLevel.ascent,
+  };
+
   static const Map<AttributeLevel, String> _tables = {
     AttributeLevel.area: 'areas',
     AttributeLevel.route: 'routes',
@@ -23,9 +29,20 @@ class AttributeRepository {
     AttributeLevel.session: 'sessions',
   };
 
-  /// Adds or updates the shared definitions. Ids come from the key, so every
-  /// device and the server agree on them.
+  /// Bootstraps the shared definitions on the device until the server
+  /// delivers them through sync (M11-4), after which the server owns them.
+  /// Ids come from the key, so every device and the server agree on them.
+  /// A definition the server deleted stays deleted.
+  ///
+  /// Throws [ArgumentError] for a non-typed definition at a level that has
+  /// no attribute table yet (area, pitch, session): it could not be stored.
   Future<void> seed([Iterable<AttributeDef> defs = attributeSeed]) async {
+    for (final def in defs) {
+      final typed = typedAttributeColumns[def.level]?.containsKey(def.key);
+      if (!_stored.contains(def.level) && !(typed ?? false)) {
+        throw ArgumentError.value(def.key, 'defs', 'cannot be stored yet');
+      }
+    }
     final now = _clock();
     await _db.batch((batch) {
       for (final def in defs) {
@@ -48,7 +65,6 @@ class AttributeRepository {
               valueType: Value(def.valueType.name),
               valueKeys: Value(jsonEncode(def.valueKeys)),
               sort: Value(def.sort),
-              deletedAt: const Value(null),
             ),
           ),
         );
@@ -60,80 +76,155 @@ class AttributeRepository {
   Future<List<AttributeDef>> definitions({AttributeLevel? level}) async {
     final query = _db.select(_db.attributeDefs)
       ..where((d) => d.deletedAt.isNull())
-      ..orderBy([(d) => OrderingTerm(expression: d.sort)]);
+      ..orderBy([
+        (d) => OrderingTerm(expression: d.sort),
+        (d) => OrderingTerm(expression: d.key),
+      ]);
     if (level != null) query.where((d) => d.level.equals(level.name));
     final rows = await query.get();
     return [for (final row in rows) ?_toDef(row)];
   }
 
-  /// Sets the values of a non-typed attribute on a route, replacing what
-  /// was there. Throws [ArgumentError] when the definition is missing, the
-  /// key is a typed column or the values are not allowed.
+  /// Sets the values of a non-typed attribute on a private route that
+  /// [userId] created, replacing what was there. Public routes are shared
+  /// and change only through moderated requests (docs/schema.md).
+  ///
+  /// Throws [ArgumentError] when the definition is missing, the key is a
+  /// typed column or the values are not allowed, and [StateError] when the
+  /// route does not exist, is public or belongs to someone else.
   Future<void> setRouteAttribute(
     String routeId,
     String key,
     List<String> values, {
-    String? createdBy,
+    required String userId,
   }) async {
     final def = await _definition(key, AttributeLevel.route);
     _checkWritable(def, key, values);
     final now = _clock();
     await _db.transaction(() async {
-      await (_db.delete(_db.routeAttributes)..where(
-            (a) => a.routeId.equals(routeId) & a.attributeKey.equals(key),
-          ))
-          .go();
-      for (final value in values) {
-        await _db
-            .into(_db.routeAttributes)
-            .insert(
-              RouteAttributesCompanion.insert(
-                id: newId(),
-                createdAt: now,
-                updatedAt: now,
-                createdBy: Value(createdBy),
-                routeId: routeId,
-                attributeKey: key,
-                value: value,
-              ),
-            );
+      final route = await (_db.select(
+        _db.routes,
+      )..where((r) => r.id.equals(routeId))).getSingleOrNull();
+      if (route == null ||
+          route.deletedAt != null ||
+          route.visibility != 'private' ||
+          route.createdBy != userId) {
+        throw StateError('Route $routeId is not a private route of $userId');
       }
+      final existing =
+          await (_db.select(_db.routeAttributes)..where(
+                (a) => a.routeId.equals(routeId) & a.attributeKey.equals(key),
+              ))
+              .get();
+      final plan = _plan([
+        for (final row in existing) (row.id, row.value, row.deletedAt),
+      ], values);
+      await _db.batch((batch) {
+        for (final id in plan.delete) {
+          batch.update(
+            _db.routeAttributes,
+            RouteAttributesCompanion(
+              deletedAt: Value(now),
+              updatedAt: Value(now),
+            ),
+            where: (a) => a.id.equals(id),
+          );
+        }
+        for (final id in plan.revive) {
+          batch.update(
+            _db.routeAttributes,
+            RouteAttributesCompanion(
+              deletedAt: const Value(null),
+              updatedAt: Value(now),
+            ),
+            where: (a) => a.id.equals(id),
+          );
+        }
+        for (final value in plan.insert) {
+          batch.insert(
+            _db.routeAttributes,
+            RouteAttributesCompanion.insert(
+              id: newId(),
+              createdAt: now,
+              updatedAt: now,
+              createdBy: Value(userId),
+              routeId: routeId,
+              attributeKey: key,
+              value: value,
+            ),
+          );
+        }
+      });
     });
   }
 
-  /// Sets the values of a non-typed attribute on one of the owner's
-  /// ascents, replacing what was there.
+  /// Sets the values of a non-typed attribute on one of [userId]'s ascents,
+  /// replacing what was there. New rows copy the ascent's owner and
+  /// visibility. Throws like [setRouteAttribute].
   Future<void> setAscentAttribute(
     String ascentId,
     String key,
     List<String> values, {
-    required String ownerId,
-    required String visibility,
+    required String userId,
   }) async {
     final def = await _definition(key, AttributeLevel.ascent);
     _checkWritable(def, key, values);
     final now = _clock();
     await _db.transaction(() async {
-      await (_db.delete(_db.ascentAttributes)..where(
-            (a) => a.ascentId.equals(ascentId) & a.attributeKey.equals(key),
-          ))
-          .go();
-      for (final value in values) {
-        await _db
-            .into(_db.ascentAttributes)
-            .insert(
-              AscentAttributesCompanion.insert(
-                id: newId(),
-                createdAt: now,
-                updatedAt: now,
-                ownerId: ownerId,
-                visibility: visibility,
-                ascentId: ascentId,
-                attributeKey: key,
-                value: value,
-              ),
-            );
+      final ascent = await (_db.select(
+        _db.ascents,
+      )..where((a) => a.id.equals(ascentId))).getSingleOrNull();
+      if (ascent == null ||
+          ascent.deletedAt != null ||
+          ascent.ownerId != userId) {
+        throw StateError('Ascent $ascentId is not an ascent of $userId');
       }
+      final existing =
+          await (_db.select(_db.ascentAttributes)..where(
+                (a) => a.ascentId.equals(ascentId) & a.attributeKey.equals(key),
+              ))
+              .get();
+      final plan = _plan([
+        for (final row in existing) (row.id, row.value, row.deletedAt),
+      ], values);
+      await _db.batch((batch) {
+        for (final id in plan.delete) {
+          batch.update(
+            _db.ascentAttributes,
+            AscentAttributesCompanion(
+              deletedAt: Value(now),
+              updatedAt: Value(now),
+            ),
+            where: (a) => a.id.equals(id),
+          );
+        }
+        for (final id in plan.revive) {
+          batch.update(
+            _db.ascentAttributes,
+            AscentAttributesCompanion(
+              deletedAt: const Value(null),
+              updatedAt: Value(now),
+              visibility: Value(ascent.visibility),
+            ),
+            where: (a) => a.id.equals(id),
+          );
+        }
+        for (final value in plan.insert) {
+          batch.insert(
+            _db.ascentAttributes,
+            AscentAttributesCompanion.insert(
+              id: newId(),
+              createdAt: now,
+              updatedAt: now,
+              ownerId: ascent.ownerId,
+              visibility: ascent.visibility,
+              ascentId: ascentId,
+              attributeKey: key,
+              value: value,
+            ),
+          );
+        }
+      });
     });
   }
 
@@ -205,6 +296,24 @@ class AttributeRepository {
     ]);
   }
 
+  /// What to change so the live rows hold exactly [wanted]: rows are
+  /// soft-deleted, not removed, and a value that comes back revives its
+  /// old row, so ids stay stable for sync.
+  static ({List<String> delete, List<String> revive, List<String> insert})
+  _plan(List<(String, String, DateTime?)> existing, List<String> wanted) {
+    final delete = <String>[];
+    final revive = <String>[];
+    final insert = <String>[];
+    final remaining = wanted.toSet();
+    for (final (id, value, deletedAt) in existing) {
+      final want = remaining.remove(value);
+      if (want && deletedAt != null) revive.add(id);
+      if (!want && deletedAt == null) delete.add(id);
+    }
+    insert.addAll(remaining);
+    return (delete: delete, revive: revive, insert: insert);
+  }
+
   Future<AttributeDef> _definition(String key, AttributeLevel level) async {
     final defs = await definitions(level: level);
     final def = defs.where((d) => d.key == key).firstOrNull;
@@ -226,16 +335,22 @@ class AttributeRepository {
   AttributeDef? _toDef(AttributeDefRow row) {
     final level = AttributeLevel.values.asNameMap()[row.level];
     final type = AttributeValueType.values.asNameMap()[row.valueType];
-    // Definitions from a newer app version are skipped, not fatal.
+    // Definitions from a newer app version, or malformed rows from sync,
+    // are skipped rather than breaking every form.
     if (level == null || type == null) return null;
+    final List<String> valueKeys;
+    try {
+      valueKeys = row.valueKeys == null
+          ? const []
+          : List<String>.from(jsonDecode(row.valueKeys!) as List<Object?>);
+    } on Object {
+      return null;
+    }
     return AttributeDef(
       key: row.key,
       level: level,
       valueType: type,
-      valueKeys: switch (row.valueKeys) {
-        final String json => (jsonDecode(json) as List<Object?>).cast<String>(),
-        null => const [],
-      },
+      valueKeys: valueKeys,
       sort: row.sort,
     );
   }

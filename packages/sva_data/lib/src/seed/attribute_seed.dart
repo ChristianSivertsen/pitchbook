@@ -6,7 +6,9 @@ import 'package:sva_core/sva_core.dart';
 /// value key once released: logged values point at them.
 ///
 /// Keys in [typedAttributeColumns] are stored in typed columns for fast
-/// filtering; every other key is stored in the attribute tables.
+/// filtering; every other key is stored in the attribute tables. Only
+/// routes and ascents have attribute tables so far, so a new area, pitch or
+/// session detail needs a typed column (and a migration) for now.
 const attributeSeed = <AttributeDef>[
   // Area
   AttributeDef(
