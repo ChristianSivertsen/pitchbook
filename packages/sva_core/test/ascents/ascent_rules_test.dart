@@ -74,7 +74,13 @@ void main() {
           ...(list! as List<Object?>).cast<String>(),
     };
     expect(expected, AscentIssue.values.map((i) => i.key).toSet());
-    expect(cases.where((c) => c.containsKey('remove')), hasLength(4));
-    expect(cases.where((c) => c['gym'] == true), isNotEmpty);
+    expect(cases.where((c) => c.containsKey('remove')), isNotEmpty);
+    expect(cases.where((c) => c.containsKey('next')), isNotEmpty);
+    final styles = {
+      for (final c in cases)
+        for (final entry in (c['log']! as List<Object?>).cast<List<Object?>>())
+          entry[0],
+    };
+    expect(styles, AscentStyle.values.map((s) => s.name).toSet());
   });
 }

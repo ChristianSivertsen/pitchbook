@@ -37,13 +37,20 @@ enum AscentIssue {
   mustBeOneTry('tries.must_be_one'),
 
   /// Too few tries for the style, counting earlier attempts.
-  tooFewTries('tries.too_few');
+  tooFewTries('tries.too_few'),
+
+  /// More tries than anyone logs: [maxLoggedTries].
+  tooManyTries('tries.too_many');
 
   new(this.key);
 
   /// For example `tries.too_few`.
   final String key;
 }
+
+/// A sanity limit on tries in one ascent, so a typo cannot break the sums.
+/// The server applies the same limit.
+const maxLoggedTries = 9999;
 
 /// What earlier ascents of the same route mean for the next one.
 final class RouteHistory {
@@ -56,7 +63,9 @@ final class RouteHistory {
       if (ascent.style.isSend) {
         sent = true;
       } else if (!sent) {
-        tries += ascent.tries;
+        // An attempt always counts as at least one try, and never more
+        // than the limit, even when its own count is flagged as wrong.
+        tries += ascent.tries.clamp(1, maxLoggedTries);
       }
     }
     return RouteHistory._(earlierTries: tries, sent: sent);
@@ -64,7 +73,8 @@ final class RouteHistory {
 
   const new _({required this.earlierTries, required this.sent});
 
-  /// Tries on attempts before the first send.
+  /// Tries on attempts before the first send. Any logged attempt counts as
+  /// at least one, so it is above zero whenever the route was tried.
   final int earlierTries;
 
   /// Whether the route was sent before.
@@ -90,10 +100,11 @@ final class RouteHistory {
     _ => 1,
   };
 
-  /// The most tries, or `null` for no limit: onsight and flash are 1.
-  int? maxTries(AscentStyle style) => switch (style) {
+  /// The most tries: onsight and flash are 1, everything else is capped
+  /// at [maxLoggedTries].
+  int maxTries(AscentStyle style) => switch (style) {
     AscentStyle.onsight || AscentStyle.flash => 1,
-    _ => null,
+    _ => maxLoggedTries,
   };
 
   /// What is wrong with logging [ascent] after this history.
@@ -108,7 +119,9 @@ final class RouteHistory {
       if (_firstTry(style) && ascent.tries != 1)
         AscentIssue.mustBeOneTry
       else if (ascent.tries < minTries(style))
-        AscentIssue.tooFewTries,
+        AscentIssue.tooFewTries
+      else if (ascent.tries > maxTries(style))
+        AscentIssue.tooManyTries,
     ];
   }
 
@@ -116,7 +129,8 @@ final class RouteHistory {
       style == AscentStyle.onsight || style == AscentStyle.flash;
 }
 
-/// Checks every ascent of one route in order, oldest first, against what
+/// Checks every ascent of one route in order, oldest first (by the
+/// session's local date, then the ascent's ordinal), against what
 /// came before it. Run it again after an edit (an ascent added, changed or
 /// removed): earlier attempts that disappear can make a later onsight
 /// possible, and a removed send turns a later repeat into an issue.

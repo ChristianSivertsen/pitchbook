@@ -1,5 +1,5 @@
 {
-  "about": "Style and tries rules (docs/PLAN.md decision 7). Run by sva_core (packages/sva_core/test/ascents/ascent_rules_test.dart) and, from M11-2, by the server's pgTAP tests, so both apply the same rules. Each case is one route's ascents, oldest first. `remove` lists indexes deleted in an edit before checking. `expect` lists the issue keys for each remaining ascent. `next` gives what a new ascent may be after the log.",
+  "about": "Style and tries rules (docs/PLAN.md decision 7). Run by sva_core (packages/sva_core/test/ascents/ascent_rules_test.dart) and, from M11-2, by the server's pgTAP tests, so both apply the same rules. Each case is one route's ascents, oldest first: by the session's local date, then the ascent's ordinal (the server must use the same order, never a client-supplied timestamp). `remove` lists indexes deleted in an edit before checking. `expect` lists the issue keys for each remaining ascent. `next` gives what a new ascent may be after the log.",
   "cases": [
     { "name": "onsight on the first try", "log": [["onsight", 1]], "expect": [[]] },
     { "name": "flash on the first try", "log": [["flash", 1]], "expect": [[]] },
@@ -18,6 +18,12 @@
     { "name": "a repeat needs an earlier send", "log": [["repeat", 1]], "expect": [["style.repeat_without_send"]] },
     { "name": "attempts after a send are fine", "log": [["flash", 1], ["attempt", 2], ["repeat", 1]], "expect": [[], [], []] },
     { "name": "every ascent has at least one try", "log": [["attempt", 0]], "expect": [["tries.too_few"]] },
+    { "name": "tries have a sanity limit", "log": [["attempt", 9999], ["attempt", 10000]], "expect": [[], ["tries.too_many"]] },
+    { "name": "an attempt with a wrong tries count still blocks a flash", "log": [["attempt", 0], ["flash", 1]], "expect": [["tries.too_few"], ["style.not_first_try"]] },
+    { "name": "negative tries cannot cancel earlier attempts", "log": [["attempt", 3], ["attempt", -3], ["flash", 1]], "expect": [[], ["tries.too_few"], ["style.not_first_try"]] },
+    { "name": "huge tries are capped and flagged", "log": [["attempt", 2147483647], ["attempt", 1], ["flash", 1]], "expect": [["tries.too_many"], [], ["style.not_first_try"]] },
+    { "name": "a repeat after an invalid repeat", "log": [["repeat", 1], ["repeat", 1]], "expect": [["style.repeat_without_send"], []] },
+    { "name": "an empty log has nothing to check", "log": [], "expect": [] },
     { "name": "gym routes: no flash after an attempt", "gym": true, "log": [["attempt", 2], ["flash", 1]], "expect": [[], ["style.not_first_try"]] },
     { "name": "gym routes: tries add up across sessions", "gym": true, "log": [["attempt", 2], ["redpoint", 3], ["repeat", 1]], "expect": [[], [], []] },
     { "name": "a send that breaks a rule still counts as a send", "log": [["attempt", 1], ["flash", 1], ["redpoint", 3]], "expect": [[], ["style.not_first_try"], ["style.already_sent"]] },
