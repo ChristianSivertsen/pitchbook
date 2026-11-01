@@ -1,6 +1,7 @@
 /// Sva core: pure Dart rules, models, grade conversion and stats.
 library;
 
+export 'src/ascents/ascent_rules.dart';
 export 'src/attributes/attribute_def.dart';
 export 'src/attributes/inheritance.dart';
 export 'src/grades/grade_system.dart';

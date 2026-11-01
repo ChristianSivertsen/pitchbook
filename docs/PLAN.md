@@ -84,7 +84,7 @@ prototype/                 HTML prototype (reference only)
 4. **Gym climbs.** Temporary gym routes identified by wall, colour and date set. They expire after a per-gym number of weeks or when a wall is marked as reset. Tries add up across sessions, so the same style rules work indoors and outdoors. Gym routes never appear in the outdoor route list. For now, gym routes, walls and colour grades are private to each user; only the gym itself is shared.
 5. **Sync.** Offline-first. Every write goes to the local database, then syncs. Each row has one owner. Shared sessions are linked copies, and shared routes change only through requests a moderator accepts. Conflicts on your own data are resolved per field, last edit wins. Deletes are soft. Media uploads in the background.
 6. **Privacy.** Each post is public, friends-only or private, with a default in settings. Photo GPS data is stripped on upload, and a crag or boulder location can be hidden.
-7. **Style and tries.** Onsight and flash mean 1 try. A redpoint needs at least 2 tries, counting earlier logged attempts on the same route. A route you have sent before logs as a repeat.
+7. **Style and tries.** Onsight and flash mean 1 try, and only outdoor rope climbs can be onsighted (boulders and gym climbs flash). A redpoint needs at least 2 tries, counting earlier logged attempts on the same route. A route you have sent before logs as a repeat.
 8. **Platforms.** Flutter for iPhone and Android. Supabase is the API for every client, including a future web app.
 
 ## Milestones
