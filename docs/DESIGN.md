@@ -1,6 +1,6 @@
 # Sva design language
 
-Sva is named after the smooth, sea-worn granite of the Norwegian coast. The brand comes from one scene: Lofoten granite rising straight out of the sea under the midnight sun. Read from left to right, the logo — low sun, a peak, a higher peak — is also a rising graph, because the app is about seeing your climbing grow.
+Sva is named after the smooth, sea-worn granite of the Norwegian coast. The brand comes from one scene: Lofoten granite rising straight out of the sea under the midnight sun. Read from left to right, the peaks rise like a graph, because the app is about seeing your climbing grow. A low midnight sun sits beside them at night and stands over them by day.
 
 Every screen should feel like that scene: calm and dark like a summer night by the sea, warm where it matters, and clear enough to read at a glance.
 
@@ -18,7 +18,7 @@ The clickable prototype in [`prototype/index.html`](../prototype/index.html) sho
 
 The mark is three shapes on a horizon line: the sun, a peak and a higher peak. The wordmark is always lowercase: **sva**.
 
-The sun tells the time of day. In Midnight sun it hangs low on the left, just above the horizon. In Daylight it stands high on the upper right of the higher peak. Wherever the theme changes, the sun rises or sets along an arc over the peaks (`SvaMotion.daybreak`, 900 ms), and its colour fades with it. With reduce motion on, it moves straight to its new place.
+The sun tells the time of day. In Midnight sun it hangs low on the left, just above the horizon. In Daylight it stands high on the upper right of the higher peak. Wherever the theme changes, the sun rises or sets along an arc, slipping behind the summit (`SvaMotion.daybreak`, 900 ms), and the mark's colours fade with it. With reduce motion on, it moves straight to its new place.
 
 | Asset | File | Use |
 |---|---|---|

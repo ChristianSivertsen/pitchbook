@@ -62,17 +62,12 @@ void main() {
     for (var i = 1; i < positions.length; i++) {
       expect(positions[i], greaterThan(positions[i - 1]));
     }
-    // Rises over the peaks rather than through them: halfway, the sun is
-    // above the lower peak's summit (y 28).
-    await tester.pumpWidget(mark(day: false));
-    await tester.pumpAndSettle();
-    await tester.pumpWidget(mark(day: true));
-    await tester.pump(kThemeAnimationDuration ~/ 2);
-    await tester.pump(SvaMotion.daybreak ~/ 2);
-    expect(painter(tester).sunCentre.dy, lessThan(28));
-
     await tester.pumpAndSettle();
     expect(painter(tester).daylight, 1);
+
+    // The path arcs upwards: halfway, the sun is above the lower peak's
+    // summit (y 28) instead of passing through it.
+    expect(const SvaMarkPainter(daylight: 0.5).sunCentre.dy, lessThan(28));
   });
 
   testWidgets('M0-9: with reduce motion the sun moves straight there', (

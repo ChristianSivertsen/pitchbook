@@ -69,8 +69,8 @@ class SvaMarkPainter extends CustomPainter {
   static const Offset _nightSun = Offset(9, 47);
   static const Offset _daySun = Offset(57, 10);
 
-  /// Pulls the path up into an arc, so the sun rises over the peaks
-  /// instead of sliding through them.
+  /// Pulls the path up into an arc, so the sun clears the lower peak and
+  /// slips behind the summit on its way across.
   static const Offset _arcControl = Offset(12, 0);
 
   /// Where the sun's centre is, in the 64 x 64 space.
