@@ -1,0 +1,26 @@
+# Shared analysis rules for the whole workspace: the app and every package
+# pick this file up because it is the closest analysis_options.yaml above
+# them. See README.md for how to run the checks.
+include: package:very_good_analysis/analysis_options.yaml
+
+formatter:
+  page_width: 80
+
+analyzer:
+  exclude:
+    - "**/build/**"
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "app/android/**"
+    - "app/ios/**"
+    - "prototype/**"
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+
+linter:
+  rules:
+    # Public API docs are required in the packages by convention, but the app
+    # and tests do not need them; enforcing them everywhere adds noise.
+    public_member_api_docs: false
