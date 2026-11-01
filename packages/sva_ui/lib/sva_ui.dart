@@ -4,7 +4,7 @@
 /// See docs/DESIGN.md for the design language behind them.
 library;
 
-export 'src/brand/sva_mark.dart';
+export 'src/brand/sva_mark.dart' show SvaLockup, SvaMark;
 export 'src/debug/token_preview.dart';
 export 'src/theme/contrast.dart';
 export 'src/theme/font_licenses.dart';

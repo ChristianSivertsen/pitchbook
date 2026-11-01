@@ -55,6 +55,10 @@ abstract final class SvaMotion {
   /// A new personal best: the only celebratory motion.
   static const Duration celebrate = Duration(milliseconds: 600);
 
+  /// The sun in the Sva mark moving between night and day when the theme
+  /// changes.
+  static const Duration daybreak = Duration(milliseconds: 900);
+
   /// Standard easing for things appearing.
   static const Curve easeOut = Curves.easeOutCubic;
 
