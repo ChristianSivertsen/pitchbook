@@ -69,6 +69,7 @@ After both review agents pass and CI is green:
 - Rules that also exist on the server (style and tries, gym route expiry) use shared JSON test cases run against both Dart and Postgres.
 - Every behaviour change has tests, following `docs/TESTING.md`: each "Done when" item gets a test at the layer named in the ticket, with the ticket code at the start of the test description (`M1-4: ...`). Each behaviour is tested once, at the lowest layer that can test it. Bug fixes start with a failing test.
 - Units are SI in storage; convert only for display. Enumerations are stable keys such as `hold.crimp`.
+- All user-facing text is in `app/lib/l10n/app_en.arb` and `app_nb.arb` (Norwegian Bokmål), never hard-coded. A test fails if a key is missing in either language. Widgets in `sva_ui` take their text as parameters.
 - UI follows `docs/DESIGN.md`: only theme tokens, never raw colours or font sizes in screens; one primary action per screen; writing rules for all text.
 - Accessibility: every interactive widget has a semantic label; respect text scaling.
 

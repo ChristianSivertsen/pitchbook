@@ -121,6 +121,9 @@ class SvaColors extends ThemeExtension<SvaColors> {
   /// Redpoint ascents.
   final Color redpoint;
 
+  /// Dims the screen behind sheets and dialogs. The same in both themes.
+  static const Color scrim = Color(0x66000000);
+
   /// Text on onsight, flash and redpoint tags.
   final Color onStyle;
 

@@ -1,0 +1,22 @@
+{
+  "@@locale": "nb",
+  "tabFeed": "Feed",
+  "tabHistory": "Historikk",
+  "tabCv": "CV",
+  "tabTraining": "Trening",
+  "logButton": "Logg en økt",
+  "feedEmptyTitle": "Øktene dine dukker opp her",
+  "feedEmptyBody": "Logg din første økt, så havner den i feeden din. Øktene til vennene dine kommer senere.",
+  "historyTitle": "Historikk",
+  "historyEmptyTitle": "Historikken din starter med én økt",
+  "historyEmptyBody": "Dager ute, grader, pyramider og innsikt fylles ut etter hvert som du logger.",
+  "cvTitle": "Klatre-CV",
+  "cvEmptyTitle": "CV-en din bygger seg selv",
+  "cvEmptyBody": "Hver klatring du logger, bygger på nivåene dine, erfaringen din og viser hva du ikke har prøvd ennå.",
+  "trainingTitle": "Trening",
+  "trainingEmptyTitle": "Følg styrke og bevegelighet",
+  "trainingEmptyBody": "Tester av fingerstyrke, trekk, kjerne og bevegelighet havner her, med fremgangen din over tid.",
+  "logSheetTitle": "Logg en økt",
+  "logSheetBody": "Logging av klatring kommer i neste milepæl.",
+  "close": "Lukk"
+}
