@@ -1,0 +1,32 @@
+{
+  "about": "Style and tries rules (docs/PLAN.md decision 7). Run by sva_core (packages/sva_core/test/ascents/ascent_rules_test.dart) and, from M11-2, by the server's pgTAP tests, so both apply the same rules. Each case is one route's ascents, oldest first. `remove` lists indexes deleted in an edit before checking. `expect` lists the issue keys for each remaining ascent. `next` gives what a new ascent may be after the log.",
+  "cases": [
+    { "name": "onsight on the first try", "log": [["onsight", 1]], "expect": [[]] },
+    { "name": "flash on the first try", "log": [["flash", 1]], "expect": [[]] },
+    { "name": "onsight is exactly one try", "log": [["onsight", 2]], "expect": [["tries.must_be_one"]] },
+    { "name": "flash is exactly one try", "log": [["flash", 0]], "expect": [["tries.must_be_one"]] },
+    { "name": "no flash after a logged attempt", "log": [["attempt", 1], ["flash", 1]], "expect": [[], ["style.not_first_try"]] },
+    { "name": "no onsight after a logged attempt", "log": [["attempt", 2], ["onsight", 1]], "expect": [[], ["style.not_first_try"]] },
+    { "name": "redpoint needs at least 2 tries", "log": [["redpoint", 1]], "expect": [["tries.too_few"]] },
+    { "name": "redpoint on the first day with 2 tries", "log": [["redpoint", 2]], "expect": [[]] },
+    { "name": "redpoint counts earlier attempts", "log": [["attempt", 3], ["redpoint", 4]], "expect": [[], []] },
+    { "name": "redpoint with fewer tries than earlier attempts plus one", "log": [["attempt", 3], ["redpoint", 3]], "expect": [[], ["tries.too_few"]] },
+    { "name": "attempts over several sessions add up", "log": [["attempt", 2], ["attempt", 3], ["redpoint", 6]], "expect": [[], [], []] },
+    { "name": "a sent route logs as a repeat", "log": [["redpoint", 2], ["repeat", 1]], "expect": [[], []] },
+    { "name": "no second redpoint", "log": [["flash", 1], ["redpoint", 2]], "expect": [[], ["style.already_sent"]] },
+    { "name": "no onsight of a sent route", "log": [["redpoint", 3], ["onsight", 1]], "expect": [[], ["style.already_sent"]] },
+    { "name": "a repeat needs an earlier send", "log": [["repeat", 1]], "expect": [["style.repeat_without_send"]] },
+    { "name": "attempts after a send are fine", "log": [["flash", 1], ["attempt", 2], ["repeat", 1]], "expect": [[], [], []] },
+    { "name": "every ascent has at least one try", "log": [["attempt", 0]], "expect": [["tries.too_few"]] },
+    { "name": "gym routes: no flash after an attempt", "gym": true, "log": [["attempt", 2], ["flash", 1]], "expect": [[], ["style.not_first_try"]] },
+    { "name": "gym routes: tries add up across sessions", "gym": true, "log": [["attempt", 2], ["redpoint", 3], ["repeat", 1]], "expect": [[], [], []] },
+    { "name": "a send that breaks a rule still counts as a send", "log": [["attempt", 1], ["flash", 1], ["redpoint", 3]], "expect": [[], ["style.not_first_try"], ["style.already_sent"]] },
+    { "name": "edit: removing earlier attempts keeps a redpoint", "log": [["attempt", 2], ["redpoint", 3]], "remove": [0], "expect": [[]] },
+    { "name": "edit: removing earlier attempts allows a flash", "log": [["attempt", 1], ["flash", 1]], "remove": [0], "expect": [[]] },
+    { "name": "edit: removing the send breaks a later repeat", "log": [["flash", 1], ["repeat", 1]], "remove": [0], "expect": [["style.repeat_without_send"]] },
+    { "name": "edit: removing one of several attempts lowers the minimum", "log": [["attempt", 1], ["attempt", 1], ["redpoint", 2]], "remove": [1], "expect": [[], []] },
+    { "name": "next: a new route allows every first-send style", "log": [], "next": { "allowed": ["onsight", "flash", "redpoint", "attempt"], "min_tries": { "onsight": 1, "flash": 1, "redpoint": 2, "attempt": 1 }, "max_tries": { "onsight": 1, "flash": 1 } } },
+    { "name": "next: after attempts only redpoint or attempt", "log": [["attempt", 3]], "next": { "allowed": ["redpoint", "attempt"], "min_tries": { "redpoint": 4, "attempt": 1 } } },
+    { "name": "next: after a send only repeat or attempt", "log": [["attempt", 3], ["redpoint", 4]], "next": { "allowed": ["repeat", "attempt"], "min_tries": { "repeat": 1, "attempt": 1 } } }
+  ]
+}
