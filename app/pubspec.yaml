@@ -10,8 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_riverpod: ^3.4.3
   go_router: ^18.1.2
+  intl: ^0.20.3
+  lucide_icons_flutter: ^3.1.25
   sva_core:
     path: ../packages/sva_core
   sva_data:
@@ -25,3 +29,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true

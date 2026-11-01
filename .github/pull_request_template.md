@@ -38,6 +38,7 @@ None
 
 - [ ] Stays inside the ticket's scope
 - [ ] Every "Done when" item has a test named with the ticket code, at the layer in docs/TESTING.md, with no overlap
+- [ ] All new user-facing text is in both `app_en.arb` and `app_nb.arb`
 - [ ] `dart format` and `flutter analyze` clean
 - [ ] No secrets, keys or personal data in code, config, tests or logs
 - [ ] Schema, security, sync or data-deletion changes are labelled `needs-user-review`

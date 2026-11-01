@@ -45,6 +45,7 @@ git checkout -b <n>-<short-slug>
 
 - Follow the package boundaries and code standards in `CLAUDE.md`.
 - Match the prototype's behaviour unless the issue says otherwise. Look, feel and wording follow `docs/DESIGN.md`.
+- Every new user-facing text goes into both `app_en.arb` and `app_nb.arb` (Norwegian Bokmål), with natural Norwegian, not a word-for-word translation. If you are unsure of a Norwegian climbing term, ask.
 - New dependencies only under the rules in `CLAUDE.md`, with the reason noted for the PR.
 - Never put secrets in code, config or tests.
 - Commit in small steps with Conventional Commit messages, each with `Refs #<n>` and the co-author trailer.

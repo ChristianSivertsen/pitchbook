@@ -1,0 +1,28 @@
+{
+  "@@locale": "en",
+  "tabFeed": "Feed",
+  "tabHistory": "History",
+  "tabCv": "CV",
+  "tabTraining": "Training",
+  "logButton": "Log a session",
+  "@logButton": {
+    "description": "Label of the centre button in the tab bar and of empty-state actions."
+  },
+  "feedEmptyTitle": "Your sessions show up here",
+  "feedEmptyBody": "Log your first session and it appears in your feed. Friends' sessions join it later.",
+  "historyTitle": "History",
+  "historyEmptyTitle": "Your history starts with one session",
+  "historyEmptyBody": "Days out, grades, pyramids and insights fill in as you log.",
+  "cvTitle": "Climbing CV",
+  "cvEmptyTitle": "Your CV builds itself",
+  "cvEmptyBody": "Every climb you log adds to your levels and experience, and shows what you have not tried yet.",
+  "trainingTitle": "Training",
+  "trainingEmptyTitle": "Track strength and mobility",
+  "trainingEmptyBody": "Finger strength, pulling, core and mobility tests arrive here, with your progress over time.",
+  "logSheetTitle": "Log a session",
+  "logSheetBody": "Logging climbs is coming soon.",
+  "close": "Close",
+  "notFoundTitle": "This page doesn't exist",
+  "notFoundBody": "The link may be old or mistyped.",
+  "notFoundAction": "Go to the feed"
+}

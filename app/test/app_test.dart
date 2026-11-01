@@ -3,18 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sva/src/app.dart';
 import 'package:sva/src/router.dart';
+import 'package:sva/src/routes.dart';
+import 'package:sva/src/shell/app_shell.dart';
 import 'package:sva/src/theme_mode.dart';
 import 'package:sva_ui/sva_ui.dart';
 
 void main() {
   Brightness brightnessOf(WidgetTester tester) =>
-      Theme.of(tester.element(find.byType(SvaLockup))).brightness;
+      Theme.of(tester.element(find.byType(AppShell))).brightness;
 
   testWidgets('M0-4: the app starts with the Sva theme', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: SvaApp()));
     await tester.pumpAndSettle();
 
-    final theme = Theme.of(tester.element(find.byType(SvaLockup)));
+    final theme = Theme.of(tester.element(find.byType(AppShell)));
     expect(theme.extension<SvaColors>(), isNotNull);
   });
 
@@ -48,7 +50,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(brightnessOf(tester), Brightness.dark);
     expect(
-      Theme.of(tester.element(find.byType(SvaLockup))).scaffoldBackgroundColor,
+      Theme.of(tester.element(find.byType(AppShell))).scaffoldBackgroundColor,
       SvaColors.midnight.background,
     );
 
@@ -65,7 +67,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(container: container, child: const SvaApp()),
     );
-    container.read(routerProvider).go(tokenPreviewPath);
+    container.read(routerProvider).go(Routes.tokenPreview);
     await tester.pumpAndSettle();
 
     expect(find.byType(SvaTokenPreview), findsOneWidget);

@@ -143,7 +143,7 @@ Depth comes from surface colour, not shadows: `surfaceSunk` < `background` < `su
 
 ## Icons and illustration
 
-- **Icons:** Phosphor Icons, regular weight, 24 px (20 px in dense rows). One family only.
+- **Icons:** Lucide (outline), 24 px (20 px in dense rows). One family only. The selected tab uses the same icon in the `text` colour; unselected tabs use `textMuted`.
 - **Topos:** the route line is `granite` with a 2 px foam (`#F7E7CE`) casing so it reads on any photo. Symbols: bolts as white circles with a cross, gear as `sea` triangles, belays as double rings, crux as a small `danger` square with C.
 - **Gear and shoe drawings:** flat shapes with one light-to-dark shading direction, item colour from the data, on a neutral tile.
 - **Gym walls:** plywood tones with holds in the climbed colours.
@@ -176,7 +176,16 @@ All motion respects the system's reduce-motion setting: transitions become fades
 - Errors say what went wrong and what to do: "Couldn't save. Check your connection and try again."
 - Use climbing terms as climbers do. Grades are shown in the user's chosen system.
 - Units: metric, with a space before the unit (`15 m`, `14 °C`). Dates like `1 Nov 2026`, times in 24-hour format.
-- Norwegian translation comes later; all text goes through the localisation layer from the start.
+- **Every text the user can see is translated.** Norwegian Bokmål and English ship from the start; more languages are added as one file each. See [Languages](#languages).
+
+## Languages
+
+- Text lives in ARB files (JSON) in `app/lib/l10n/`: `app_en.arb` (English, the template) and `app_nb.arb` (Norwegian Bokmål). Flutter generates typed accessors (`AppLocalizations.of(context).logButton`).
+- The app follows the phone's language. Norwegian phones (Bokmål, Nynorsk or plain Norwegian) get Bokmål; any other language falls back to English. A manual language choice comes with the settings screen.
+- Add a language: copy `app_en.arb` to `app_<code>.arb`, translate it, and add the code to the language test.
+- Never hard-code user-facing text in widgets. The brand name "sva" is the only exception.
+- Plurals, numbers, dates and units use the ARB plural and placeholder syntax with the locale's formats, never string concatenation.
+- Norwegian copy follows the same voice: short, direct, sentence case. Climbing terms stay as Norwegian climbers say them (onsight, flash, redpoint, crux; "økt" for a session, "taulengde" for a pitch).
 
 ## Accessibility
 
