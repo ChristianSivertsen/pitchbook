@@ -1,0 +1,1603 @@
+<title>Pitchbook</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single phone-sized app column (full-bleed on phones), tab bar at the bottom, sheets slide over the app. Guidebook-topo vernacular: chalk ground, slate ink, rope-orange line. A second "forest" palette swaps the accent family to greens. */
+:root{
+  --bg:#EDEFEA; --surface:#FAFBF8; --sunk:#E2E6DF; --ink:#1A2420; --muted:#5B6862; --line:#D3D9D1;
+  --accent:#C2561A; --accent-ink:#FFFFFF; --lichen:#58782A; --desk:#D9DDD5;
+  --os:#58782A; --fl:#C9922A; --rp:#C2561A; --att:#9AA49E;
+  --good:#3F7A3A; --warn:#A8650F; --bad:#B23B2E;
+  --f-display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+.phone[data-palette="forest"]{
+  --bg:#E7EEE5; --surface:#F7FAF5; --sunk:#D9E4D5; --ink:#13261B; --muted:#526A5A; --line:#C7D7C3;
+  --accent:#1F7A4C; --accent-ink:#FFFFFF; --lichen:#6F9A2B;
+  --os:#7FA83A; --fl:#C9922A; --rp:#1F7A4C; --att:#9AAE9F;
+}
+@media (prefers-color-scheme:dark){
+ :root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#121815; --surface:#1A221E; --sunk:#232C27; --ink:#E6ECE5; --muted:#9BA79F; --line:#2D3832;
+  --accent:#E8813F; --accent-ink:#1A120C; --lichen:#9CBB5B; --desk:#0B0F0D;
+  --os:#9CBB5B; --fl:#E0B04F; --rp:#E8813F; --att:#5F6B64;
+  --good:#7DBB6E; --warn:#E0A548; --bad:#E77163;
+ }
+ :root:not([data-theme="light"]) .phone[data-palette="forest"]{
+  --bg:#0F1712; --surface:#16211A; --sunk:#1E2C23; --ink:#E3EEE5; --muted:#93A899; --line:#28392E;
+  --accent:#4FBF7F; --accent-ink:#08140D; --lichen:#A8C85A;
+  --os:#A8C85A; --fl:#E0B04F; --rp:#4FBF7F; --att:#56685B;
+ }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121815; --surface:#1A221E; --sunk:#232C27; --ink:#E6ECE5; --muted:#9BA79F; --line:#2D3832;
+  --accent:#E8813F; --accent-ink:#1A120C; --lichen:#9CBB5B; --desk:#0B0F0D;
+  --os:#9CBB5B; --fl:#E0B04F; --rp:#E8813F; --att:#5F6B64;
+  --good:#7DBB6E; --warn:#E0A548; --bad:#E77163;
+}
+:root[data-theme="dark"] .phone[data-palette="forest"]{
+  --bg:#0F1712; --surface:#16211A; --sunk:#1E2C23; --ink:#E3EEE5; --muted:#93A899; --line:#28392E;
+  --accent:#4FBF7F; --accent-ink:#08140D; --lichen:#A8C85A;
+  --os:#A8C85A; --fl:#E0B04F; --rp:#4FBF7F; --att:#56685B;
+}
+html,body{height:100%}
+body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45;display:flex;justify-content:center;align-items:center;padding-block:20px;box-sizing:border-box}
+*,*::before,*::after{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+button[disabled]{cursor:not-allowed}
+input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.phone{width:min(400px,100%);height:min(860px,100%);background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:30px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 30px 60px -30px rgba(0,0,0,.45)}
+@media (max-width:520px){body{display:block;padding-block:0}.phone{width:100%;height:100%;border:0;border-radius:0;box-shadow:none}}
+.screen{flex:1;overflow-y:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:24px}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-block:18px 12px}
+h1{font-family:var(--f-display);font-weight:800;font-size:34px;line-height:1;letter-spacing:.01em;margin:0;text-transform:uppercase}
+h2{font-family:var(--f-display);font-weight:800;font-size:21px;line-height:1.05;letter-spacing:.02em;margin:0;text-transform:uppercase;text-wrap:balance}
+h3{font-size:13px;font-weight:700;margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:8px}
+.wrap{flex-wrap:wrap}
+.between{justify-content:space-between}
+.pill{font-family:var(--f-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1px dashed var(--muted);color:var(--muted);border-radius:99px;padding:2px 8px;white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.section{display:flex;flex-direction:column;gap:10px;padding-top:18px}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12px;color:#fff;flex:none;background-size:cover;background-position:center}
+.who{border:0;background:transparent;padding:0;text-align:left;display:flex;align-items:center;gap:8px;min-width:0}
+.pfp{position:relative;cursor:pointer;display:inline-block;border-radius:50%}
+.pfp-badge{position:absolute;right:-2px;bottom:-2px;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;border:2px solid var(--bg)}
+.pfp-badge svg{width:14px;height:14px}
+.grade{font-family:var(--f-display);font-weight:800;font-size:17px;line-height:1;padding:3px 7px;border-radius:6px;background:var(--ink);color:var(--surface);letter-spacing:.02em;white-space:nowrap}
+.grade.sm{font-size:14px;padding:2px 6px}
+.grade.gym{box-shadow:inset 0 0 0 1px rgba(127,127,127,.35);font-family:var(--f-body);font-size:12px;font-weight:700;letter-spacing:0;padding:4px 7px}
+.grade.un{background:transparent;color:var(--muted);border:1px dashed var(--line);font-family:var(--f-body);font-size:11px;font-weight:600;letter-spacing:0}
+.style{font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px;color:#fff;white-space:nowrap}
+.s-Onsight{background:var(--os)}.s-Flash{background:var(--fl);color:#1d1606}.s-Redpoint{background:var(--rp);color:var(--accent-ink)}.s-Repeat{background:var(--muted)}.s-Attempt{background:transparent;color:var(--muted);border:1px solid var(--att)}
+.tag{font-size:11px;padding:2px 7px;border-radius:5px;background:var(--sunk);color:var(--ink);white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:6px 11px;font-size:13px;font-weight:500;line-height:1.1;display:inline-flex;align-items:center;gap:6px}
+.chip:hover{border-color:var(--muted)}
+.chip.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.chip[disabled]{opacity:.35;text-decoration:line-through}
+.chip.inh{background:var(--sunk);border-style:dashed;cursor:default}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block;box-shadow:inset 0 0 0 1px rgba(127,127,127,.4);flex:none}
+.seg{display:flex;background:var(--sunk);border-radius:10px;padding:3px;gap:2px;overflow-x:auto}
+.seg button{flex:1;border:0;background:transparent;border-radius:8px;padding:7px 8px;font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;background:var(--accent);color:var(--accent-ink);font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn[disabled]{opacity:.4}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:7px 11px;font-size:13px;border-radius:9px}
+.btn.danger{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+.iconbtn{border:0;background:transparent;padding:6px;border-radius:8px;display:grid;place-items:center;color:var(--ink)}
+.iconbtn:hover{background:var(--sunk)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field>label,.lbl{font-size:12px;font-weight:600;color:var(--muted)}
+.input{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+textarea.input{resize:vertical;min-height:64px}
+select.input{appearance:auto}
+input[type=color]{width:38px;height:34px;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface);flex:none}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* tab bar */
+.tabbar{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);background:var(--surface);padding:6px max(8px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px))}
+.tab{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;font-weight:600;color:var(--muted);padding:4px 0}
+.tab.on{color:var(--ink)}
+.tab svg{width:22px;height:22px}
+.tab.log span.plus{width:46px;height:46px;border-radius:14px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;margin-top:-18px;box-shadow:0 6px 14px -6px var(--accent)}
+/* feed */
+.post{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-bottom:1px solid var(--line)}
+.post:last-child{border-bottom:0}
+.post-title{font-size:16px;font-weight:700;margin:0;text-wrap:balance}
+.post-desc{margin:0;font-size:13.5px;max-width:65ch}
+.topo{display:block;width:100%;border-radius:10px;background:#777}
+.climbs{display:flex;flex-direction:column;gap:6px}
+.climb{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
+.climb .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat .v{font-family:var(--f-display);font-weight:800;font-size:22px;line-height:1}
+.stat .k{font-size:10.5px;color:var(--muted)}
+.actions{display:flex;gap:6px}
+.act{border:1px solid var(--line);background:transparent;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.act.on{border-color:var(--accent);color:var(--accent)}
+/* media */
+.mstrip{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.media{position:relative;flex:none;width:96px;aspect-ratio:1;border-radius:9px;overflow:hidden;background:var(--sunk);border:0;padding:0}
+.media>img,.media>video,.media>svg{width:100%;height:100%;object-fit:cover;display:block}
+.mtag{position:absolute;left:4px;bottom:4px;max-width:calc(100% - 8px);background:rgba(10,14,12,.72);color:#fff;font-size:10px;font-weight:600;padding:2px 5px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mvid{position:absolute;right:4px;top:4px;background:rgba(10,14,12,.72);color:#fff;font-family:var(--f-mono);font-size:9.5px;padding:1px 5px;border-radius:4px}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mgrid .mitem{display:flex;flex-direction:column;gap:6px}
+.mgrid .media{width:100%}
+.mgrid select{padding:6px 8px;font-size:12px}
+.addmedia{width:96px;aspect-ratio:1;flex:none;border:1.5px dashed var(--muted);border-radius:9px;display:grid;place-items:center;text-align:center;font-size:11.5px;font-weight:600;color:var(--muted);cursor:pointer;padding:6px}
+.mpend{display:flex;flex-direction:column;gap:4px;flex:none;width:96px}
+.mpend select{font-size:11px;padding:4px 6px;border-radius:7px}
+/* sheets */
+.sheet{position:absolute;inset:0;background:var(--bg);z-index:20;display:flex;flex-direction:column;animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px max(12px,env(safe-area-inset-left,0px)) 10px;border-bottom:1px solid var(--line);background:var(--surface)}
+.sheet-head h2{font-size:19px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sheet-body{flex:1;overflow-y:auto;padding:14px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:18px}
+.sheet-foot{padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--surface);display:flex;gap:8px}
+.sheet-foot .btn{flex:1}
+.modepick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.modepick button{display:flex;align-items:center;gap:10px;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);text-align:left;font-weight:700;font-size:14.5px}
+.modepick button small{display:block;font-weight:500;font-size:11.5px;color:var(--muted)}
+.modepick button svg{flex:none;width:26px;height:26px}
+.modepick button.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface));box-shadow:inset 0 0 0 1px var(--accent)}
+.modepick button.on svg{color:var(--accent)}
+.group{display:flex;flex-direction:column;gap:14px;padding-top:4px;border-top:1px solid var(--line)}
+.group>.eyebrow{padding-top:12px}
+.routepick{display:flex;flex-direction:column;gap:4px;max-height:230px;overflow-y:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:4px}
+.rp{display:grid;grid-template-columns:1fr auto;gap:2px 8px;text-align:left;border:0;background:transparent;padding:8px;border-radius:8px}
+.rp:hover{background:var(--sunk)}
+.rp.on{background:var(--sunk);outline:1.5px solid var(--ink)}
+.rp small{grid-column:1;color:var(--muted);font-size:11.5px}
+.rp .grade{grid-row:1/3;grid-column:2;align-self:center}
+.auto{display:flex;gap:10px;align-items:center;background:var(--sunk);border-radius:10px;padding:10px 12px;font-size:13px}
+.auto b{font-family:var(--f-mono);font-weight:500}
+.hint{font-size:12px;color:var(--muted);margin:0;padding:8px 10px;border-left:3px solid var(--accent);background:var(--sunk);border-radius:0 8px 8px 0}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:18px}
+.stepper button[disabled]{opacity:.35}
+.stepper span{font-family:var(--f-display);font-weight:800;font-size:24px;min-width:28px;text-align:center}
+.stepper.sm{gap:6px}.stepper.sm button{width:28px;height:28px;font-size:15px;border-radius:8px}.stepper.sm span{font-size:18px;min-width:20px}
+.pending{display:flex;flex-direction:column;gap:6px}
+.pend{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:7px 8px 7px 10px;font-size:13px}
+.pend.gone{opacity:.45}.pend.gone b{text-decoration:line-through}
+input[type=range]{width:100%;accent-color:var(--accent)}
+/* charts */
+.chart{display:block;width:100%;height:auto;overflow:visible}
+.chart text{fill:var(--muted);font-family:var(--f-mono);font-size:9px}
+.bar-row{display:grid;grid-template-columns:62px 1fr 44px;gap:8px;align-items:center;font-size:12.5px}
+.bar-row .lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{height:14px;background:var(--sunk);border-radius:4px;overflow:hidden;display:flex}
+.bar-track i{display:block;height:100%}
+.bar-row .num{text-align:right;font-family:var(--f-mono);font-size:12px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.insight{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}
+.insight .mark{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:15px;background:var(--sunk);color:var(--accent)}
+.insight p{margin:0}
+.totals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 8px}
+/* cv */
+.cvhead{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.headline{display:flex;gap:6px;flex-wrap:wrap}
+.hl{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:8px 10px;border-radius:10px;background:var(--surface);border:1px solid var(--line);min-width:84px}
+.hl .k{font-size:10.5px;color:var(--muted)}
+.skills{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.skill{display:flex;flex-direction:column;gap:5px;padding:9px 10px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
+.skill.zero{background:transparent;border-style:dashed}
+.skill .top2{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.skill .nm{font-weight:600;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.skill .lv{font-family:var(--f-display);font-weight:800;font-size:16px}
+.skill .lv small{font-family:var(--f-body);font-weight:500;font-size:10px;color:var(--muted);margin-right:2px}
+.meter{height:5px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--lichen)}
+.skill .sub{font-size:10.5px;color:var(--muted)}
+.matrix{border-collapse:separate;border-spacing:3px;width:100%;font-size:11px}
+.matrix th{font-weight:600;color:var(--muted);text-align:center;font-size:10.5px}
+.matrix th:first-child{text-align:left}
+.matrix td{text-align:center;border-radius:5px;height:26px;font-family:var(--f-mono);font-size:11px}
+.matrix td.rk{text-align:left;font-family:var(--f-body);font-weight:600;font-size:11.5px}
+.matrix td.none{background:repeating-linear-gradient(135deg,transparent 0 4px,var(--sunk) 4px 6px);color:var(--muted)}
+.xp{display:grid;grid-template-columns:auto 1fr auto;gap:2px 12px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+.xp:last-child{border-bottom:0}
+.xp .ico{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:13px;background:var(--sunk);grid-row:1/3}
+.xp small{grid-column:2;color:var(--muted);font-size:12px}
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:10px 6px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:11px}
+.badge .medal{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:14px;border:2px solid var(--accent);color:var(--accent)}
+.badge.locked{opacity:.45}.badge.locked .medal{border-style:dashed;border-color:var(--muted);color:var(--muted)}
+/* gear and shoes */
+.rack{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gear{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px 8px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:11px;font-weight:600;text-align:center;line-height:1.2;position:relative}
+.gear .gearicon{width:100%;height:auto;max-width:84px}
+.gear .cnt{position:absolute;top:6px;right:7px;font-family:var(--f-mono);font-size:10.5px;font-weight:500;color:var(--muted)}
+.gear.off{opacity:.5;border-style:dashed}
+.gearicon{border-radius:10px;display:block}
+.due{font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:4px;letter-spacing:.02em;white-space:nowrap}
+.due.warn{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.due.bad{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.due.ok{background:var(--sunk);color:var(--muted)}
+.gearrow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.gearrow:last-child{border-bottom:0}
+.gearrow .nm{font-size:13px;font-weight:600}
+.gearrow small{display:block;color:var(--muted);font-size:11px;font-weight:400}
+.delta-chip{font-family:var(--f-mono);font-size:11px;padding:1px 6px;border-radius:5px;background:var(--sunk)}
+.rackstrip{display:flex;gap:4px;flex-wrap:wrap}
+.hero{display:grid;place-items:center;padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.hero svg{width:min(220px,70%);height:auto}
+.shoes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.shoe{display:flex;flex-direction:column;gap:4px;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--surface);text-align:left}
+.shoe svg{width:100%;height:auto;border-radius:9px}
+.shoe b{font-size:12.5px}
+.shoe small{font-size:11px;color:var(--muted)}
+.shoe.off{opacity:.55;border-style:dashed}
+/* training */
+.bench{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;text-align:left;width:100%;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px}
+.bench .big{font-family:var(--f-display);font-weight:800;font-size:28px;line-height:1}
+.bench .big small{font-family:var(--f-body);font-size:12px;font-weight:500;color:var(--muted);margin-left:3px}
+.delta{font-family:var(--f-mono);font-size:11.5px}
+.up{color:var(--good)}.down{color:var(--bad)}
+/* topo maker */
+.topomaker{touch-action:none;user-select:none;-webkit-user-select:none;cursor:crosshair}
+.toolrow{display:flex;gap:6px;overflow-x:auto}
+.tool{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 10px;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.tool.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.pitchrow{display:grid;grid-template-columns:32px 1fr 74px;gap:8px;align-items:center}
+.colcard{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.range{display:grid;grid-template-columns:56px 1fr auto 1fr;gap:6px;align-items:center;font-size:12px}
+.range .input,.colcard .input{padding:7px 8px;font-size:12.5px}
+.comment{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;font-size:13px}
+.toast{position:absolute;left:50%;bottom:86px;transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;z-index:50;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis}
+.note{font-size:12px;color:var(--muted);margin:0}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:12.5px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font-weight:600}
+.empty{padding:20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
+.swatch{display:flex;gap:3px}.swatch i{width:14px;height:14px;border-radius:4px;display:block}
+</style>
+
+<div class="phone" id="app"></div>
+
+<script>
+/* ---------- utilities ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const cap=s=>s?s[0].toUpperCase()+s.slice(1):s;
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const hash=s=>{let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0};
+const rng=mulberry32(7);
+const ri=n=>Math.floor(rng()*n);
+const pick=a=>a[ri(a.length)];
+const iso=d=>d.toISOString().slice(0,10);
+const addDays=(s,n)=>{const d=new Date(s+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return iso(d)};
+const addMonths=(ym,n)=>{let y=+ym.slice(0,4),m=+ym.slice(5,7)-1+n;y+=Math.floor(m/12);m=((m%12)+12)%12;return y+'-'+String(m+1).padStart(2,'0')};
+const monthsBetween=(a,b)=>(+b.slice(0,4)-+a.slice(0,4))*12+(+b.slice(5,7)-+a.slice(5,7));
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fmtDate=s=>{const d=new Date(s+'T12:00:00Z');return d.getUTCDate()+' '+MON[d.getUTCMonth()]+' '+d.getUTCFullYear()};
+const fmtYM=ym=>ym?MON[+ym.slice(5,7)-1]+' '+ym.slice(0,4):'—';
+const month=s=>+s.slice(5,7)-1;
+const season=s=>['Winter','Winter','Spring','Spring','Spring','Summer','Summer','Summer','Autumn','Autumn','Autumn','Winter'][month(s)];
+const num=n=>Math.round(n).toLocaleString('en-GB').replace(/,/g,' ');
+const lum=h=>{const n=parseInt(h.slice(1),16);return(.299*(n>>16)+.587*(n>>8&255)+.114*(n&255))>160?'#161616':'#fff'};
+function shade(h,p){const n=parseInt(h.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;const t=p<0?0:255,q=Math.abs(p);r=Math.round(r+(t-r)*q);g=Math.round(g+(t-g)*q);b=Math.round(b+(t-b)*q);return'#'+((1<<24)|(r<<16)|(g<<8)|b).toString(16).slice(1)}
+const START='2024-11-01',TODAY='2026-11-01',NOWYM=TODAY.slice(0,7);
+let store=null;try{store=window.localStorage}catch(e){}
+
+/* ---------- grade systems (stored as a shared difficulty index) ---------- */
+const SYS={
+  route:{
+    nor:{label:'Norwegian',g:['4','4+','5','5+','6-','6','6+','7-','7','7+','7+/8-','8-','8','8+','8+/9-','9-','9']},
+    french:{label:'French',g:['4','5a','5b','5c','6a','6a+','6b','6b+','6c','6c+','7a','7a+','7b','7b+','7c','7c+','8a']},
+    yds:{label:'YDS',g:['5.6','5.7','5.8','5.9','5.10a','5.10b','5.10c','5.10d','5.11a','5.11c','5.11d','5.12a','5.12b','5.12c','5.12d','5.13a','5.13b']},
+    uiaa:{label:'UIAA',g:['IV+','V','V+','VI-','VI+','VII-','VII','VII+','VIII-','VIII-/VIII','VIII','VIII+','IX-','IX','IX+','X-','X']}
+  },
+  boulder:{
+    font:{label:'Font',g:['4','5','5+','6A','6A+','6B','6B+','6C','6C+','7A','7A+','7B','7B+','7C']},
+    v:{label:'V scale',g:['V0','V1','V2','V3','V3','V4','V4','V5','V5','V6','V7','V8','V8','V9']}
+  }
+};
+let savedPal='rope',savedMode='out';try{savedPal=store?.getItem('pb-palette')||'rope';savedMode=store?.getItem('pb-logmode')==='in'?'in':'out'}catch(e){}
+const S={rsys:'nor',bsys:'font',palette:savedPal,lastMode:savedMode,tab:'feed',sheet:null,stack:[],hist:'overview',pyr:'All routes',prog:'routes',
+  ex:{metric:'sends',group:'rock',scope:'routes',setting:'outdoor',period:'all'},bench:null,day:null,person:null,gym:null,gearId:null,shoeId:null,toast:null,rackVis:'Public'};
+const isB=r=>r.disc==='Boulder';
+const gName=(r,g=r.g)=>{if(r.gcol)return r.gcol.n;if(g==null)return'Ungraded';const s=isB(r)?SYS.boulder[S.bsys]:SYS.route[S.rsys];return s.g[clamp(Math.round(g),0,s.g.length-1)]};
+const gNameScope=(boulder,g)=>gName({disc:boulder?'Boulder':'Sport'},g);
+const rangeText=(boulder,lo,hi)=>lo==null?'Not mapped':lo===hi||hi==null?gNameScope(boulder,lo):gNameScope(boulder,lo)+' to '+gNameScope(boulder,hi);
+function gradeBadge(r,sm=''){
+  if(r.gcol)return`<span class="grade ${sm} gym" style="background:${r.gcol.hex};color:${lum(r.gcol.hex)}">${esc(r.gcol.n)}</span>`;
+  if(r.g==null)return`<span class="grade ${sm} un">Ungraded</span>`;
+  return`<span class="grade ${sm}">${esc(gName(r))}</span>`;
+}
+
+/* ---------- people ---------- */
+const PEOPLE={
+  me:{name:'Christian',ini:'CS',col:'#1A2420',photo:null},
+  ingrid:{name:'Ingrid Solberg',ini:'IS',col:'#6C4BA3'},
+  mats:{name:'Mats Hagen',ini:'MH',col:'#2E6E8E'},
+  ane:{name:'Ane Lie',ini:'AL',col:'#A0473A'},
+  jonas:{name:'Jonas Berg',ini:'JB',col:'#5F7A2A'}
+};
+try{const p=store?.getItem('pb-pfp');if(p)PEOPLE.me.photo=p}catch(e){}
+const av=(who,size=0,extra='')=>{const p=PEOPLE[who];return`<span class="avatar" style="background-color:${p.col};${p.photo?`background-image:url('${p.photo}');`:''}${size?`width:${size}px;height:${size}px;font-size:${Math.round(size*.38)}px;`:''}${extra}" role="img" aria-label="${esc(p.name)}">${p.photo?'':p.ini}</span>`};
+const first=w=>w==='me'?'You':PEOPLE[w].name.split(' ')[0];
+
+/* ---------- crags, gyms and routes (example data) ---------- */
+const CRAGS={
+  lof:{name:'Presten, Lofoten',short:'Lofoten',country:'Norway',rock:'Gneiss',elev:[150,450]},
+  fla:{name:'Hanshelleren, Flatanger',short:'Flatanger',country:'Norway',rock:'Granite',elev:[60,120]},
+  kol:{name:'Kolsås, Bærum',short:'Kolsås',country:'Norway',rock:'Basalt',elev:[80,160]},
+  siu:{name:'Siurana, Catalonia',short:'Siurana',country:'Spain',rock:'Limestone',elev:[40,120]},
+  fon:{name:'Bas Cuvier, Fontainebleau',short:'Fontainebleau',country:'France',rock:'Sandstone',elev:[10,40]},
+  cha:{name:'Aiguilles Rouges, Chamonix',short:'Chamonix',country:'France',rock:'Granite',elev:[700,1300]},
+  gym1:{name:'Home gym, Oslo',short:'Home gym',country:'Norway',rock:'Plastic',indoor:true,grading:'colour',scale:'gym1',elev:[0,0],
+    walls:[{id:'w1',name:'Main wall',height:15,angle:'Vertical',kind:'Rope'},{id:'w2',name:'Slab wall',height:12,angle:'Slab',kind:'Rope'},{id:'w3',name:'Cave',height:4.5,angle:'Overhang',kind:'Boulder'},{id:'w4',name:'Board',height:3.5,angle:'Overhang',kind:'Boulder'}]},
+  gym2:{name:'Travel gym, Bergen',short:'Bergen gym',country:'Norway',rock:'Plastic',indoor:true,grading:'standard',scale:null,elev:[0,0],
+    walls:[{id:'w1',name:'Lead hall',height:12,angle:'Overhang',kind:'Rope'},{id:'w2',name:'Boulder room',height:4,angle:'Vertical',kind:'Boulder'}]}
+};
+// Custom gym colour scales. Each colour covers a range of grades (index into the shared scale), or null when not mapped.
+const GYMSCALES={gym1:{grades:[
+  {n:'Green',hex:'#3FA34D',bmin:0,bmax:1,rmin:0,rmax:2},
+  {n:'Blue',hex:'#2F6FD1',bmin:2,bmax:4,rmin:4,rmax:6},
+  {n:'Yellow',hex:'#E8C21C',bmin:4,bmax:6,rmin:6,rmax:8},
+  {n:'Red',hex:'#D33A2C',bmin:6,bmax:8,rmin:8,rmax:10},
+  {n:'Black',hex:'#1E1E1E',bmin:8,bmax:11,rmin:10,rmax:13}]}};
+const gyms=()=>Object.entries(CRAGS).filter(([,c])=>c.indoor);
+const wallOf=(gid,wid)=>{const g=CRAGS[gid];return g.walls.find(w=>w.id===wid)||g.walls[0]};
+const ROUTES={};
+function addRoute(crag,name,disc,g,pitches,len,angle,features,holds,prot,descent,extra={}){
+  const id=crag+'-'+name.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+  ROUTES[id]={id,crag,name,disc,g,pitches,len,angle,features,holds,prot,descent,rope:pitches>1||len>30?'60 m':'50 m',stars:1+ri(3),...extra};
+  return id;
+}
+[
+ ['lof','Vestpillaren','Multipitch',4,9,300,'Vertical',['Hand crack','Corner'],['Jugs'],'Trad','Walk-off',{fa:'1973'}],
+ ['lof','Bare Blåbær','Multipitch',3,7,250,'Slab',['Finger crack','Face'],['Crimps'],'Trad','Rappel'],
+ ['lof','Storpillaren','Multipitch',6,8,280,'Vertical',['Corner','Hand crack'],['Jugs','Crimps'],'Trad','Walk-off'],
+ ['lof','Silmaril','Trad',8,1,35,'Vertical',['Finger crack'],['Crimps'],'Trad','Lower-off'],
+ ['lof','Tindediederet','Trad',5,2,55,'Vertical',['Corner'],['Pinches'],'Trad','Rappel'],
+ ['lof','Kjerringa','Trad',3,1,30,'Slab',['Hand crack'],['Jugs'],'Trad','Walk-off'],
+ ['lof','Blåmann','Trad',7,1,28,'Overhang',['Hand crack'],['Jugs'],'Mixed','Lower-off'],
+ ['lof','Lundefuglen','Trad',4,1,32,'Vertical',['Arête'],['Crimps'],'Runout','Walk-off'],
+ ['fla','Varmen','Sport',6,1,22,'Overhang',['Face'],['Jugs'],'Bolted','Lower-off'],
+ ['fla','Havbris','Sport',7,1,25,'Overhang',['Face'],['Pinches','Jugs'],'Bolted','Lower-off'],
+ ['fla','Ravnen','Sport',8,1,28,'Overhang',['Face'],['Pinches'],'Bolted','Lower-off'],
+ ['fla','Nordlys','Sport',9,1,30,'Roof',['Face'],['Slopers','Jugs'],'Bolted','Lower-off'],
+ ['fla','Fjæresteinen','Sport',9,1,26,'Overhang',['Arête'],['Pinches'],'Bolted','Lower-off'],
+ ['fla','Kråkeslottet','Sport',10,1,32,'Overhang',['Face'],['Slopers'],'Bolted','Lower-off'],
+ ['fla','Midnattsol','Sport',11,1,35,'Roof',['Face'],['Pinches','Slopers'],'Bolted','Lower-off'],
+ ['fla','Stormkast','Sport',12,1,38,'Overhang',['Face'],['Crimps'],'Bolted','Lower-off'],
+ ['kol','Søndagstur','Sport',4,1,18,'Vertical',['Face'],['Jugs'],'Bolted','Lower-off'],
+ ['kol','Fjellrevens vei','Trad',5,1,22,'Vertical',['Hand crack'],['Jugs'],'Trad','Walk-off'],
+ ['kol','Hjemmebane','Sport',6,1,20,'Vertical',['Face'],['Crimps'],'Bolted','Lower-off'],
+ ['kol','Skiferdiederet','Trad',6,1,24,'Vertical',['Corner'],['Crimps'],'Trad','Walk-off'],
+ ['kol','Ettermiddagsfissur','Trad',7,1,20,'Vertical',['Finger crack'],['Crimps'],'Trad','Lower-off'],
+ ['kol','Grå eminens','Sport',8,1,22,'Slab',['Face'],['Crimps'],'Bolted','Lower-off'],
+ ['kol','Kveldsløftet','Sport',10,1,21,'Vertical',['Face'],['Crimps'],'Bolted','Lower-off'],
+ ['siu','Sant Joan','Sport',5,1,24,'Vertical',['Face'],['Pockets'],'Bolted','Lower-off'],
+ ['siu','Ca la Rosa','Sport',6,1,26,'Vertical',['Face'],['Crimps'],'Bolted','Lower-off'],
+ ['siu','Can Puig','Sport',7,1,28,'Vertical',['Face'],['Pockets','Crimps'],'Bolted','Lower-off'],
+ ['siu','El Pati','Sport',8,1,25,'Vertical',['Face'],['Crimps'],'Bolted','Lower-off'],
+ ['siu','Tufa Jove','Sport',9,1,30,'Overhang',['Face'],['Pinches'],'Bolted','Lower-off'],
+ ['siu','Mel i Mató','Sport',10,1,27,'Vertical',['Face'],['Crimps','Pockets'],'Bolted','Lower-off'],
+ ['siu','Pa amb Tomàquet','Sport',11,1,30,'Vertical',['Face'],['Pockets'],'Bolted','Lower-off'],
+ ['siu','Llum de Tardor','Sport',12,1,32,'Overhang',['Face'],['Crimps'],'Bolted','Lower-off'],
+ ['fon','Les Sablons','Boulder',3,1,4,'Vertical',['Face'],['Slopers'],'Crash pads','Downclimb'],
+ ['fon','La Dalle Noire','Boulder',4,1,4,'Slab',['Face'],['Crimps'],'Crash pads','Downclimb'],
+ ['fon',"L'Arête Fine",'Boulder',5,1,4,'Vertical',['Arête'],['Pinches'],'Crash pads','Downclimb'],
+ ['fon','La Pince','Boulder',6,1,3,'Overhang',['Face'],['Pinches'],'Crash pads','Downclimb'],
+ ['fon','Le Rond','Boulder',7,1,3,'Vertical',['Face'],['Slopers'],'Crash pads','Downclimb'],
+ ['fon','Le Surplomb Gris','Boulder',8,1,4,'Overhang',['Face'],['Slopers','Crimps'],'Crash pads','Downclimb'],
+ ['fon','Le Bloc Plat','Boulder',9,1,3,'Vertical',['Face'],['Crimps'],'Crash pads','Downclimb'],
+ ['fon','Le Toit Doux','Boulder',10,1,4,'Roof',['Face'],['Slopers'],'Crash pads','Downclimb'],
+ ['cha','Arête Lumière','Alpine',1,12,400,'Vertical',['Arête'],['Jugs'],'Trad','Walk-off'],
+ ['cha','Pilier Rouge','Alpine',4,10,350,'Vertical',['Hand crack','Face'],['Jugs','Crimps'],'Trad','Rappel'],
+ ['cha','Dalle Blanche','Multipitch',4,6,220,'Slab',['Face'],['Crimps'],'Mixed','Rappel'],
+ ['cha','Fissure Glacier','Multipitch',6,6,200,'Vertical',['Hand crack','Finger crack'],['Jugs'],'Trad','Rappel'],
+ ['cha','Dièdre Cosmique','Multipitch',7,5,180,'Vertical',['Corner'],['Pinches'],'Trad','Rappel']
+].forEach(a=>addRoute(...a));
+const byName=n=>Object.values(ROUTES).find(r=>r.name===n).id;
+const needsRack=r=>!!r&&!isB(r)&&!r.indoor&&['Trad','Mixed','Runout'].includes(r.prot);
+const tradish=r=>['Trad','Multipitch','Alpine'].includes(r.disc);
+
+/* ---------- trad rack ---------- */
+// own = pieces you own, def = pieces in your default rack. Dates are year-month.
+const RESLING=['cam','hex'],TEXTILE=['sling','alpine','draw','rope'];
+const gearBase={brand:'',model:'',made:'2022-01',bought:'2022-01',reslung:null,reslingYrs:5,remind:true,retireYrs:10,notes:''};
+const GEAR=[
+ {id:'c03',type:'cam',label:'Cam #0.3',color:'#2D5DB8',own:1,def:1,brand:'Black Diamond',model:'Camalot C4',made:'2019-04',bought:'2019-05',reslung:'2024-02'},
+ {id:'c04',type:'cam',label:'Cam #0.4',color:'#8E9196',own:1,def:1,brand:'Black Diamond',model:'Camalot C4',made:'2019-04',bought:'2019-05',reslung:'2024-02'},
+ {id:'c05',type:'cam',label:'Cam #0.5',color:'#7A3FA0',own:2,def:2,brand:'Black Diamond',model:'Camalot C4',made:'2021-12',bought:'2022-02'},
+ {id:'c075',type:'cam',label:'Cam #0.75',color:'#2F9A4A',own:2,def:2,brand:'Black Diamond',model:'Camalot C4',made:'2023-05',bought:'2023-06'},
+ {id:'c1',type:'cam',label:'Cam #1',color:'#D2342A',own:2,def:2,brand:'Black Diamond',model:'Camalot C4',made:'2018-06',bought:'2018-08',reslung:'2021-01'},
+ {id:'c2',type:'cam',label:'Cam #2',color:'#E3B31B',own:2,def:2,brand:'Black Diamond',model:'Camalot C4',made:'2023-05',bought:'2023-06'},
+ {id:'c3',type:'cam',label:'Cam #3',color:'#2D5DB8',own:1,def:1,brand:'Black Diamond',model:'Camalot C4',made:'2020-08',bought:'2020-09',reslung:'2025-09'},
+ {id:'c4',type:'cam',label:'Cam #4',color:'#8E9196',own:1,def:0,brand:'Black Diamond',model:'Camalot C4',made:'2023-03',bought:'2023-04'},
+ {id:'nuts',type:'nut',label:'Nuts #1–11',color:'#C9A23A',own:1,def:1,brand:'Wild Country',model:'Rocks',made:'2017-05',bought:'2017-06'},
+ {id:'hex',type:'hex',label:'Hexes 4–7',color:'#C0392B',own:1,def:0,brand:'Wild Country',model:'Rockcentrics',made:'2016-04',bought:'2016-05',remind:false},
+ {id:'s60',type:'sling',label:'Sling 60 cm',color:'#E2725B',own:4,def:4,brand:'Mammut',model:'Dyneema 8 mm',made:'2017-03',bought:'2017-04'},
+ {id:'s120',type:'sling',label:'Sling 120 cm',color:'#3B8EA5',own:2,def:2,brand:'Mammut',model:'Dyneema 8 mm',made:'2022-02',bought:'2022-03'},
+ {id:'adraw',type:'alpine',label:'Alpine draw',color:'#7FB24A',own:8,def:6,brand:'DMM',model:'Alpha Trad',made:'2021-03',bought:'2021-04'},
+ {id:'qd',type:'draw',label:'Quickdraw',color:'#4A4A4A',own:12,def:2,brand:'Petzl',model:'Spirit Express',made:'2019-02',bought:'2019-03'},
+ {id:'lock',type:'locker',label:'Locker',color:'#C47A2C',own:5,def:4,brand:'Petzl',model:'Attache',made:'2020-01',bought:'2020-02'},
+ {id:'tool',type:'tool',label:'Nut tool',color:'#3A6EA5',own:1,def:1,brand:'DMM',model:'Nut Key',made:'2017-05',bought:'2017-06'},
+ {id:'atc',type:'belay',label:'Guide belay device',color:'#5A6168',own:1,def:1,brand:'Black Diamond',model:'ATC Guide',made:'2019-04',bought:'2019-05'},
+ {id:'rope',type:'rope',label:'Rope 60 m',color:'#2E86C1',own:1,def:1,brand:'Beal',model:'Booster 9.7',made:'2023-04',bought:'2023-05',retireYrs:7}
+].map(g=>({...gearBase,...g}));
+const GEARTYPES={cam:'Cam',nut:'Nut set',hex:'Hex set',sling:'Sling',alpine:'Alpine draw',draw:'Quickdraw',locker:'Locking carabiner',tool:'Nut tool',belay:'Belay device',rope:'Rope'};
+const FRIEND_RACKS={
+  jonas:{vis:'Public',items:[['cam','Cam #0.2','#E3B31B',1],['cam','Cam #0.3','#2D5DB8',2],['cam','Cam #0.5','#7A3FA0',2],['cam','Cam #0.75','#2F9A4A',2],['cam','Cam #1','#D2342A',2],['cam','Cam #2','#E3B31B',2],['cam','Cam #3','#2D5DB8',2],['cam','Cam #4','#8E9196',1],['nut','Nuts #1–13','#C9A23A',2],['alpine','Alpine draw','#E2725B',10],['sling','Sling 240 cm','#7A3FA0',1],['rope','Half ropes 2 × 60 m','#C2561A',1]]},
+  ingrid:{vis:'Friends',items:[['cam','Cam #0.4','#8E9196',1],['cam','Cam #0.75','#2F9A4A',1],['cam','Cam #1','#D2342A',1],['cam','Cam #2','#E3B31B',1],['nut','Nuts #4–11','#C9A23A',1],['alpine','Alpine draw','#3B8EA5',6],['locker','Locker','#C47A2C',3]]},
+  mats:{vis:'Private',items:[]},
+  ane:{vis:'Public',items:[['draw','Quickdraw','#4A4A4A',14],['rope','Rope 70 m','#58782A',1],['locker','Locker','#C47A2C',2]]}
+};
+
+/* ---------- shoes ---------- */
+const SHOES=[
+ {id:'sol',brand:'La Sportiva',model:'Solution',size:'41.5',color:'#E8B21C',closure:'Velcro',for:['boulder','sport'],bought:'2024-08',resoles:0,lastResole:null,resoleAfter:110,retired:false,notes:'Steep sport and bouldering.'},
+ {id:'tc',brand:'La Sportiva',model:'TC Pro',size:'42',color:'#46525E',closure:'Lace',for:['trad'],bought:'2023-05',resoles:1,lastResole:'2025-04',resoleAfter:120,retired:false,notes:'All-day trad and multipitch.'},
+ {id:'gym',brand:'Scarpa',model:'Vapor V',size:'41.5',color:'#C0392B',closure:'Velcro',for:['gym'],bought:'2024-09',resoles:2,lastResole:'2026-06',resoleAfter:60,retired:false,notes:''},
+ {id:'old',brand:'Five Ten',model:'Anasazi',size:'42',color:'#2E6E8E',closure:'Velcro',for:[],bought:'2020-03',resoles:3,lastResole:'2023-02',resoleAfter:100,retired:true,notes:'Retired. Upper is worn through.'}
+];
+const shoeFor=ctx=>(SHOES.find(s=>!s.retired&&s.for.includes(ctx))||SHOES.find(s=>!s.retired)||{}).id||null;
+
+/* ---------- generate two years of example history ---------- */
+const DAYS={},ASC=[];let aid=0,inId=0;
+const tried={},sentR={};
+const OFF={Sport:0,Trad:1.5,Multipitch:2,Alpine:3.5,Boulder:0};
+const TAGS=['Pumpy','Techy','Powerful','Scary','Sustained','Reachy','Polished','Great rock','Heady','Balancy'];
+const CONDS=['Dry','Dry','Dry','Perfect','Humid','Windy','Damp'];
+const FEEL=['Very soft','Soft','Fair','Hard','Very hard'];
+const BASET={lof:[2,3,6,9,13,17,19,18,13,8,4,2],fla:[0,1,4,8,12,16,18,17,13,8,3,1],kol:[-4,-3,1,7,13,17,19,18,13,7,2,-2],siu:[11,12,15,17,21,26,29,28,24,19,14,11],fon:[5,6,10,13,17,20,22,22,18,14,9,6],cha:[-6,-5,-2,1,5,9,12,12,8,4,-1,-4]};
+const TITLES={lof:['Long day on Presten','Midnight sun pitches','Cracks and cod'],fla:['Flatanger pump fest','Cave day'],kol:['After-work laps','Evening at Kolsås','Quick Kolsås session'],siu:['Siurana winter sun','Crimp therapy'],fon:['Bleau sloper school','Sand and slopers'],cha:['Alpine start','Above the clouds']};
+function lvlAt(d){const t=(new Date(d)-new Date(START))/(new Date(TODAY)-new Date(START));return{r:7.2+2.8*t,b:5.6+2.6*t}}
+function newDay(id,date,cid,who,extra={}){
+  DAYS[id]={id,date,crag:cid,who,partners:[],elev:0,hours:2,temp:null,cond:'Indoor',kudos:ri(9),kudoed:false,comments:[],title:'',desc:'',media:[],shoe:null,...extra};
+  return DAYS[id];
+}
+function climbDay(date,cid){
+  const L=lvlAt(date),rs=Object.values(ROUTES).filter(r=>r.crag===cid).sort(()=>rng()-.5);
+  const ok=r=>r.g+OFF[r.disc]<=(isB(r)?L.b:L.r)+2.4;
+  let picked;
+  if(cid==='cha')picked=[rs.find(r=>r.g+OFF[r.disc]<=L.r+.6)||rs[0]];
+  else if(cid==='lof'&&rng()<.55)picked=[rs.find(r=>r.disc==='Multipitch'&&ok(r))||rs[0]];
+  else picked=rs.filter(ok).slice(0,cid==='fon'?4+ri(4):2+ri(3));
+  if(!picked.length)picked=[rs[0]];
+  const id=date+'-'+cid;
+  const d=newDay(id,date,cid,'me',{partners:[pick(['ingrid','mats','ane','jonas'])].concat(rng()<.3?[pick(['jonas','ane'])]:[]).filter((v,i,a)=>a.indexOf(v)===i),
+    elev:CRAGS[cid].elev[0]+ri(CRAGS[cid].elev[1]-CRAGS[cid].elev[0]),hours:cid==='cha'?8+ri(5):picked.some(r=>r.pitches>1)?6+ri(4):3+ri(4),
+    temp:Math.round(BASET[cid][month(date)]+rng()*7-3),cond:pick(CONDS),title:rng()<.55?pick(TITLES[cid]):'',
+    shoe:picked.some(tradish)?'tc':'sol'});
+  for(const r of picked){
+    const lv=(isB(r)?L.b:L.r)-OFF[r.disc],diff=r.g-lv;let style,att=1;
+    if(sentR[r.id])style='Repeat';
+    else{const p=clamp(.6-.3*diff,.06,.95);
+      if(rng()<p){style=tried[r.id]?'Redpoint':(isB(r)?'Flash':(diff<-.6||rng()<.45?'Onsight':'Flash'));att=tried[r.id]?Math.min(tried[r.id],isB(r)?14:7)+1+ri(2):1;sentR[r.id]=1}
+      else{style='Attempt';att=isB(r)?2+ri(6):1+ri(2);tried[r.id]=(tried[r.id]||0)+att}}
+    const a={id:++aid,day:id,date,who:'me',route:r.id,style,att,
+      lead:isB(r)?'—':(r.disc==='Sport'?(rng()<.05?'Top-rope':'Lead'):(rng()<.18?'Follow':r.pitches>1&&rng()<.5?'Swing leads':'Lead')),
+      feel:FEEL[clamp(2+Math.round((rng()-.5)*2.2+(style==='Attempt'?.8:0)),0,4)],
+      tags:[pick(TAGS)].concat(rng()<.4?[pick(TAGS)]:[]).filter((v,i,a)=>a.indexOf(v)===i),
+      cond:d.cond,temp:d.temp};
+    if(needsRack(r)){a.rack={};if(rng()<.3){const g=pick(['c4','c4','hex','c03','adraw']);const gd=GEAR.find(x=>x.id===g);a.rack[g]=gd.def<gd.own?1:-1}}
+    ASC.push(a);
+  }
+}
+function makeIndoor(gid,wid,type,gi,angle,holds){
+  const g=CRAGS[gid],w=wallOf(gid,wid),b=type==='Boulder';let gv=null,gcol=null,range=null;
+  if(g.grading==='colour'&&gi!=null){const c=GYMSCALES[g.scale]?.grades[gi];if(c){gcol={n:c.n,hex:c.hex};const lo=b?c.bmin:c.rmin,hi=(b?c.bmax:c.rmax)??lo;if(lo!=null){range=[lo,hi];gv=(lo+hi)/2}}}
+  else if(g.grading==='standard'&&gi!=null)gv=gi;
+  return{id:'in-'+(++inId),crag:gid,wall:w.name,name:cap((gcol?gcol.n+' ':'')+(b?'boulder':type.toLowerCase())),disc:b?'Boulder':'Sport',indoor:type,g:gv,gcol,range,pitches:1,len:w.height,
+    angle,features:['Face'],holds:holds.length?holds:['Jugs'],prot:b?'Crash pads':'Bolted',descent:b?'Downclimb':'Lower-off',rope:'—'};
+}
+function gymDay(date,gid='gym1'){
+  const L=lvlAt(date),id=date+'-'+gid,sc=GYMSCALES.gym1.grades,walls=CRAGS[gid].walls;
+  newDay(id,date,gid,'me',{partners:rng()<.6?[pick(['ingrid','mats','ane'])]:[],kudos:ri(5),title:rng()<.5?pick(['Tuesday training','Blues and reds','Cave session','Lunch laps','Board and blues']):'',shoe:'gym'});
+  const n=5+ri(6);
+  for(let i=0;i<n;i++){
+    const b=rng()<.6,w=pick(walls.filter(x=>x.kind===(b?'Boulder':'Rope'))),type=b?'Boulder':pick(['Top-rope','Lead','Lead','Auto-belay']);
+    const ci=clamp(Math.round((b?(L.b-1)/2:(L.r-2)/2)+(rng()-.6)*2.2),0,4),c=sc[ci],diff=(b?(c.bmin+c.bmax)/2-L.b:(c.rmin+c.rmax)/2-L.r);
+    const p=clamp(.7-.3*diff,.1,.95),ok=rng()<p,style=ok?(rng()<.6?'Flash':'Redpoint'):'Attempt';
+    const inl=makeIndoor(gid,w.id,type,ci,rng()<.8?w.angle:pick(['Slab','Vertical','Overhang','Roof']),[pick(['Crimps','Slopers','Pinches','Jugs','Pockets'])]);
+    ASC.push({id:++aid,day:id,date,who:'me',inl,route:inl.id,style,att:style==='Flash'?1:style==='Redpoint'?2+ri(4):1+ri(4),lead:b?'—':type,feel:pick(FEEL.slice(1,4)),tags:rng()<.5?[pick(TAGS)]:[],cond:'Indoor',temp:null});
+  }
+}
+const TRIPS=[['siu','2024-12-02',7],['fon','2025-03-08',6],['lof','2025-07-05',8],['cha','2025-08-10',4],['fla','2025-09-12',5],['siu','2025-12-01',6],['fon','2026-03-14',5],['lof','2026-07-04',7],['cha','2026-08-08',5],['fla','2026-09-18',6]];
+const tripDays={};
+TRIPS.forEach(([c,s,n])=>{for(let i=0;i<n;i++)tripDays[addDays(s,i)]=c});
+for(let d=START;d<TODAY;d=addDays(d,1)){
+  if(tripDays[d]){if(rng()<.82)climbDay(d,tripDays[d]);continue}
+  const dow=new Date(d+'T12:00:00Z').getUTCDay(),m=month(d);
+  if((dow===6||dow===3)&&m>=3&&m<=9&&rng()<.42)climbDay(d,'kol');
+  else if((dow===2||dow===4)&&(m>=10||m<=2?rng()<.6:rng()<.18))gymDay(d);
+}
+if(!DAYS['2026-10-29-gym1'])gymDay('2026-10-29');
+DAYS['2026-10-29-gym1'].title='Red circuit, finally';DAYS['2026-10-29-gym1'].desc='Two new reds in the cave. The black on the slab wall still says no.';
+const myDays=()=>Object.values(DAYS).filter(d=>d.who==='me').sort((a,b)=>b.date.localeCompare(a.date));
+{const md=myDays().filter(d=>!CRAGS[d.crag].indoor);
+ if(md[0]){md[0].comments.push({who:'ingrid',text:'Strong day! Was the top crux wet?'},{who:'me',text:'Bone dry after noon.'});
+   md[0].title=md[0].title||'Last warm evening of the season';md[0].desc='Cold fingers on the first route, then perfect friction. Jonas lent me a #4 for the wide bit.';}
+ if(md[1])md[1].comments.push({who:'mats',text:'That topo is going straight into my ticklist.'});
+ const sample=(d,specs)=>{const as=ASC.filter(a=>a.day===d.id);specs.forEach(([type,ti,dur])=>d.media.push({id:'m'+(++aid),type,seed:d.id+ti,route:ti!=null&&as[ti]?(as[ti].inl?as[ti].inl.id:as[ti].route):null,dur}))};
+ if(md[0])sample(md[0],[['image',0],['video',0,'0:24'],['image',null]]);
+ if(md[2])sample(md[2],[['image',1],['image',null]]);
+ sample(DAYS['2026-10-29-gym1'],[['video',2,'0:41'],['image',null]]);}
+// friends' posts
+function friendPost(who,date,cid,items,extra){
+  const id=date+'-'+cid+'-'+who;
+  newDay(id,date,cid,who,{elev:CRAGS[cid].elev[0]+40,hours:5,temp:BASET[cid][month(date)],cond:'Dry',kudos:3+ri(9),...extra});
+  items.forEach(([n,style,lead='Lead'])=>{const r=ROUTES[byName(n)];ASC.push({id:++aid,day:id,date,who,route:r.id,style,att:style==='Redpoint'?6:1,lead:isB(r)?'—':lead,feel:'Fair',tags:['Techy'],cond:'Dry',temp:DAYS[id].temp})});
+  return DAYS[id];
+}
+friendPost('ingrid','2026-10-31','kol',[['Kveldsløftet','Redpoint'],['Grå eminens','Repeat'],['Ettermiddagsfissur','Onsight']],{title:'Kveldsløftet goes down',comments:[{who:'mats',text:'Finally! That crimp sequence is evil.'}],partners:['me'],media:[{id:'f1',type:'image',seed:'ing1',route:byName('Kveldsløftet')},{id:'f2',type:'video',seed:'ing2',route:byName('Kveldsløftet'),dur:'1:12'}]});
+friendPost('mats','2026-10-27','fon',[['Le Toit Doux','Attempt'],['Le Rond','Flash'],['La Pince','Flash']],{title:'Slopers for breakfast'});
+friendPost('ane','2026-10-19','siu',[['Llum de Tardor','Redpoint'],['Pa amb Tomàquet','Onsight']],{comments:[{who:'ingrid',text:'Onsight on 8-?! Wow.'}],media:[{id:'f3',type:'image',seed:'ane1',route:byName('Llum de Tardor')}]});
+friendPost('jonas','2026-10-11','lof',[['Storpillaren','Onsight','Swing leads']],{elev:420,hours:9,title:'Storpillaren in a day',desc:'Eight pitches of perfect corner. Doubles of #1 to #3 were the right call.'});
+
+/* ---------- training benchmarks (example data) ---------- */
+const BENCH=[
+ {id:'hang',cat:'Finger strength',name:'Max hang',proto:'20 mm edge · 7 s · half crimp',unit:'% BW',a:118,b:141,hi:true,fr:{ingrid:152,mats:137,ane:129}},
+ {id:'pull',cat:'Pulling',name:'Weighted pull-up',proto:'1 rep max · added load',unit:'kg',a:16,b:29,hi:true,fr:{ingrid:14,mats:33,ane:9}},
+ {id:'lock',cat:'Pulling',name:'One-arm lock-off',proto:'90° elbow · best arm',unit:'s',a:4,b:9,hi:true,fr:{ingrid:7,mats:12,ane:5}},
+ {id:'rep',cat:'Endurance',name:'Repeaters',proto:'7 on / 3 off · 20 mm · bodyweight',unit:'reps',a:22,b:37,hi:true,fr:{ingrid:44,mats:30,ane:41}},
+ {id:'lever',cat:'Core',name:'Front lever',proto:'Full lever hold',unit:'s',a:0,b:6,hi:true,fr:{ingrid:3,mats:9,ane:2}},
+ {id:'pan',cat:'Mobility',name:'Pancake',proto:'Seated straddle · chest to floor',unit:'cm',a:31,b:17,hi:false,fr:{ingrid:6,mats:34,ane:0}},
+ {id:'step',cat:'Mobility',name:'High step',proto:'Foot height beside hip, standing',unit:'cm',a:88,b:103,hi:true,fr:{ingrid:112,mats:91,ane:117}}
+];
+BENCH.forEach(b=>{b.hist=[];let d='2024-11-10';let i=0;while(d<TODAY){const t=i/16;b.hist.push({date:d,v:Math.round((b.a+(b.b-b.a)*Math.pow(t,.8)+(rng()-.5)*(Math.abs(b.b-b.a)*.12))*10)/10});d=addDays(d,42+ri(10));i++}
+  b.hist.forEach(h=>{if(b.unit!=='% BW'&&b.unit!=='kg')h.v=Math.max(0,Math.round(h.v))})});
+
+/* ---------- derived ---------- */
+const R=a=>a.inl||ROUTES[a.route],C=a=>CRAGS[R(a).crag];
+const routeById=id=>ROUTES[id]||ASC.find(a=>a.inl&&a.inl.id===id)?.inl;
+const isIn=a=>!!C(a).indoor;
+const mine=()=>ASC.filter(a=>a.who==='me');
+const mineOut=()=>mine().filter(a=>!isIn(a));
+const isSend=a=>a.style!=='Attempt';
+const isNewSend=a=>a.style!=='Attempt'&&a.style!=='Repeat';
+const TEMPB=t=>t==null?'Indoor':t<8?'Below 8 °C':t<16?'8–15 °C':t<22?'16–21 °C':'22 °C +';
+const DIMS={
+  setting:{label:'Indoor or outdoor',get:a=>[isIn(a)?'Indoor':'Outdoor'],all:['Outdoor','Indoor']},
+  disc:{label:'Discipline',get:a=>[R(a).disc],all:['Sport','Trad','Multipitch','Alpine','Boulder']},
+  rock:{label:'Rock type',get:a=>[C(a).rock],all:['Granite','Gneiss','Limestone','Sandstone','Basalt','Conglomerate','Quartzite']},
+  angle:{label:'Angle',get:a=>[R(a).angle],all:['Slab','Vertical','Overhang','Roof']},
+  feat:{label:'Features',get:a=>R(a).features,all:['Face','Finger crack','Hand crack','Offwidth','Chimney','Corner','Arête']},
+  holds:{label:'Hold type',get:a=>R(a).holds,all:['Crimps','Pockets','Pinches','Slopers','Jugs']},
+  prot:{label:'Protection',get:a=>[R(a).prot],all:['Bolted','Trad','Mixed','Runout','Crash pads']},
+  wall:{label:'Gym wall',get:a=>[R(a).wall||'Outdoor'],all:null},
+  country:{label:'Country',get:a=>[C(a).country],all:null},
+  season:{label:'Season',get:a=>[season(a.date)],all:['Winter','Spring','Summer','Autumn']},
+  temp:{label:'Temperature',get:a=>[TEMPB(a.temp)],all:['Below 8 °C','8–15 °C','16–21 °C','22 °C +']},
+  cond:{label:'Conditions',get:a=>[a.cond],all:null},
+  style:{label:'Style',get:a=>[a.style],all:['Onsight','Flash','Redpoint','Repeat','Attempt']},
+  lead:{label:'Rope role',get:a=>[a.lead],all:null},
+  feel:{label:'How it felt',get:a=>[a.feel],all:FEEL},
+  shoe:{label:'Shoes',get:a=>[(SHOES.find(s=>s.id===DAYS[a.day]?.shoe)||{model:'Not set'}).model],all:null}
+};
+const METRICS={
+  sends:{label:'Sends',f:as=>as.filter(isSend).length},
+  asc:{label:'Ascents logged',f:as=>as.length},
+  pitches:{label:'Pitches',f:as=>sum(as.map(a=>R(a).pitches))},
+  metres:{label:'Metres climbed',f:as=>Math.round(sum(as.map(a=>R(a).len))),unit:' m'},
+  rate:{label:'Send rate',f:as=>as.length?Math.round(100*as.filter(isSend).length/as.length):0,unit:' %',max:100},
+  max:{label:'Hardest send',f:as=>{const s=as.filter(a=>isNewSend(a)&&R(a).g!=null);return s.length?Math.max(...s.map(a=>R(a).g)):null},grade:true},
+  att:{label:'Avg tries to redpoint',f:as=>{const s=as.filter(a=>a.style==='Redpoint');return s.length?Math.round(10*sum(s.map(a=>a.att))/s.length)/10:0}}
+};
+function skillXP(){
+  const xp={};
+  mine().filter(isSend).forEach(a=>{const r=R(a);
+    const base=(isB(r)?5:8)*Math.sqrt(r.pitches)*(1+Math.max(0,(r.g??3)-3)*.25)*({Onsight:1.5,Flash:1.3,Redpoint:1.1,Repeat:.5}[a.style])*(a.lead==='Follow'?.6:1)*(isIn(a)?.35:1);
+    for(const k of ['disc','rock','angle','feat','holds','prot','season'])for(const v of DIMS[k].get(a)){xp[k+':'+v]=(xp[k+':'+v]||0)+base}});
+  return xp;
+}
+const level=x=>{const l=Math.sqrt((x||0)/14);return{lv:Math.min(20,Math.floor(l)),frac:l-Math.floor(l)}};
+const lvName=l=>l<1?'Not started':l<3?'Novice':l<6?'Developing':l<10?'Competent':l<14?'Experienced':'Expert';
+// Tries and sends you logged on a route before (optionally excluding one session)
+function routeHistory(id,exceptDay){
+  const as=mine().filter(a=>a.route===id&&a.day!==exceptDay);
+  const sent=as.filter(isSend).sort((a,b)=>a.date.localeCompare(b.date))[0];
+  return{tries:sum(as.filter(a=>a.style==='Attempt').map(a=>a.att)),days:new Set(as.filter(a=>a.style==='Attempt').map(a=>a.date)).size,sent};
+}
+
+/* ---------- gear and shoe status ---------- */
+function gearUse(id){let climbs=0,days=new Set(),last=null;const g=GEAR.find(x=>x.id===id);
+  mine().forEach(a=>{if(!a.rack)return;const n=(g?.def||0)+(a.rack[id]||0);if(n>0){climbs++;days.add(a.date);if(!last||a.date>last)last=a.date}});return{climbs,days:days.size,last}}
+function gearStatus(g){
+  if(RESLING.includes(g.type)){const from=g.reslung||g.made;if(!from)return null;const due=addMonths(from,12*g.reslingYrs),left=monthsBetween(NOWYM,due);
+    return{kind:'Resling',due,left,lvl:left<0?'bad':left<=6?'warn':'ok',label:left<0?'Resling overdue':left<=6?'Resling soon':'Resling '+fmtYM(due),remind:g.remind}}
+  if(TEXTILE.includes(g.type)){const due=addMonths(g.made,12*g.retireYrs),left=monthsBetween(NOWYM,due);
+    return{kind:'Retire',due,left,lvl:left<0?'bad':left<=6?'warn':'ok',label:left<0?'Past retire date':left<=6?'Retire soon':'Retire '+fmtYM(due),remind:g.remind}}
+  return null;
+}
+const statusChip=g=>{const s=gearStatus(g);return s&&s.remind&&s.lvl!=='ok'?`<span class="due ${s.lvl}">${s.label}</span>`:''};
+function shoeUse(s){const ds=Object.values(DAYS).filter(d=>d.who==='me'&&d.shoe===s.id);const since=s.lastResole||s.bought;
+  const sinceDays=ds.filter(d=>d.date.slice(0,7)>=since).length;return{days:ds.length,climbs:sum(ds.map(d=>dayAsc(d.id).length)),sinceDays,last:ds.map(d=>d.date).sort().pop()}}
+function shoeStatus(s){if(s.retired)return{lvl:'ok',label:'Retired'};const u=shoeUse(s),f=u.sinceDays/s.resoleAfter;return{lvl:f>=1?'bad':f>=.85?'warn':'ok',label:f>=1?'Resole due':f>=.85?'Resole soon':`${u.sinceDays} of ${s.resoleAfter} days`,u}}
+
+/* ---------- illustrations ---------- */
+function gdefs(k,c){const L=shade(c,.4),D=shade(c,-.42);return`<defs><linearGradient id="${k}c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${L}"/><stop offset=".5" stop-color="${c}"/><stop offset="1" stop-color="${D}"/></linearGradient><linearGradient id="${k}m" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7E878F"/><stop offset=".4" stop-color="#F5F7F8"/><stop offset=".7" stop-color="#C4CBD0"/><stop offset="1" stop-color="#6F777E"/></linearGradient><radialGradient id="${k}b" cx=".5" cy=".35" r=".8"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#DFE4E0"/></radialGradient></defs>`}
+function binerSVG(k,x,y,w,h,gate='straight',lock=''){
+  const sp=`M${x+w*.62} ${y+2.5} C${x+w*.15} ${y-1} ${x+1} ${y+h*.12} ${x+2} ${y+h*.35} L${x+3.5} ${y+h*.74} C${x+5} ${y+h} ${x+w*.45} ${y+h-1.5} ${x+w*.7} ${y+h-3} C${x+w-1} ${y+h-5} ${x+w-1} ${y+h*.8} ${x+w-2} ${y+h*.7}`;
+  const nose=`M${x+w*.62} ${y+2.5} C${x+w*.9} ${y+4} ${x+w-1} ${y+h*.12} ${x+w-2.5} ${y+h*.22}`;
+  const gt=gate==='bent'?`M${x+w-2} ${y+h*.7} Q${x+w*.68} ${y+h*.46} ${x+w-3} ${y+h*.24}`:`M${x+w-2} ${y+h*.7} L${x+w-3} ${y+h*.24}`;
+  let s=`<path d="${sp}" fill="none" stroke="#596168" stroke-width="5.4" stroke-linecap="round"/><path d="${sp}" fill="none" stroke="url(#${k}m)" stroke-width="3.6" stroke-linecap="round"/><path d="${nose}" fill="none" stroke="#596168" stroke-width="5.4" stroke-linecap="round"/><path d="${nose}" fill="none" stroke="url(#${k}m)" stroke-width="3.6" stroke-linecap="round"/>`;
+  if(gate==='wire')s+=`<path d="${gt}" stroke="#9BA3AA" stroke-width="1.3" fill="none" transform="translate(-1.3 0)"/><path d="${gt}" stroke="#9BA3AA" stroke-width="1.3" fill="none" transform="translate(1.3 0)"/>`;
+  else s+=`<path d="${gt}" stroke="#596168" stroke-width="3.6" fill="none" stroke-linecap="round"/><path d="${gt}" stroke="#DCE0E3" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  if(lock)s+=`<rect x="${x+w-7}" y="${y+h*.4}" width="9" height="${h*.24}" rx="2.5" fill="${lock}" stroke="rgba(0,0,0,.4)" stroke-width=".8"/>`+[0,1,2,3].map(i=>`<path d="M${x+w-6} ${y+h*.44+i*h*.045} h7" stroke="rgba(0,0,0,.28)" stroke-width=".7"/>`).join('');
+  return s;
+}
+function gearSVG(t,c,s=64){
+  const k='gg'+hash(t+c),L=shade(c,.4),D=shade(c,-.42),CC=`url(#${k}c)`,M=`url(#${k}m)`;
+  let b=`<rect width="100" height="100" rx="14" fill="url(#${k}b)"/>`;
+  if(t==='cam'){
+    const lobe='M50 30 C40 12 18 10 12 26 C8 38 17 47 29 43 Z';
+    const front=`<path d="${lobe}" fill="${CC}" stroke="${D}" stroke-width="1"/><path d="M14 24 C19 14 31 11 41 16" stroke="${D}" stroke-width="2.4" stroke-dasharray="1.2 1.8" fill="none"/><circle cx="27" cy="29" r="3.6" fill="${D}" opacity=".55"/><path d="M20 20 C26 15 33 15 38 18" stroke="#fff" stroke-width="1.2" opacity=".5" fill="none"/>`;
+    const back=`<path d="${lobe}" fill="${D}" transform="translate(5 -2) rotate(-9 50 30)"/>`;
+    const loop='M41 70 C30 90 38 97 50 97 C62 97 70 90 59 70';
+    b+=`<path d="${loop}" fill="none" stroke="${D}" stroke-width="7.5" stroke-linecap="round"/><path d="${loop}" fill="none" stroke="${CC}" stroke-width="5.5" stroke-linecap="round"/><path d="${loop}" fill="none" stroke="${L}" stroke-width=".9" stroke-dasharray="2 2.5" opacity=".9"/>
+     <rect x="44" y="88" width="12" height="7" rx="1.5" fill="#222"/><path d="M45 89.5 l2 4 l2-4 l2 4 l2-4 l2 4" stroke="#777" stroke-width=".7" fill="none"/>
+     <rect x="46" y="32" width="8" height="44" rx="4" fill="${M}" stroke="#6B737A" stroke-width=".8"/><rect x="45" y="65" width="10" height="12" rx="3" fill="${D}"/><path d="M46.5 67 h7 M46.5 70 h7 M46.5 73 h7" stroke="rgba(255,255,255,.25)" stroke-width=".8"/>
+     <path d="M34 57 C33 48 31 42 29 35 M66 57 C67 48 69 42 71 35" stroke="#AEB6BC" stroke-width="1.3" fill="none"/>
+     ${back}<g transform="translate(100 0) scale(-1 1)">${back}</g>
+     <rect x="14" y="27" width="72" height="6" rx="3" fill="${M}" stroke="#6B737A" stroke-width=".7"/>
+     ${front}<g transform="translate(100 0) scale(-1 1)">${front}</g>
+     <circle cx="50" cy="30" r="5" fill="${M}" stroke="#5F676E"/><circle cx="50" cy="30" r="1.8" fill="#5F676E"/>
+     <rect x="28" y="54" width="44" height="8" rx="4" fill="#2F353B"/><rect x="31" y="55.2" width="38" height="2" rx="1" fill="#6A737C"/>`;
+  }else if(t==='nut'){
+    b+=`<rect x="16" y="74" width="68" height="20" rx="10" fill="none" stroke="#596168" stroke-width="5.4"/><rect x="16" y="74" width="68" height="20" rx="10" fill="none" stroke="${M}" stroke-width="3.6"/><path d="M66 75 L83 81" stroke="#596168" stroke-width="3.4" stroke-linecap="round"/><path d="M66 75 L83 81" stroke="#DCE0E3" stroke-width="1.8" stroke-linecap="round"/>`;
+    [[30,16,13,13],[50,11,17,18],[71,6,21,23]].forEach(([cx,top,w,h])=>{
+      b+=`<path d="M${cx-2.6} ${top+h} L${cx-2.6} 66 M${cx+2.6} ${top+h} L${cx+2.6} 66" stroke="#8D959C" stroke-width="1.8"/><path d="M${cx-2.6} ${top+h} L${cx-2.6} 66 M${cx+2.6} ${top+h} L${cx+2.6} 66" stroke="#E2E6E9" stroke-width=".8" stroke-dasharray="1.6 1.2"/>
+       <rect x="${cx-4.5}" y="62" width="9" height="7" rx="1.6" fill="${M}" stroke="#6B737A" stroke-width=".6"/><path d="M${cx-2.6} 69 C${cx-6} 82 ${cx+6} 82 ${cx+2.6} 69" stroke="#8D959C" stroke-width="1.8" fill="none"/>
+       <polygon points="${cx-w/2},${top} ${cx+w/2},${top} ${cx+w/2+3},${top+2} ${cx-w/2+3},${top+2}" fill="${L}"/>
+       <polygon points="${cx+w/2},${top} ${cx+w/2+3},${top+2} ${cx+w*.38+2.5},${top+h+1} ${cx+w*.38},${top+h}" fill="${D}"/>
+       <polygon points="${cx-w/2},${top} ${cx+w/2},${top} ${cx+w*.38},${top+h} ${cx-w*.38},${top+h}" fill="${CC}" stroke="${D}" stroke-width=".8"/>
+       <path d="M${cx-w*.3} ${top+h*.35} H${cx+w*.3}" stroke="#fff" stroke-width=".9" opacity=".45"/>`});
+  }else if(t==='hex'){
+    b+=`<path d="M44 52 C40 70 46 80 50 86 C54 80 60 70 56 52" stroke="${D}" stroke-width="4.4" fill="none"/><path d="M44 52 C40 70 46 80 50 86 C54 80 60 70 56 52" stroke="${CC}" stroke-width="2.8" fill="none"/><circle cx="50" cy="68" r="3.6" fill="${D}"/>
+     <polygon points="34,14 60,9 72,28 65,52 40,56 27,36" fill="${CC}" stroke="${D}" stroke-width="1.2"/><polygon points="40,19 58,15 64,30 59,47 43,50 35,35" fill="${L}" opacity=".35"/><polygon points="60,9 72,28 76,27 64,8" fill="${D}"/>
+     <circle cx="47" cy="26" r="2.8" fill="${D}"/><circle cx="54" cy="41" r="2.8" fill="${D}"/>${binerSVG(k,40,80,20,18,'wire')}`;
+  }else if(t==='sling'){
+    const P='M50 6 C24 6 22 34 30 58 C36 76 40 92 50 92 C60 92 64 76 70 58 C78 34 76 6 50 6Z';
+    b+=`<path d="${P}" fill="none" stroke="${D}" stroke-width="9.5"/><path d="${P}" fill="none" stroke="${CC}" stroke-width="7.5"/><path d="${P}" fill="none" stroke="#F4F4F0" stroke-width="2.4" opacity=".9"/><path d="${P}" fill="none" stroke="${L}" stroke-width=".7" stroke-dasharray="2 2" transform="translate(0 0)"/>
+     <rect x="42" y="84" width="16" height="9" rx="1.5" fill="#1E1E1E"/><path d="M43 86 l2 5 l2-5 l2 5 l2-5 l2 5 l2-5 l2 5" stroke="#8A8A8A" stroke-width=".7" fill="none"/>`;
+  }else if(t==='alpine'){
+    b+=binerSVG(k,36,3,28,30,'wire')+[['M43 30 C35 45 35 55 43 70'],['M50 30 V70'],['M57 30 C65 45 65 55 57 70']].map(([d])=>`<path d="${d}" stroke="${D}" stroke-width="5" fill="none"/><path d="${d}" stroke="${CC}" stroke-width="3.4" fill="none"/><path d="${d}" stroke="#F4F4F0" stroke-width=".9" fill="none" opacity=".8"/>`).join('')+binerSVG(k,36,67,28,30,'wire');
+  }else if(t==='draw'){
+    b+=binerSVG(k,35,2,30,34,'straight')+`<rect x="41" y="30" width="18" height="36" rx="6" fill="${CC}" stroke="${D}"/><rect x="44" y="37" width="12" height="3" rx="1" fill="#fff" opacity=".75"/><rect x="44" y="42" width="12" height="1.5" rx=".7" fill="#fff" opacity=".45"/><rect x="40" y="55" width="20" height="13" rx="4" fill="#1D1D1D" opacity=".6"/>`+binerSVG(k,35,60,30,36,'bent');
+  }else if(t==='locker'){
+    b+=binerSVG(k,26,8,48,84,'straight',CC);
+  }else if(t==='tool'){
+    b+=`<circle cx="30" cy="86" r="7.5" fill="none" stroke="#596168" stroke-width="5"/><circle cx="30" cy="86" r="7.5" fill="none" stroke="${M}" stroke-width="3.2"/>
+     <path d="M31 80 L62 18 C64 13 70 12 73 16 L76 20 C78 23 75 26 72 25 L69 24 L38 84 Z" fill="${CC}" stroke="${D}"/><path d="M73 16 L81 9 L84 12 L76 20" fill="${CC}" stroke="${D}"/><path d="M40 70 L64 22" stroke="#fff" stroke-width="1.2" opacity=".45"/><rect x="47" y="42" width="10" height="4" rx="1" fill="${D}" transform="rotate(-63 52 44)"/>`;
+  }else if(t==='belay'){
+    b+=`<path d="M42 70 C40 90 60 90 58 70" stroke="#596168" stroke-width="3.6" fill="none"/><path d="M42 70 C40 90 60 90 58 70" stroke="#C7CDD2" stroke-width="2" fill="none"/>
+     <path d="M28 20 C28 12 72 12 72 20 L77 62 C77 73 23 73 23 62 Z" fill="${CC}" stroke="${D}" stroke-width="1.2"/><path d="M32 20 C34 15 66 15 68 20" stroke="#fff" stroke-width="1.3" opacity=".45" fill="none"/>
+     <rect x="34" y="25" width="12" height="30" rx="6" fill="#E3E7E4" stroke="${D}" stroke-width=".9"/><rect x="54" y="25" width="12" height="30" rx="6" fill="#E3E7E4" stroke="${D}" stroke-width=".9"/><circle cx="50" cy="63" r="3.2" fill="#E3E7E4" stroke="${D}" stroke-width=".8"/><path d="M36 40 h8 M56 40 h8" stroke="${D}" stroke-width=".6" stroke-dasharray="1 1"/>`;
+  }else if(t==='rope'){
+    for(let i=0;i<9;i++)b+=`<ellipse cx="50" cy="${40+i*1.9}" rx="${37-i*1.3}" ry="${21-i*.7}" fill="none" stroke="${D}" stroke-width="5"/><ellipse cx="50" cy="${40+i*1.9}" rx="${37-i*1.3}" ry="${21-i*.7}" fill="none" stroke="${CC}" stroke-width="3.6"/><ellipse cx="50" cy="${40+i*1.9}" rx="${37-i*1.3}" ry="${21-i*.7}" fill="none" stroke="#fff" stroke-width=".9" stroke-dasharray="2.5 3" opacity=".6"/>`;
+    b+=`<rect x="40" y="52" width="20" height="12" rx="3" fill="${CC}" stroke="${D}"/><path d="M42 56 h16 M42 60 h16" stroke="${D}" stroke-width="1"/><path d="M44 64 C40 78 32 86 26 92 M56 64 C60 78 68 86 74 92" stroke="${D}" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M44 64 C40 78 32 86 26 92 M56 64 C60 78 68 86 74 92" stroke="${CC}" stroke-width="3.4" fill="none" stroke-linecap="round"/>`;
+  }
+  return`<svg class="gearicon" width="${s}" height="${s}" viewBox="0 0 100 100" aria-hidden="true">${gdefs(k,c)}${b}</svg>`;
+}
+function shoeSVG(sh,w=120){
+  const c=sh.color,k='sh'+hash(sh.id+c),L=shade(c,.4),D=shade(c,-.42),CC=`url(#${k}c)`;
+  let clos='';
+  if(sh.closure==='Velcro')clos=`<path d="M30 21 L42 46" stroke="${D}" stroke-width="9" stroke-linecap="round"/><path d="M30 21 L42 46" stroke="${L}" stroke-width="6.5" stroke-linecap="round"/><path d="M42 24 L54 46" stroke="${D}" stroke-width="9" stroke-linecap="round"/><path d="M42 24 L54 46" stroke="${L}" stroke-width="6.5" stroke-linecap="round"/><rect x="38" y="42" width="5" height="5" rx="1" fill="#222"/><rect x="50" y="42" width="5" height="5" rx="1" fill="#222"/>`;
+  else if(sh.closure==='Lace')clos=[0,1,2,3,4].map(i=>`<circle cx="${32+i*5}" cy="${22+i*3}" r="1.3" fill="#222"/><circle cx="${40+i*5}" cy="${20+i*3.6}" r="1.3" fill="#222"/>`).join('')+`<path d="M32 22 L45 23.6 M37 25 L50 27.2 M42 28 L55 30.8 M47 31 L60 34.4 M32 22 L40 20 M37 25 L45 23.6 M42 28 L50 27.2 M47 31 L55 30.8" stroke="#F4F2EE" stroke-width="1.4"/>`;
+  else clos=`<path d="M30 22 C38 27 46 31 54 36" stroke="${D}" stroke-width="5" fill="none"/><path d="M30 22 C38 27 46 31 54 36" stroke="#222" stroke-width="2" stroke-dasharray="1.5 1.5" fill="none"/>`;
+  return`<svg width="${w}" viewBox="0 0 120 70" role="img" aria-label="${esc(sh.brand+' '+sh.model)}">${gdefs(k,c)}<rect width="120" height="70" rx="10" fill="url(#${k}b)"/>
+   <path d="M10 52 C12 60 28 62 52 61 L102 57 C112 56 116 50 112 46 L104 46 L14 50 Z" fill="#1C1C1C"/>
+   <path d="M12 50 C8 38 12 22 26 18 C38 15 48 24 60 28 C76 33 94 34 106 40 C114 44 114 50 106 51 L16 53 Z" fill="${CC}" stroke="${D}"/>
+   <path d="M62 34 C76 37 90 39 102 43" stroke="${L}" stroke-width="2" opacity=".75" fill="none"/>
+   <path d="M58 44 C76 40 96 40 108 44 C114 46 113 51 106 52 L56 53 Z" fill="#2A2A2A"/><path d="M60 46 C78 43 94 43 106 46" stroke="#555" stroke-width=".8" fill="none"/>
+   <path d="M12 50 C9 42 10 34 14 30 L22 50 Z" fill="#2A2A2A"/><path d="M16 22 C11 11 23 9 25 18" stroke="#222" stroke-width="3" fill="none"/>
+   <path d="M26 18 C32 14 40 16 44 22" stroke="${L}" stroke-width="2.6" fill="none"/>${clos}</svg>`;
+}
+
+/* ---------- topo, wall and photo rendering ---------- */
+const ROCKC={Granite:['#C3B3A4','#8F7E72'],Gneiss:['#97948F','#5E5C59'],Limestone:['#DCD1B8','#AE9C7E'],Sandstone:['#D8B78C','#A5805A'],Basalt:['#77736C','#47443F'],Conglomerate:['#A99A86','#6F6252'],Quartzite:['#D9D4CC','#A39C91']};
+function genTopo(r){
+  const rr=mulberry32(hash(r.id));let x=90+rr()*120,y=388;const pts=[[x,y]];
+  const n=8;for(let i=1;i<=n;i++){y=388-i*(366/n);x=clamp(x+(rr()-.5)*70,40,260);pts.push([Math.round(x),Math.round(y)])}
+  const marks=[];
+  const along=t=>{const f=t*(pts.length-1),i=Math.floor(f),k=f-i,p=pts[i],q=pts[Math.min(i+1,pts.length-1)];return[p[0]+(q[0]-p[0])*k,p[1]+(q[1]-p[1])*k]};
+  if(r.prot==='Bolted'||r.prot==='Mixed')for(let t=.1;t<.95;t+=.11){const[a,b]=along(t);marks.push({t:'bolt',x:a+7,y:b})}
+  if(r.prot==='Trad'||r.prot==='Mixed'||r.prot==='Runout')for(let t=.14;t<.9;t+=r.prot==='Runout'?.3:.16){const[a,b]=along(t+rr()*.04);marks.push({t:'gear',x:a-8,y:b})}
+  if(r.pitches>1)for(let p=1;p<Math.min(r.pitches,6);p++){const[a,b]=along(p/Math.min(r.pitches,6));marks.push({t:'belay',x:a,y:b})}
+  const[cx,cy]=along(.45+rr()*.3);marks.push({t:'crux',x:cx+12,y:cy});
+  marks.push({t:'anchor',x:pts[n][0],y:pts[n][1]});
+  return{pts,marks};
+}
+function rockBg(seedStr,rock){
+  const rr=mulberry32(hash(seedStr+'bg')),[c1,c2]=ROCKC[rock]||ROCKC.Granite,gid='g'+hash(seedStr);let s='';
+  s+=`<defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>`;
+  s+=`<rect width="300" height="400" fill="url(#${gid})"/>`;
+  for(let i=0;i<7;i++){s+=`<ellipse cx="${rr()*300}" cy="${rr()*400}" rx="${30+rr()*70}" ry="${20+rr()*60}" fill="${rr()<.5?'#000':'#fff'}" opacity="${.04+rr()*.06}"/>`}
+  for(let i=0;i<16;i++){let x=rr()*300,y=rr()*400,d=`M${x.toFixed(0)} ${y.toFixed(0)}`;const ang=rr()<.6?-1.4+rr()*.5:rr()*3;for(let k=0;k<4;k++){x+=Math.cos(ang)*(12+rr()*25)+(rr()-.5)*12;y+=Math.sin(ang)*(12+rr()*25)+(rr()-.5)*12;d+=` L${x.toFixed(0)} ${y.toFixed(0)}`}
+    s+=`<path d="${d}" stroke="#1a1612" stroke-width="${.6+rr()*1.6}" fill="none" opacity="${.25+rr()*.3}" stroke-linecap="round"/>`}
+  s+=`<rect y="370" width="300" height="30" fill="#2c3a22" opacity=".35"/>`;
+  return s;
+}
+function markSVG(m){
+  const{x,y}=m;
+  if(m.t==='bolt')return`<g><circle cx="${x}" cy="${y}" r="4" fill="#fff" stroke="#111" stroke-width="1.2"/><path d="M${x-2} ${y-2}L${x+2} ${y+2}M${x+2} ${y-2}L${x-2} ${y+2}" stroke="#111" stroke-width="1.2"/></g>`;
+  if(m.t==='gear')return`<path d="M${x} ${y-5}L${x+4.5} ${y+3.5}L${x-4.5} ${y+3.5}Z" fill="#2B8CBE" stroke="#fff" stroke-width="1.2"/>`;
+  if(m.t==='belay')return`<g><circle cx="${x}" cy="${y}" r="7" fill="none" stroke="#fff" stroke-width="2.4"/><circle cx="${x}" cy="${y}" r="7" fill="none" stroke="#111" stroke-width="1"/><circle cx="${x}" cy="${y}" r="2.6" fill="#fff"/></g>`;
+  if(m.t==='anchor')return`<g><circle cx="${x-4}" cy="${y}" r="3.4" fill="#fff" stroke="#111"/><circle cx="${x+4}" cy="${y}" r="3.4" fill="#fff" stroke="#111"/></g>`;
+  if(m.t==='crux')return`<g><rect x="${x-7}" y="${y-7}" width="14" height="14" rx="3" fill="#D7263D" stroke="#fff" stroke-width="1.2"/><text x="${x}" y="${y+3.5}" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="sans-serif">C</text></g>`;
+  return'';
+}
+const pathD=pts=>pts.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ');
+function topoSVG(r,{label=true,cls='topo',crop=false}={}){
+  const t=r.topo||genTopo(r),rock=CRAGS[r.crag]?.rock||'Granite';
+  const vb=crop?'0 60 300 220':'0 0 300 400';
+  return`<svg class="${cls}" viewBox="${vb}" role="img" aria-label="Topo of ${esc(r.name)}">${rockBg(r.id,rock)}
+   <path d="${pathD(t.pts)}" stroke="#fff" stroke-width="6" fill="none" stroke-linejoin="round" stroke-linecap="round" opacity=".9"/>
+   <path d="${pathD(t.pts)}" stroke="#FF6A1A" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+   ${t.marks.map(markSVG).join('')}
+   ${label?`<g><rect x="8" y="${crop?68:8}" rx="5" width="${Math.max(54,r.name.length*6.6+44)}" height="22" fill="#111" opacity=".78"/><text x="16" y="${crop?83:23}" fill="#fff" font-size="12" font-weight="700" font-family="Public Sans,sans-serif">${esc(r.name)} · ${esc(gName(r))}</text></g>`:''}
+  </svg>`;
+}
+// Indoor sessions: a plywood wall with one cluster of holds per climb, in the climb's colour.
+function wallSVG(d,as){
+  const rr=mulberry32(hash(d.id)),g=CRAGS[d.crag];let s=`<rect width="300" height="220" fill="#D6CEC0"/>`;
+  s+=`<polygon points="0,0 110,0 95,220 0,220" fill="#CBC2B2"/><polygon points="200,0 300,0 300,220 215,220" fill="#BFB6A5"/><polygon points="95,0 200,0 215,220 95,220" fill="#DDD5C8"/>`;
+  for(let x=8;x<300;x+=16)for(let y=8;y<220;y+=16)s+=`<circle cx="${x}" cy="${y}" r=".9" fill="#8A8172"/>`;
+  as.forEach((a,i)=>{const r=R(a),col=r.gcol?r.gcol.hex:['#E67E22','#8E44AD','#16A085','#C0392B'][i%4];let x=20+(i+.5)*(260/as.length)+(rr()-.5)*10,y=200;
+    for(let k=0;k<6;k++){y-=24+rr()*10;x+=(rr()-.5)*22;const rx=5+rr()*6,ry=4+rr()*4,rot=rr()*180;s+=`<ellipse cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" transform="rotate(${rot.toFixed(0)} ${x.toFixed(0)} ${y.toFixed(0)})" fill="${col}" stroke="rgba(0,0,0,.35)" stroke-width=".8"/>`}});
+  s+=`<rect y="204" width="300" height="16" fill="#3A3F45"/>`;
+  const lbl=`${g.short} · ${as.length} climbs`;
+  s+=`<rect x="8" y="8" rx="5" width="${lbl.length*6.3+16}" height="22" fill="#111" opacity=".78"/><text x="16" y="23" fill="#fff" font-size="12" font-weight="700" font-family="Public Sans,sans-serif">${esc(lbl)}</text>`;
+  return`<svg class="topo" viewBox="0 0 300 220" role="img" aria-label="Wall at ${esc(g.short)}">${s}</svg>`;
+}
+function sampleShot(m,rock,indoor){
+  const rr=mulberry32(hash(m.seed));const hx=110+rr()*80,hy=150+rr()*40;
+  const bg=indoor?`<rect width="300" height="400" fill="#CFC7B8"/>`+[0,1,2,3,4,5,6,7].map(i=>`<ellipse cx="${(rr()*300).toFixed(0)}" cy="${(80+rr()*260).toFixed(0)}" rx="10" ry="7" fill="${['#3FA34D','#2F6FD1','#E8C21C','#D33A2C'][i%4]}"/>`).join(''):rockBg(m.seed,rock);
+  const fig=`<g stroke="#20262B" stroke-width="9" stroke-linecap="round" fill="none"><path d="M${hx} ${hy+14} L${hx} ${hy+60}"/><path d="M${hx} ${hy+22} L${hx-26} ${hy-8}"/><path d="M${hx} ${hy+24} L${hx+30} ${hy+4}"/><path d="M${hx} ${hy+60} L${hx-22} ${hy+92}"/><path d="M${hx} ${hy+60} L${hx+20} ${hy+84} L${hx+28} ${hy+100}"/></g><circle cx="${hx}" cy="${hy}" r="11" fill="#E0B04F" stroke="#20262B" stroke-width="2"/>`;
+  const rope=indoor?'':`<path d="M${hx+4} ${hy+60} Q${hx+40} ${hy+180} ${hx+10} 400" stroke="#FF6A1A" stroke-width="3" fill="none"/>`;
+  return`<svg viewBox="0 70 300 300" aria-hidden="true">${bg}${rope}${fig}</svg>`;
+}
+function mediaEl(m,d,{controls=false}={}){
+  const r=m.route?routeById(m.route):null;
+  let inner;
+  if(m.url)inner=m.type==='video'?`<video src="${m.url}" muted playsinline ${controls?'controls':''} preload="metadata"></video>`:`<img src="${m.url}" alt="${esc(r?r.name:'Session photo')}">`;
+  else inner=sampleShot(m,CRAGS[d.crag].rock,CRAGS[d.crag].indoor);
+  return`${inner}${m.type==='video'&&!(controls&&m.url)?`<span class="mvid">▶ ${m.dur||'video'}</span>`:''}${r?`<span class="mtag">${esc(r.name)}</span>`:''}`;
+}
+
+/* ---------- icons ---------- */
+const I={
+ feed:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l6-12 4 7 3-5 5 10z"/></svg>',
+ hist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+ plus:'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+ cv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg>',
+ train:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 9h18M5 9v4a2 2 0 002 2h2v-6M19 9v4a2 2 0 01-2 2h-2v-6"/></svg>',
+ close:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+ undo:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7L4 12l5 5M4 12h11a5 5 0 010 10h-2"/></svg>',
+ back:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+ gear:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>',
+ heart:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg>',
+ heartf:'<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg>',
+ chat:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+ share:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg>',
+ edit:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+ cam:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>'
+};
+
+/* ---------- feed ---------- */
+function dayAsc(id){return ASC.filter(a=>a.day===id)}
+function bestRoute(as){const s=as.filter(isSend);const list=(s.length?s:as).map(R);return list.sort((a,b)=>((b.g??0)+OFF[b.disc]*(b.pitches>1?1:0))-((a.g??0)+OFF[a.disc]*(a.pitches>1?1:0)))[0]}
+function dayStats(d,as){return{climbs:as.length,pitches:sum(as.map(a=>R(a).pitches)),metres:sum(as.map(a=>R(a).len)),elev:d.elev}}
+function mediaStrip(d,max=5){
+  if(!d.media.length)return'';
+  return`<div class="mstrip">${d.media.slice(0,max).map(m=>`<button class="media" data-a="openDay" data-id="${d.id}" aria-label="Open ${m.type}">${mediaEl(m,d)}</button>`).join('')}${d.media.length>max?`<button class="media" data-a="openDay" data-id="${d.id}" style="display:grid;place-items:center;font-weight:700">+${d.media.length-max}</button>`:''}</div>`;
+}
+function postHTML(d){
+  const as=dayAsc(d.id),c=CRAGS[d.crag],p=PEOPLE[d.who],st=dayStats(d,as);
+  if(!as.length)return'';
+  const partners=d.partners.length?' · with '+d.partners.map(x=>x==='me'?'you':PEOPLE[x].name.split(' ')[0]).join(', '):'';
+  const hero=c.indoor?wallSVG(d,as):topoSVG(bestRoute(as),{crop:true});
+  const climbsShown=as.slice(0,c.indoor?5:6);
+  return`<article class="post">
+   <div class="row between"><button class="who" data-a="openPerson" data-id="${d.who}">${av(d.who)}<div style="min-width:0"><div><b>${esc(p.name)}</b> <span class="muted">at ${esc(c.short)}</span></div><div class="muted" style="font-size:12px">${fmtDate(d.date)} · ${c.indoor?'Indoor':esc(c.country)}${esc(partners)}</div></div></button>
+    ${d.who==='me'?`<button class="iconbtn" data-a="editDay" data-id="${d.id}" aria-label="Edit session">${I.edit}</button>`:''}</div>
+   ${d.title?`<h3 class="post-title">${esc(d.title)}</h3>`:''}${d.desc?`<p class="post-desc">${esc(d.desc)}</p>`:''}
+   <button class="iconbtn" style="padding:0" data-a="openDay" data-id="${d.id}" aria-label="Open session">${hero}</button>
+   ${mediaStrip(d)}
+   <div class="climbs">${climbsShown.map(a=>`<div class="climb"><span class="nm">${esc(R(a).name)} <span class="muted" style="font-weight:400;font-size:12px">${c.indoor?esc(R(a).wall):R(a).disc}${R(a).pitches>1?' · '+R(a).pitches+' p':''}</span></span><span class="style s-${a.style}">${a.style}</span>${gradeBadge(R(a),'sm')}</div>`).join('')}
+    ${as.length>climbsShown.length?`<button class="act" style="align-self:flex-start" data-a="openDay" data-id="${d.id}">+${as.length-climbsShown.length} more climbs</button>`:''}</div>
+   ${c.indoor?'':`<div class="row wrap" style="gap:5px">${[...new Set(as.flatMap(a=>[...R(a).features,...R(a).holds,...a.tags]))].slice(0,6).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`}
+   <div class="stats">${c.indoor?`
+    <div class="stat"><div class="v">${st.climbs}</div><div class="k">Climbs</div></div>
+    <div class="stat"><div class="v">${as.filter(isSend).length}</div><div class="k">Sends</div></div>
+    <div class="stat"><div class="v">${num(st.metres)}<small style="font-size:12px"> m</small></div><div class="k">Climbed</div></div>
+    <div class="stat"><div class="v">${d.hours}<small style="font-size:12px"> h</small></div><div class="k">Session</div></div>`:`
+    <div class="stat"><div class="v">${st.pitches}</div><div class="k">Pitches</div></div>
+    <div class="stat"><div class="v">${num(st.metres)}<small style="font-size:12px"> m</small></div><div class="k">Climbed</div></div>
+    <div class="stat"><div class="v">${num(st.elev)}<small style="font-size:12px"> m</small></div><div class="k">Elev. gain</div></div>
+    <div class="stat"><div class="v">${d.temp}°</div><div class="k">${esc(d.cond)}</div></div>`}
+   </div>
+   <div class="actions">
+    <button class="act ${d.kudoed?'on':''}" data-a="kudos" data-id="${d.id}" aria-pressed="${d.kudoed}">${d.kudoed?I.heartf:I.heart} ${d.kudos+(d.kudoed?1:0)}</button>
+    <button class="act" data-a="openDay" data-id="${d.id}">${I.chat} ${d.comments.length}</button>
+    <button class="act" data-a="share" data-id="${d.id}" style="margin-left:auto">${I.share} Share</button>
+   </div>
+  </article>`;
+}
+function viewFeed(){
+  const days=Object.values(DAYS).sort((a,b)=>b.date.localeCompare(a.date)||(a.who==='me'?-1:1)).slice(0,12);
+  return`<div class="top"><h1>Feed</h1><span class="pill">Example data</span></div>
+   <div class="card row" style="gap:12px">${av('me')}<div style="flex:1"><b>Last 30 days</b><div class="muted" style="font-size:12px">${weekLine()}</div></div><button class="btn sm" data-a="openLog">Log</button></div>
+   ${days.map(postHTML).join('')}`;
+}
+function weekLine(){const from=addDays(TODAY,-30),as=mine().filter(a=>a.date>=from);const out=new Set(as.filter(a=>!isIn(a)).map(a=>a.date)).size,ind=new Set(as.filter(isIn).map(a=>a.date)).size;return`${out} days outside · ${ind} gym sessions · ${as.filter(isSend).length} sends`}
+
+/* ---------- day detail ---------- */
+function rackUsedHTML(a){
+  const counts=defRack();Object.entries(a.rack||{}).forEach(([k,d])=>counts[k]=(counts[k]||0)+d);
+  const changes=rackDeltaText(a.rack);
+  return`<div class="stack" style="gap:6px"><div class="lbl">Rack: ${changes.length?'default rack, '+esc(changes.join(', ')):'default rack'}</div>
+   <div class="rackstrip">${GEAR.filter(g=>counts[g.id]>0&&['cam','nut','hex'].includes(g.type)).map(g=>`<span title="${esc(g.label)} × ${counts[g.id]}">${gearSVG(g.type,g.color,34)}</span>`).join('')}</div></div>`;
+}
+function sheetDay(){
+  const d=DAYS[S.day];if(!d){S.sheet=null;return''}
+  const as=dayAsc(d.id),c=CRAGS[d.crag],own=d.who==='me',sh=SHOES.find(s=>s.id===d.shoe);
+  const opts=[['','No route']].concat(as.map(a=>[R(a).id,R(a).name])).filter((v,i,arr)=>arr.findIndex(x=>x[0]===v[0])===i);
+  const walls=[...new Set(as.map(a=>R(a).wall).filter(Boolean))].map(n=>{const w=c.walls?.find(x=>x.name===n);return w?`${w.name} ${w.height} m`:n});
+  return sheetWrap(`${esc(c.short)} · ${fmtDate(d.date)}`,`
+   ${as.length?(c.indoor?wallSVG(d,as):topoSVG(bestRoute(as))):''}
+   <div class="row between"><button class="who" data-a="openPerson" data-id="${d.who}">${av(d.who)}<div><b>${esc(PEOPLE[d.who].name)}</b><div class="muted" style="font-size:12px">${esc(c.name)}, ${esc(c.country)}</div></div></button>
+   <div class="row">${own?`<button class="act" data-a="editDay" data-id="${d.id}">${I.edit} Edit</button>`:''}<button class="act ${d.kudoed?'on':''}" data-a="kudos" data-id="${d.id}">${d.kudoed?I.heartf:I.heart} ${d.kudos+(d.kudoed?1:0)}</button></div></div>
+   ${d.title||d.desc?`<div class="stack" style="gap:4px">${d.title?`<h3 class="post-title">${esc(d.title)}</h3>`:''}${d.desc?`<p class="post-desc">${esc(d.desc)}</p>`:''}</div>`:''}
+   <div class="auto"><span>${c.indoor?'Indoor':'Auto-filled'}</span><b>${c.indoor?`${esc(walls.join(' · '))} · ${d.hours} h`:`${d.temp} °C · ${esc(d.cond)} · ${season(d.date)} · ${d.hours} h · ${num(d.elev)} m gain`}</b></div>
+   ${sh?`<div class="row" style="gap:10px">${shoeSVG(sh,72)}<div><div class="lbl">Shoes</div><b>${esc(sh.brand)} ${esc(sh.model)}</b></div></div>`:''}
+   ${d.media.length||own?`<div class="stack" style="gap:8px"><div class="row between"><h3>Photos and videos</h3>${own?`<label class="btn ghost sm" for="media-day">${I.cam} Add</label><input type="file" id="media-day" class="vh" accept="image/*,video/*" multiple>`:''}</div>
+    ${d.media.length?`<div class="mgrid">${d.media.map(m=>`<div class="mitem"><div class="media">${mediaEl(m,d,{controls:true})}</div>${own?`<select class="input" data-dmedia="${m.id}" aria-label="Tag a route">${opts.map(([v,l])=>`<option value="${v}" ${(m.route||'')===v?'selected':''}>${esc(l)}</option>`).join('')}</select>`:''}</div>`).join('')}</div>`:'<p class="note">No photos or videos yet. Add some and tag the route they belong to.</p>'}</div>`:''}
+   ${as.map(a=>{const r=R(a);return`<div class="card stack" style="gap:8px">
+     <div class="row between"><div><h3 style="font-size:15px">${esc(r.name)}</h3><div class="muted" style="font-size:12px">${r.indoor?esc(r.indoor)+' · '+esc(r.wall)+' · '+r.len+' m':`${r.disc} · ${r.pitches>1?r.pitches+' pitches · ':''}${r.len} m · ${esc(r.prot)}`}</div></div>${gradeBadge(r)}</div>
+     <div class="row wrap" style="gap:5px"><span class="style s-${a.style}">${a.style}</span>${a.lead!=='—'&&!r.indoor?`<span class="tag">${a.lead}</span>`:''}<span class="tag">${a.att} ${a.att===1?'try':'tries'}</span><span class="tag">Felt ${a.feel.toLowerCase()}</span>${a.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+     ${r.indoor?`<dl class="kv"><dt>Wall</dt><dd>${esc(r.wall)}</dd><dt>Angle</dt><dd>${esc(r.angle)}</dd><dt>Holds</dt><dd>${esc(r.holds.join(', '))}</dd>${r.gcol?`<dt>Colour range</dt><dd>${r.range?esc(rangeText(isB(r),r.range[0],r.range[1])):'Not mapped'}</dd>`:''}</dl>`:
+     `<dl class="kv"><dt>Rock</dt><dd>${esc(CRAGS[r.crag].rock)}</dd><dt>Angle</dt><dd>${esc(r.angle)}</dd><dt>Features</dt><dd>${esc(r.features.join(', '))}</dd><dt>Holds</dt><dd>${esc(r.holds.join(', '))}</dd><dt>Descent</dt><dd>${esc(r.descent)} · ${esc(r.rope)} rope</dd>${r.fa?`<dt>First ascent</dt><dd>${esc(r.fa)}</dd>`:''}</dl>`}
+     ${a.rack&&a.who==='me'?rackUsedHTML(a):''}
+   </div>`}).join('')}
+   <div class="stack"><h3>Comments</h3>
+    ${d.comments.length?d.comments.map(c=>`<div class="comment">${av(c.who,26)}<div><b>${esc(first(c.who))}</b> ${esc(c.text)}</div></div>`).join(''):'<p class="note">No comments yet.</p>'}
+    <div class="row"><input class="input" id="cmt" placeholder="Add a comment" aria-label="Comment"><button class="btn sm" data-a="comment">Post</button></div>
+   </div>`);
+}
+
+/* ---------- log or edit a session ---------- */
+let L=null;
+function newLog(){
+  L={editDay:null,mode:S.lastMode,route:null,style:null,lead:'Lead',att:1,feel:2,tags:[],cond:'Dry',stars:2,rack:null,rackOpen:false,q:'',pendOut:[],
+     gym:'gym1',wall:'w1',ic:{type:'Lead',gi:null,angle:'Vertical',holds:[],style:null,att:1,tags:[]},pending:[],removed:[],
+     title:'',desc:'',media:[],partners:['ingrid'],shoe:null};
+}
+function selectWall(wid){const w=wallOf(L.gym,wid);L.wall=w.id;L.ic.angle=w.angle;if(w.kind==='Boulder')L.ic.type='Boulder';else if(L.ic.type==='Boulder')L.ic.type='Lead';if(L.ic.type==='Boulder'&&CRAGS[L.gym].grading==='standard')L.ic.gi=null}
+const lockedTries=s=>s==='Onsight'||s==='Flash';
+const sessionCrag=()=>L.editDay?DAYS[L.editDay].crag:L.pendOut.length?ROUTES[L.pendOut[0].route].crag:null;
+function routeListHTML(){
+  const q=L.q.toLowerCase(),only=sessionCrag();
+  const recent=[...new Set(mineOut().slice(-40).reverse().map(a=>a.route))];
+  let list=Object.values(ROUTES).filter(r=>(!only||r.crag===only)&&(!q||(r.name+' '+CRAGS[r.crag].short).toLowerCase().includes(q)));
+  list.sort((a,b)=>(recent.indexOf(a.id)<0?999:recent.indexOf(a.id))-(recent.indexOf(b.id)<0?999:recent.indexOf(b.id)));
+  return list.slice(0,30).map(r=>`<button class="rp ${L.route===r.id?'on':''}" data-a="pickRoute" data-id="${r.id}"><b>${esc(r.name)}</b>${gradeBadge(r,'sm')}<small>${esc(CRAGS[r.crag].short)} · ${r.disc}${r.pitches>1?' · '+r.pitches+' pitches':''}</small></button>`).join('')||'<div class="empty">No routes match. Add it as a new route.</div>';
+}
+const chipGroup=(key,opts,sel,multi=false,disabled=[])=>`<div class="chips" role="group">${opts.map(o=>{const on=multi?sel.includes(o):sel===o,dis=disabled.includes(o);return`<button class="chip ${on?'on':''}" data-a="chip" data-k="${key}" data-v="${esc(o)}" data-m="${multi?1:0}" aria-pressed="${on}" ${dis?'disabled':''}>${esc(o)}</button>`}).join('')}</div>`;
+const stepper=(val,a,extra='',sm='',minOff=false,maxOff=false)=>`<div class="stepper ${sm}"><button data-a="${a}" data-d="-1" ${extra} aria-label="Decrease" ${minOff?'disabled':''}>−</button><span>${val}</span><button data-a="${a}" data-d="1" ${extra} aria-label="Increase" ${maxOff?'disabled':''}>+</button></div>`;
+// Prior tries on a route: logged history plus attempts added earlier in this session
+function priorFor(id){const h=routeHistory(id,L.editDay);const inSession=L.pendOut.filter(p=>p.route===id);
+  return{tries:h.tries+sum(inSession.filter(p=>p.style==='Attempt').map(p=>p.att)),sent:h.sent||inSession.find(p=>p.style!=='Attempt'),days:h.days}}
+function minTries(style,prior){return style==='Redpoint'?Math.max(2,prior+1):1}
+function triesHTML(style,att,prior,a,extra=''){
+  const locked=lockedTries(style),min=minTries(style,prior);
+  const hint=!style?'Pick a style first.':locked?`${style==='Onsight'?'Onsight':'Flash'} means you sent it on your first try, so tries is 1.`:style==='Redpoint'?(prior?`Includes your ${prior} earlier ${prior===1?'try':'tries'} on this climb. A redpoint needs at least 2.`:'A redpoint means you fell or rested on an earlier try, so it needs at least 2.'):style==='Attempt'?'Tries without a send.':'Tries this time.';
+  return`<div class="stack" style="gap:6px"><div class="row between"><span class="lbl">Tries</span>${stepper(att,a,extra,'',locked||att<=min,locked)}</div><p class="note">${hint}</p></div>`;
+}
+function rackLogHTML(){
+  const changes=Object.fromEntries(GEAR.map(g=>[g.id,(L.rack[g.id]||0)-g.def]));
+  const txt=rackDeltaText(changes);
+  return`<div class="card stack" style="gap:10px">
+   <div class="row between"><div><h3>Rack</h3><div class="muted" style="font-size:12px">${txt.length?'Default rack, '+esc(txt.join(', ')):'Default rack'} · ${esc(rackSummary(L.rack))}</div></div><button class="btn ghost sm" data-a="rackOpen">${L.rackOpen?'Done':'Adjust'}</button></div>
+   ${L.rackOpen?`<div>${GEAR.map(g=>{const n=L.rack[g.id]||0,d=n-g.def;return`<div class="gearrow">${gearSVG(g.type,g.color,40)}<div class="nm">${esc(g.label)}<small>You own ${g.own}${d?` · <span class="delta-chip">${d>0?'+':''}${d}</span>`:''}</small></div>${stepper(n,'rackAdj',`data-id="${g.id}"`,'sm',n<=0,n>=Math.max(g.own,g.def))}</div>`}).join('')}</div>`:
+   `<div class="rackstrip">${GEAR.filter(g=>(L.rack[g.id]||0)>0&&['cam','nut','hex'].includes(g.type)).map(g=>gearSVG(g.type,g.color,34)).join('')}</div>`}
+  </div>`;
+}
+function tagOptions(){
+  const dayId=L.editDay||TODAY+'-'+(L.mode==='out'?(sessionCrag()||(L.route?ROUTES[L.route].crag:'')):L.gym);
+  const o=[['','No route']];
+  dayAsc(dayId).filter(a=>!L.removed.includes(a.id)).forEach(a=>o.push([R(a).id,R(a).name]));
+  if(L.mode==='out'){L.pendOut.forEach((p,i)=>o.push(['p'+i,`New: ${ROUTES[p.route].name}`]));if(L.route)o.push(['cur',ROUTES[L.route].name+' (this climb)'])}
+  else L.pending.forEach((p,i)=>o.push(['p'+i,`New #${i+1}: ${pendName(p)}`]));
+  return o.filter((v,i,a)=>a.findIndex(x=>x[0]===v[0])===i);
+}
+function defaultShoe(){
+  if(L.mode==='in')return shoeFor('gym');
+  const rs=[...L.pendOut.map(p=>ROUTES[p.route]),L.route&&ROUTES[L.route],...(L.editDay?dayAsc(L.editDay).map(R):[])].filter(Boolean);
+  return shoeFor(rs.some(tradish)?'trad':rs.some(isB)?'boulder':'sport');
+}
+function sessionHTML(){
+  const opts=tagOptions(),cur=L.shoe||defaultShoe();
+  return`<div class="group"><span class="eyebrow">Session post</span>
+   <div class="field"><label for="lg-title">Title</label><input class="input" id="lg-title" value="${esc(L.title)}" placeholder="${L.mode==='in'?'e.g. Red circuit, finally':'e.g. Last warm evening at Kolsås'}"></div>
+   <div class="field"><label for="lg-desc">Description</label><textarea class="input" id="lg-desc" rows="2" placeholder="Optional. Beta, conditions, who held the rope.">${esc(L.desc)}</textarea></div>
+   <div class="field"><span class="lbl">Photos and videos</span>
+    <div class="mstrip">
+     <label class="addmedia" for="media-in">${I.cam}<span>Add photo or video</span></label><input type="file" id="media-in" class="vh" accept="image/*,video/*" multiple>
+     ${L.media.map((m,i)=>`<div class="mpend"><div class="media">${m.type==='video'?`<video src="${m.url}" muted playsinline preload="metadata"></video><span class="mvid">▶</span>`:`<img src="${m.url}" alt="${esc(m.name)}">`}</div>
+       <select class="input" data-lmedia="${i}" aria-label="Tag a route">${opts.map(([v,l])=>`<option value="${v}" ${m.route===v?'selected':''}>${esc(l)}</option>`).join('')}</select></div>`).join('')}
+    </div><p class="note">Media shows on the session post. Tag a route if a photo or video belongs to one climb.${L.editDay?' Media already on the post can be retagged from the session page.':''}</p></div>
+   <div class="field"><span class="lbl">Shoes</span><div class="chips">${SHOES.filter(s=>!s.retired).map(s=>`<button class="chip ${cur===s.id?'on':''}" data-a="pickShoe" data-id="${s.id}" aria-pressed="${cur===s.id}">${shoeSVG(s,34)}${esc(s.model)}</button>`).join('')}</div>${!L.shoe?'<p class="note">Picked from the type of climbing. Tap to change.</p>':''}</div>
+   <div class="field"><span class="lbl">Partners</span>${chipGroup('partners',['ingrid','mats','ane','jonas'].map(x=>PEOPLE[x].name),L.partners.map(x=>PEOPLE[x].name),true)}</div>
+  </div>`;
+}
+const pendName=p=>{const g=CRAGS[L.gym],w=wallOf(L.gym,p.wall),b=p.type==='Boulder',t=b?'boulder':p.type.toLowerCase();
+  if(g.grading==='colour'&&p.gi!=null&&GYMSCALES[g.scale]?.grades[p.gi])return`${GYMSCALES[g.scale].grades[p.gi].n} ${t} · ${w.name}`;
+  if(g.grading==='standard'&&p.gi!=null)return`${gNameScope(b,p.gi)} ${t} · ${w.name}`;return`${cap(t)} · ${w.name}`};
+function existingHTML(){
+  const as=dayAsc(L.editDay);if(!as.length)return'';
+  return`<div class="stack" style="gap:6px"><div class="lbl">Already in this session · ${as.length-L.removed.length} climbs</div><div class="pending">${as.map(a=>{const gone=L.removed.includes(a.id);return`<div class="pend ${gone?'gone':''}"><span class="mono muted">·</span><span><b>${esc(R(a).name)}</b>${R(a).wall?` <span class="muted">· ${esc(R(a).wall)}</span>`:''}</span>${gradeBadge(R(a),'sm')}<span class="style s-${a.style}">${a.style}</span><button class="iconbtn" data-a="rmExisting" data-id="${a.id}" aria-label="${gone?'Keep':'Remove'} ${esc(R(a).name)}">${gone?I.undo:I.close}</button></div>`}).join('')}</div>
+   ${L.removed.length?`<p class="note">${L.removed.length} marked for removal. They are removed when you save.</p>`:''}</div>`;
+}
+function indoorHTML(){
+  const g=CRAGS[L.gym],ic=L.ic,b=ic.type==='Boulder',w=wallOf(L.gym,L.wall);
+  let grade='';
+  if(g.grading==='colour'&&GYMSCALES[g.scale])grade=`<div class="chips" role="group">${GYMSCALES[g.scale].grades.map((c,i)=>`<button class="chip ${ic.gi===i?'on':''}" data-a="icGrade" data-i="${i}" aria-pressed="${ic.gi===i}"><i class="dot" style="background:${c.hex}"></i>${esc(c.n)}</button>`).join('')}<button class="chip ${ic.gi==null?'on':''}" data-a="icGrade" data-i="">Ungraded</button></div>
+    ${ic.gi!=null&&GYMSCALES[g.scale].grades[ic.gi]?`<p class="note">${esc(GYMSCALES[g.scale].grades[ic.gi].n)} at this gym: ${esc(rangeText(b,b?GYMSCALES[g.scale].grades[ic.gi].bmin:GYMSCALES[g.scale].grades[ic.gi].rmin,b?GYMSCALES[g.scale].grades[ic.gi].bmax:GYMSCALES[g.scale].grades[ic.gi].rmax))}</p>`:''}`;
+  else if(g.grading==='standard'){const gs=b?SYS.boulder[S.bsys]:SYS.route[S.rsys];grade=`<select class="input" id="ic-g"><option value="">Ungraded</option>${gs.g.map((x,i)=>`<option value="${i}" ${ic.gi===i?'selected':''}>${esc(x)}</option>`).join('')}</select>`}
+  else grade='<p class="note">This gym is set as ungraded.</p>';
+  return`${L.editDay?'':`<div class="field"><span class="lbl">Gym</span>${chipGroup('gym',gyms().map(([,c])=>c.short),g.short)}</div>`}
+   ${g.walls.length>1?`<div class="field"><span class="lbl">Wall</span><div class="chips">${g.walls.map(x=>`<button class="chip ${L.wall===x.id?'on':''}" data-a="pickWall" data-id="${x.id}" aria-pressed="${L.wall===x.id}">${esc(x.name)} <span class="muted" style="font-size:11px">${x.height} m · ${x.angle}</span></button>`).join('')}</div></div>`:''}
+   <p class="note">${esc(w.name)} is ${w.height} m and set as ${w.angle.toLowerCase()}, so new climbs here start with that. Indoor climbs stay in this session and are not added to the route list. <button class="act" style="display:inline;padding:2px 8px" data-a="editGym" data-id="${L.gym}">Edit gym, walls and grades</button></p>
+   <div class="card stack" style="gap:14px">
+    <div class="field"><span class="lbl">Type</span>${chipGroup('itype',w.kind==='Boulder'?['Boulder']:['Lead','Top-rope','Auto-belay'],ic.type)}</div>
+    <div class="field"><span class="lbl">Grade${g.grading==='colour'?' (gym colours)':''}</span>${grade}</div>
+    <div class="field"><span class="lbl">Wall angle</span>${chipGroup('iangle',DIMS.angle.all,ic.angle)}</div>
+    <div class="field"><span class="lbl">Main holds</span>${chipGroup('iholds',DIMS.holds.all,ic.holds,true)}</div>
+    <div class="field"><span class="lbl">Style</span>${chipGroup('istyle',['Flash','Redpoint','Repeat','Attempt'],ic.style)}</div>
+    ${triesHTML(ic.style,ic.att,0,'att','data-t="ic"')}
+    <div class="field"><span class="lbl">Describe it</span>${chipGroup('itags',TAGS,ic.tags,true)}</div>
+    <button class="btn" data-a="addIndoor" ${ic.style?'':'disabled'}>Add climb to session</button>
+   </div>
+   ${L.pending.length?`<div class="stack" style="gap:6px"><div class="lbl">New climbs · ${L.pending.length}</div><div class="pending">${L.pending.map((p,i)=>{const col=g.grading==='colour'&&p.gi!=null?GYMSCALES[g.scale]?.grades[p.gi]?.hex:null;return`<div class="pend"><span class="mono muted">${i+1}</span><span>${col?`<i class="dot" style="background:${col};vertical-align:-1px"></i> `:''}<b>${esc(pendName(p))}</b></span><span class="muted" style="font-size:12px">${p.att}×</span><span class="style s-${p.style}">${p.style}</span><button class="iconbtn" data-a="rmIndoor" data-i="${i}" aria-label="Remove climb ${i+1}">${I.close}</button></div>`}).join('')}</div></div>`:'<p class="note">Add each climb as you go: colour, style, add.</p>'}`;
+}
+function outdoorHTML(){
+  const r=L.route&&ROUTES[L.route],c=r&&CRAGS[r.crag],only=sessionCrag();
+  let styles=['Onsight','Flash','Redpoint','Repeat','Attempt'],dis=[],pr={tries:0};
+  if(r){if(isB(r))styles=styles.filter(s=>s!=='Onsight');pr=priorFor(r.id);if(pr.sent)dis=['Onsight','Flash','Redpoint'];else if(pr.tries)dis=['Onsight','Flash'];else dis=['Repeat']}
+  return`<div class="field"><label for="rq">Route or problem${only?` at ${esc(CRAGS[only].short)}`:''}</label><input class="input" id="rq" placeholder="Search routes" value="${esc(L.q)}" autocomplete="off">
+    <div class="routepick" id="rlist">${routeListHTML()}</div>
+    <button class="btn ghost sm" data-a="newRoute" style="align-self:flex-start">+ Add a new route with topo</button></div>
+   ${r?`<div class="stack" style="gap:8px">
+     <div class="lbl">From the route · already known</div>
+     <div class="chips">${[r.disc,c.rock,r.angle,...r.features,...r.holds,r.prot,r.len+' m',r.pitches>1?r.pitches+' pitches':null,r.descent].filter(Boolean).map(t=>`<span class="chip inh">${esc(t)}</span>`).join('')}</div></div>
+    ${pr.sent?`<p class="hint">You sent this on ${fmtDate(pr.sent.date||TODAY)}, so it logs as a repeat.</p>`:pr.tries?`<p class="hint">You have ${pr.tries} earlier ${pr.tries===1?'try':'tries'} on this route, so onsight and flash are not possible.</p>`:''}
+    <div class="field"><span class="lbl">Style</span>${chipGroup('style',styles,L.style,false,dis)}</div>
+    ${triesHTML(L.style,L.att,pr.tries,'att')}
+    ${isB(r)?'':`<div class="field"><span class="lbl">Rope</span>${chipGroup('lead',['Lead','Follow','Swing leads','Top-rope'],L.lead)}</div>`}
+    ${needsRack(r)?rackLogHTML():''}
+    <div class="field"><label for="feel" class="lbl">How it felt for the grade: <b style="color:var(--ink)" id="feel-l">${FEEL[L.feel]}</b></label><input type="range" id="feel" min="0" max="4" step="1" value="${L.feel}"></div>
+    <div class="field"><span class="lbl">Describe it</span>${chipGroup('tags',TAGS,L.tags,true)}</div>
+    <div class="field"><span class="lbl">Conditions</span>
+     <div class="auto"><span>Auto-filled</span><b>${BASET[r.crag][month(L.editDay?DAYS[L.editDay].date:TODAY)]} °C · Overcast · ${season(L.editDay?DAYS[L.editDay].date:TODAY)}</b></div>
+     ${chipGroup('cond',['Perfect','Dry','Humid','Damp','Windy','Cold','Hot'],L.cond)}</div>
+    <div class="field"><span class="lbl">Quality</span>${chipGroup('stars',['★','★★','★★★'],'★'.repeat(L.stars))}</div>
+    <button class="btn ghost" data-a="addOut" ${L.style?'':'disabled'}>Add climb and log another</button>
+   `:'<p class="note">Pick a route. Its rock, angle, features and protection fill in automatically.</p>'}
+   ${L.pendOut.length?`<div class="stack" style="gap:6px"><div class="lbl">New climbs · ${L.pendOut.length}</div><div class="pending">${L.pendOut.map((p,i)=>`<div class="pend"><span class="mono muted">${i+1}</span><span><b>${esc(ROUTES[p.route].name)}</b></span>${gradeBadge(ROUTES[p.route],'sm')}<span class="style s-${p.style}">${p.style}</span><button class="iconbtn" data-a="rmOut" data-i="${i}" aria-label="Remove ${esc(ROUTES[p.route].name)}">${I.close}</button></div>`).join('')}</div></div>`:''}`;
+}
+function canSave(){if(L.editDay)return true;return L.mode==='out'?!!(L.pendOut.length||(L.route&&L.style)):(L.pending.length>0||!!L.ic.style)}
+function sheetLog(){
+  const d=L.editDay&&DAYS[L.editDay];
+  const n=L.mode==='out'?L.pendOut.length+(L.route&&L.style?1:0):L.pending.length+(L.ic.style?1:0);
+  return sheetWrap(d?'Edit session':'Log a session',`
+   ${d?`<div class="auto"><span>Session</span><b>${esc(CRAGS[d.crag].short)} · ${fmtDate(d.date)}</b></div>`:`<div class="field"><span class="lbl">Where did you climb?</span><div class="modepick" role="radiogroup" aria-label="Where did you climb?">
+     <button class="${L.mode==='out'?'on':''}" data-a="logMode" data-v="out" role="radio" aria-checked="${L.mode==='out'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 20l7-13 4 7 3-4 6 10z"/></svg><span>Outdoor<small>Crags and mountains</small></span></button>
+     <button class="${L.mode==='in'?'on':''}" data-a="logMode" data-v="in" role="radio" aria-checked="${L.mode==='in'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 21V9l9-6 9 6v12z"/><circle cx="9" cy="13" r="1.3"/><circle cx="14" cy="11" r="1.3"/><circle cx="12" cy="17" r="1.3"/></svg><span>Indoor gym<small>Walls and boards</small></span></button>
+    </div></div>`}
+   ${d?existingHTML():''}
+   ${d?`<div class="eyebrow">Add a climb you forgot</div>`:''}
+   ${L.mode==='out'?outdoorHTML():indoorHTML()}
+   ${sessionHTML()}
+  `,`<button class="btn ghost" data-a="close">Cancel</button><button class="btn" data-a="saveLog" ${canSave()?'':'disabled'}>${d?'Save changes':n>1?`Save session (${n})`:'Save'}</button>`);
+}
+function rememberMode(m){S.lastMode=m;try{store?.setItem('pb-logmode',m)}catch(e){}}
+function saveLog(){
+  if(!L.editDay)rememberMode(L.mode);
+  const edit=L.editDay&&DAYS[L.editDay];let curIdx=-1,id,ids=[];
+  if(L.mode==='out'){
+    if(L.route&&L.style){A.addOut(null,true);curIdx=L.pendOut.length-1}
+    if(!edit&&!L.pendOut.length)return;
+    const crag=edit?edit.crag:ROUTES[L.pendOut[0].route].crag;id=edit?edit.id:TODAY+'-'+crag;
+    if(!DAYS[id])newDay(id,TODAY,crag,'me',{elev:CRAGS[crag].elev[0],hours:4,temp:BASET[crag][month(TODAY)],cond:L.pendOut[0].cond,kudos:0});
+    const date=DAYS[id].date;
+    ids=L.pendOut.map(p=>{const a={id:++aid,day:id,date,who:'me',route:p.route,style:p.style,att:p.att,lead:p.lead,feel:p.feel,tags:p.tags,cond:p.cond,temp:DAYS[id].temp};if(p.rack)a.rack=p.rack;ASC.push(a);if(p.style!=='Attempt')sentR[p.route]=1;return p.route});
+  }else{
+    if(L.ic.style){A.addIndoor(null,true);curIdx=L.pending.length-1}
+    const gid=edit?edit.crag:L.gym;id=edit?edit.id:TODAY+'-'+gid;
+    if(!DAYS[id])newDay(id,TODAY,gid,'me',{kudos:0});
+    const date=DAYS[id].date;
+    ids=L.pending.map(p=>{const inl=makeIndoor(gid,p.wall,p.type,p.gi,p.angle,p.holds);ASC.push({id:++aid,day:id,date,who:'me',inl,route:inl.id,style:p.style,att:p.att,lead:p.type==='Boulder'?'—':p.type,feel:'Fair',tags:p.tags,cond:'Indoor',temp:null});return inl.id});
+  }
+  const day=DAYS[id];
+  if(L.removed.length){const rm=new Set(L.removed);for(let i=ASC.length-1;i>=0;i--)if(rm.has(ASC[i].id))ASC.splice(i,1);
+    const left=new Set(dayAsc(id).map(a=>R(a).id));day.media.forEach(m=>{if(m.route&&!left.has(m.route))m.route=null})}
+  if(edit){day.title=L.title.trim();day.desc=L.desc.trim();day.partners=[...L.partners]}
+  else{if(L.title.trim())day.title=L.title.trim();if(L.desc.trim())day.desc=L.desc.trim();day.partners=[...new Set([...day.partners,...L.partners])]}
+  day.shoe=L.shoe||defaultShoe();
+  const key=k=>k==='cur'?ids[curIdx]:/^p\d+$/.test(k||'')?ids[+k.slice(1)]:k;
+  L.media.forEach(m=>day.media.push({id:'m'+(++aid),type:m.type,url:m.url,route:key(m.route)||null}));
+  const left=dayAsc(id).length;
+  if(!left){delete DAYS[id];toast('Session deleted: no climbs left');S.sheet=null;S.stack=[];render();return}
+  toast(edit?`Session updated: ${left} climbs`:`Saved: ${ids.length} ${ids.length===1?'climb':'climbs'}`);
+  S.sheet=edit?'day':null;S.day=id;S.stack=[];if(!edit)S.tab='feed';render();if(!edit)$('.screen').scrollTop=0;
+}
+
+/* ---------- new route + topo maker ---------- */
+let NR=null,T=null;
+function newRouteState(){NR={name:'',crag:sessionCrag()||'kol',disc:'Sport',g:6,pitches:1,len:25,angle:'Vertical',features:['Face'],holds:['Crimps'],prot:'Bolted',descent:'Lower-off',rope:'60 m',fa:'',topo:null}}
+const outdoorCrags=()=>Object.entries(CRAGS).filter(([,c])=>!c.indoor);
+function sheetNewRoute(){
+  const gs=NR.disc==='Boulder'?SYS.boulder[S.bsys]:SYS.route[S.rsys];
+  return sheetWrap('New route',`
+   <div class="field"><label for="nr-name">Name</label><input class="input" id="nr-name" value="${esc(NR.name)}" placeholder="e.g. Nordveggen direkte"></div>
+   <div class="field"><span class="lbl">Crag</span>${chipGroup('crag',outdoorCrags().map(([,c])=>c.short),CRAGS[NR.crag].short,false,sessionCrag()?outdoorCrags().filter(([k])=>k!==sessionCrag()).map(([,c])=>c.short):[])}<p class="note">Rock type comes from the crag: ${esc(CRAGS[NR.crag].rock)}.</p></div>
+   <div class="field"><span class="lbl">Discipline</span>${chipGroup('disc',['Sport','Trad','Multipitch','Alpine','Boulder'],NR.disc)}</div>
+   <div class="row" style="gap:10px">
+    <div class="field" style="flex:1"><label for="nr-g">Grade (${gs.label})</label><select class="input" id="nr-g">${gs.g.map((x,i)=>`<option value="${i}" ${i===NR.g?'selected':''}>${esc(x)}</option>`).join('')}</select></div>
+    <div class="field" style="width:76px"><label for="nr-p">Pitches</label><input class="input" id="nr-p" type="number" min="1" value="${NR.pitches}"></div>
+    <div class="field" style="width:84px"><label for="nr-l">Length m</label><input class="input" id="nr-l" type="number" min="1" value="${NR.len}"></div>
+   </div>
+   <div class="field"><span class="lbl">Angle</span>${chipGroup('angle',DIMS.angle.all,NR.angle)}</div>
+   <div class="field"><span class="lbl">Features</span>${chipGroup('features',DIMS.feat.all,NR.features,true)}</div>
+   <div class="field"><span class="lbl">Hold types</span>${chipGroup('holds',DIMS.holds.all,NR.holds,true)}</div>
+   <div class="field"><span class="lbl">Protection</span>${chipGroup('prot',DIMS.prot.all,NR.prot)}</div>
+   <div class="field"><span class="lbl">Descent</span>${chipGroup('descent',['Lower-off','Rappel','Walk-off','Downclimb'],NR.descent)}</div>
+   <div class="field"><span class="lbl">Rope needed</span>${chipGroup('rope',['50 m','60 m','70 m','80 m','2 × 50 m'],NR.rope)}</div>
+   <div class="field"><label for="nr-fa">First ascent</label><input class="input" id="nr-fa" value="${esc(NR.fa)}" placeholder="Names and year"></div>
+   <div class="card stack" style="gap:10px"><div class="row between"><h3>Topo</h3><button class="btn sm" data-a="openTopo">${NR.topo?'Edit topo':'Draw topo'}</button></div>
+    ${NR.topo?topoSVG({...NR,id:'new-'+NR.crag,name:NR.name||'New route'}):'<p class="note">Draw the line on a photo of the wall, then mark bolts, gear, belays and the crux.</p>'}</div>
+  `,`<button class="btn ghost" data-a="back">Back</button><button class="btn" data-a="saveRoute">Save route</button>`,true);
+}
+function saveRoute(){
+  if(!NR.name.trim()){toast('Give the route a name first');return}
+  const id=addRoute(NR.crag,NR.name.trim(),NR.disc,NR.g,NR.pitches,NR.len,NR.angle,NR.features.length?NR.features:['Face'],NR.holds.length?NR.holds:['Jugs'],NR.prot,NR.descent,{rope:NR.rope,fa:NR.fa,topo:NR.topo});
+  L.route=id;L.q='';L.style=null;L.att=1;L.rack=needsRack(ROUTES[id])?defRack():null;popSheet();toast('Route added to '+CRAGS[NR.crag].short);
+}
+function newTopo(){T=NR.topo?{...JSON.parse(JSON.stringify(NR.topo)),tool:'line',undo:[]}:{pts:[],marks:[],pitches:[{g:NR.g,len:NR.len}],tool:'line',undo:[]};if(!T.pitches)T.pitches=[{g:NR.g,len:NR.len}]}
+function sheetTopo(){
+  const tools=[['line','Line'],['bolt','Bolt'],['gear','Gear'],['belay','Belay'],['crux','Crux'],['anchor','Anchor']];
+  const gs=NR.disc==='Boulder'?SYS.boulder[S.bsys]:SYS.route[S.rsys];
+  return sheetWrap('Topo maker',`
+   <p class="note">Prototype: the wall is a generated stand-in for your photo. Drag to draw the line from the bottom up, then tap to place symbols.</p>
+   <div class="toolrow">${tools.map(([k,l])=>`<button class="tool ${T.tool===k?'on':''}" data-a="tool" data-t="${k}">${k==='line'?'<svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 12C5 9 4 5 12 2" stroke="#FF6A1A" stroke-width="2.4" fill="none"/></svg>':`<svg width="16" height="16" viewBox="-9 -9 18 18">${markSVG({t:k,x:0,y:0})}</svg>`}${l}</button>`).join('')}
+    <button class="tool" data-a="undo">Undo</button><button class="tool" data-a="clearTopo">Clear</button></div>
+   <svg class="topo topomaker" id="tm" viewBox="0 0 300 400">${rockBg('new-'+NR.crag,CRAGS[NR.crag].rock)}
+    <path id="tm-c" d="${pathD(T.pts)}" stroke="#fff" stroke-width="6" fill="none" stroke-linejoin="round" stroke-linecap="round" opacity=".9"/>
+    <path id="tm-p" d="${pathD(T.pts)}" stroke="#FF6A1A" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+    <g id="tm-m">${T.marks.map(markSVG).join('')}</g></svg>
+   <div class="stack" style="gap:8px"><div class="row between"><h3>Pitches</h3><button class="btn ghost sm" data-a="addPitch">+ Pitch</button></div>
+    ${T.pitches.map((p,i)=>`<div class="pitchrow"><span class="mono muted">P${i+1}</span><select class="input" data-pitch="${i}" data-f="g" aria-label="Grade of pitch ${i+1}">${gs.g.map((x,j)=>`<option value="${j}" ${j===p.g?'selected':''}>${esc(x)}</option>`).join('')}</select><input class="input" type="number" data-pitch="${i}" data-f="len" value="${p.len}" aria-label="Length of pitch ${i+1} in metres"></div>`).join('')}
+   </div>
+  `,`<button class="btn ghost" data-a="back">Back</button><button class="btn ghost" data-a="share">Share</button><button class="btn" data-a="saveTopo">Use topo</button>`,true);
+}
+function bindTopo(){
+  const svg=$('#tm');if(!svg)return;let drawing=false;
+  const pt=e=>{const b=svg.getBoundingClientRect();return[Math.round((e.clientX-b.left)/b.width*300),Math.round((e.clientY-b.top)/b.height*400)]};
+  svg.addEventListener('pointerdown',e=>{const p=pt(e);
+    if(T.tool==='line'){drawing=true;svg.setPointerCapture(e.pointerId);T.undo.push({k:'pts',n:T.pts.length});T.pts.push(p);upd()}
+    else{T.marks.push({t:T.tool,x:p[0],y:p[1]});T.undo.push({k:'mark'});$('#tm-m').innerHTML=T.marks.map(markSVG).join('')}});
+  svg.addEventListener('pointermove',e=>{if(!drawing)return;const p=pt(e),l=T.pts[T.pts.length-1];if(Math.hypot(p[0]-l[0],p[1]-l[1])>6){T.pts.push(p);upd()}});
+  const end=()=>{drawing=false};svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end);
+  function upd(){const d=pathD(T.pts);$('#tm-p').setAttribute('d',d);$('#tm-c').setAttribute('d',d)}
+}
+
+/* ---------- gyms, walls and custom grades ---------- */
+function gradeSelect(list,val,attrs){return`<select class="input" ${attrs}><option value="">None</option>${list.map((x,j)=>`<option value="${j}" ${val===j?'selected':''}>${esc(x)}</option>`).join('')}</select>`}
+function sheetGym(){
+  const g=CRAGS[S.gym],sc=g.scale&&GYMSCALES[g.scale];
+  const rg=SYS.route[S.rsys].g,bg=SYS.boulder[S.bsys].g;
+  return sheetWrap('Gym',`
+   <div class="field"><label for="gy-name">Name</label><input class="input" id="gy-name" value="${esc(g.name)}"></div>
+   <div class="stack" style="gap:8px"><div class="row between"><h3>Walls</h3><button class="btn ghost sm" data-a="addWall">+ Wall</button></div>
+    ${g.walls.map((w,i)=>`<div class="colcard">
+      <div class="row"><input class="input" value="${esc(w.name)}" data-wall="${i}" data-f="name" aria-label="Wall name">${g.walls.length>1?`<button class="iconbtn" data-a="rmWall" data-i="${i}" aria-label="Remove wall ${esc(w.name)}">${I.close}</button>`:''}</div>
+      <div class="row" style="gap:6px"><input class="input" type="number" min="1" step="0.5" value="${w.height}" data-wall="${i}" data-f="height" aria-label="Height in metres" style="width:72px"><span class="muted">m</span>
+       <select class="input" data-wall="${i}" data-f="angle" aria-label="Wall angle">${DIMS.angle.all.map(a=>`<option ${w.angle===a?'selected':''}>${a}</option>`).join('')}</select>
+       <select class="input" data-wall="${i}" data-f="kind" aria-label="Wall type"><option value="Rope" ${w.kind==='Rope'?'selected':''}>Rope wall</option><option value="Boulder" ${w.kind==='Boulder'?'selected':''}>Boulder</option></select></div></div>`).join('')}
+    <p class="note">Each climb you log on a wall gets its height and starts with its angle. You can still change the angle per climb.</p></div>
+   <div class="field"><span class="lbl">Grading</span>${chipGroup('grading',['Colour scale','Standard grades','Ungraded'],{colour:'Colour scale',standard:'Standard grades',none:'Ungraded'}[g.grading])}</div>
+   ${g.grading==='colour'&&sc?`<div class="stack" style="gap:8px"><div class="row between"><h3>Colours, easiest first</h3><button class="btn ghost sm" data-a="addColour">+ Colour</button></div>
+    ${sc.grades.map((c,i)=>`<div class="colcard">
+      <div class="row"><input type="color" value="${c.hex}" data-col="${i}" data-f="hex" aria-label="Colour ${i+1}"><input class="input" value="${esc(c.n)}" data-col="${i}" data-f="n" aria-label="Name of colour ${i+1}"><button class="iconbtn" data-a="rmColour" data-i="${i}" aria-label="Remove ${esc(c.n)}">${I.close}</button></div>
+      <div class="range"><span class="lbl">Boulder</span>${gradeSelect(bg,c.bmin,`data-col="${i}" data-f="bmin" aria-label="${esc(c.n)} boulder grade from"`)}<span class="muted">to</span>${gradeSelect(bg,c.bmax,`data-col="${i}" data-f="bmax" aria-label="${esc(c.n)} boulder grade to"`)}</div>
+      <div class="range"><span class="lbl">Route</span>${gradeSelect(rg,c.rmin,`data-col="${i}" data-f="rmin" aria-label="${esc(c.n)} route grade from"`)}<span class="muted">to</span>${gradeSelect(rg,c.rmax,`data-col="${i}" data-f="rmax" aria-label="${esc(c.n)} route grade to"`)}</div>
+     </div>`).join('')}
+    <p class="note">Ranges are optional. With a range, gym climbs join grade charts at the middle of the range. Without one, they still count in volume, angle and hold stats.</p></div>`:''}
+  `,`<button class="btn" data-a="back">Done</button>`,true);
+}
+
+/* ---------- history ---------- */
+function viewHistory(){
+  const tabs=[['overview','Overview'],['pyramid','Pyramid'],['progress','Progress'],['explore','Explorer'],['log','Logbook']];
+  const body={overview:histOverview,pyramid:histPyramid,progress:histProgress,explore:histExplore,log:histLog}[S.hist]();
+  return`<div class="top"><h1>History</h1><span class="pill">Example data</span></div>
+   <div class="seg" role="tablist">${tabs.map(([k,l])=>`<button class="${S.hist===k?'on':''}" data-a="hist" data-v="${k}" role="tab" aria-selected="${S.hist===k}">${l}</button>`).join('')}</div>${body}`;
+}
+function histOverview(){
+  const m=mine(),mo=mineOut(),dayObjs=Object.values(DAYS).filter(d=>d.who==='me');
+  const countries=new Set(mo.map(a=>C(a).country));
+  return`<div class="section"><div class="totals">
+    ${[[new Set(mo.map(a=>a.date)).size,'Days outside'],[new Set(m.filter(isIn).map(a=>a.date)).size,'Gym sessions'],[sum(mo.map(a=>R(a).pitches)),'Outdoor pitches'],[num(sum(m.map(a=>R(a).len)))+' m','Climbed'],[num(sum(dayObjs.map(d=>d.elev)))+' m','Elevation gain'],[countries.size,'Countries']].map(([v,k])=>`<div class="stat"><div class="v">${v}</div><div class="k">${k}</div></div>`).join('')}
+   </div><p class="note">Since ${fmtDate(START)}.</p></div>
+   <div class="section"><div class="row between"><h2>Days climbing</h2><span class="eyebrow">Last 12 months</span></div>${heatmap()}
+    <div class="legend"><span><i style="background:var(--accent)"></i>Outside, darker means more pitches</span><span><i style="background:var(--lichen)"></i>Gym</span></div></div>
+   <div class="section"><h2>Insights</h2>${insights().map(([m,t])=>`<div class="card insight"><span class="mark">${m}</span><p>${t}</p></div>`).join('')}</div>
+   <div class="section"><h2>Where you climb</h2>${placesBars()}</div>`;
+}
+function heatmap(){
+  const per={},gym={};mine().forEach(a=>{if(isIn(a))gym[a.date]=1;else per[a.date]=(per[a.date]||0)+R(a).pitches});
+  let start=addDays(TODAY,-364);const dow=new Date(start+'T12:00:00Z').getUTCDay();start=addDays(start,-((dow+6)%7));
+  const cs=6,gap=1.4,cols=53;let s='',lastM=-1;
+  for(let w=0;w<cols;w++)for(let k=0;k<7;k++){const d=addDays(start,w*7+k);if(d>TODAY)continue;const v=per[d]||0;
+    const fill=v?'var(--accent)':gym[d]?'var(--lichen)':'var(--sunk)';const op=v?clamp(.3+v/14,.3,1):gym[d]?.75:1;
+    s+=`<rect x="${w*(cs+gap)}" y="${12+k*(cs+gap)}" width="${cs}" height="${cs}" rx="1.2" fill="${fill}" fill-opacity="${op.toFixed(2)}"><title>${fmtDate(d)}: ${v?v+' pitches':gym[d]?'gym':'rest'}</title></rect>`;
+    if(k===0&&month(d)!==lastM&&+d.slice(8)<=7){lastM=month(d);s+=`<text x="${w*(cs+gap)}" y="8">${MON[lastM]}</text>`}}
+  const W=cols*(cs+gap);
+  return`<div style="overflow-x:auto"><svg class="chart" viewBox="0 0 ${W} ${12+7*(cs+gap)}" style="min-width:330px">${s}</svg></div>`;
+}
+function placesBars(){
+  const by={};mine().forEach(a=>{const c=C(a);const k=c.short;by[k]=by[k]||{c,days:new Set(),p:0};by[k].days.add(a.date);by[k].p+=R(a).pitches});
+  const rows=Object.entries(by).sort((a,b)=>b[1].days.size-a[1].days.size),mx=Math.max(...rows.map(r=>r[1].days.size));
+  return`<div class="stack" style="gap:7px">${rows.map(([k,v])=>`<div class="bar-row" style="grid-template-columns:96px 1fr 70px"><span class="lab"><b>${esc(k)}</b><br><small class="muted">${v.c.indoor?'Indoor':esc(v.c.country)+' · '+esc(v.c.rock)}</small></span><div class="bar-track"><i style="width:${v.days.size/mx*100}%;background:${v.c.indoor?'var(--lichen)':'var(--ink)'}"></i></div><span class="num">${v.days.size} days</span></div>`).join('')}</div>`;
+}
+function insights(){
+  const m=mineOut(),out=[];
+  const os={};m.filter(a=>a.style==='Onsight'&&!isB(R(a))).forEach(a=>{const k=C(a).rock;os[k]=Math.max(os[k]??-1,R(a).g)});
+  const oe=Object.entries(os).sort((a,b)=>b[1]-a[1]);
+  if(oe.length>1){const[h,l]=[oe[0],oe[oe.length-1]];if(h[1]>l[1])out.push(['OS',`Your best onsight on <b>${h[0].toLowerCase()}</b> is ${gNameScope(0,h[1])}, but only ${gNameScope(0,l[1])} on <b>${l[0].toLowerCase()}</b>.`])}
+  const t={};m.filter(a=>a.style==='Redpoint').forEach(a=>{const k=R(a).angle;(t[k]=t[k]||[]).push(a.att)});
+  const te=Object.entries(t).filter(e=>e[1].length>1).map(([k,v])=>[k,sum(v)/v.length]).sort((a,b)=>b[1]-a[1]);
+  if(te.length>1)out.push(['RP',`Redpoints on <b>${te[0][0].toLowerCase()}</b> terrain take you ${te[0][1].toFixed(1)} tries on average, against ${te[te.length-1][1].toFixed(1)} on ${te[te.length-1][0].toLowerCase()}.`]);
+  const tb={};m.forEach(a=>{const k=TEMPB(a.temp);tb[k]=tb[k]||[0,0];tb[k][1]++;if(isSend(a))tb[k][0]++});
+  const tbe=Object.entries(tb).filter(e=>e[1][1]>8).map(([k,v])=>[k,Math.round(100*v[0]/v[1])]).sort((a,b)=>b[1]-a[1]);
+  if(tbe.length>1)out.push(['°C',`You send <b>${tbe[0][1]} %</b> of your tries at ${tbe[0][0]}, and ${tbe[tbe.length-1][1]} % at ${tbe[tbe.length-1][0]}.`]);
+  const gc={};mine().filter(a=>isIn(a)&&R(a).gcol).forEach(a=>{const k=R(a).gcol.n;gc[k]=gc[k]||[0,0,R(a).g??0];gc[k][1]++;if(a.style==='Flash')gc[k][0]++});
+  const ge=Object.entries(gc).filter(e=>e[1][1]>=5).sort((a,b)=>b[1][2]-a[1][2]);
+  if(ge.length>1)out.push(['IN',`At the gym you flash <b>${Math.round(100*ge[1][1][0]/ge[1][1][1])} %</b> of ${ge[1][0].toLowerCase()}s and ${Math.round(100*ge[0][1][0]/ge[0][1][1])} % of ${ge[0][0].toLowerCase()}s.`]);
+  const lt=m.filter(a=>tradish(R(a))&&a.lead==='Lead').sort((a,b)=>b.date.localeCompare(a.date))[0];
+  if(lt){const n=Math.round((new Date(TODAY)-new Date(lt.date))/864e5);out.push(['TR',`<b>${n} ${n===1?'day':'days'}</b> since your last trad lead (${esc(R(lt).name)}). ${m.filter(a=>R(a).disc==='Trad'&&a.lead==='Lead').length} trad leads logged in total.`])}
+  const due=GEAR.filter(g=>{const s=gearStatus(g);return s&&s.remind&&s.lvl!=='ok'});
+  if(due.length)out.push(['!',`${due.length} ${due.length===1?'piece':'pieces'} of gear need attention: ${esc(due.map(g=>g.label).join(', '))}. See My rack on your CV.`]);
+  const feats=new Set(m.flatMap(a=>R(a).features));const missing=DIMS.feat.all.filter(f=>!feats.has(f));
+  if(missing.length)out.push(['?',`No logged climbs with <b>${missing.map(x=>x.toLowerCase()).join('</b> or <b>')}</b>. That is the biggest gap in your CV.`]);
+  return out;
+}
+const PYRDISC=['All routes','Sport','Trad','Multipitch','Alpine','Boulder'];
+function histPyramid(){
+  const boulder=S.pyr==='Boulder';
+  const s=mineOut().filter(isNewSend).filter(a=>boulder?isB(R(a)):(!isB(R(a))&&(S.pyr==='All routes'||R(a).disc===S.pyr)));
+  if(!s.length)return`<div class="section">${chipGroup('pyr',PYRDISC,S.pyr)}<div class="empty">No sends in ${esc(S.pyr)} yet.</div></div>`;
+  const top=Math.max(...s.map(a=>R(a).g)),rows=[];
+  for(let g=top;g>=Math.max(0,top-7);g--){const at=s.filter(a=>R(a).g===g);rows.push([g,['Onsight','Flash','Redpoint'].map(st=>at.filter(a=>a.style===st).length)])}
+  const mx=Math.max(...rows.map(r=>sum(r[1])),1);
+  return`<div class="section">${chipGroup('pyr',PYRDISC,S.pyr)}</div>
+   <div class="section"><div class="row between"><h2>Grade pyramid</h2><span class="eyebrow">${boulder?SYS.boulder[S.bsys].label:SYS.route[S.rsys].label}</span></div>
+   <div class="stack" style="gap:6px">${rows.map(([g,c])=>`<div class="bar-row"><span class="lab"><span class="grade sm">${esc(gNameScope(boulder,g))}</span></span><div class="bar-track" style="background:transparent;justify-content:center">${c.map((n,i)=>n?`<i style="width:${n/mx*100}%;background:var(--${['os','fl','rp'][i]})" title="${n}"></i>`:'').join('')}</div><span class="num">${sum(c)}</span></div>`).join('')}</div>
+   <div class="legend"><span><i style="background:var(--os)"></i>Onsight</span><span><i style="background:var(--fl)"></i>Flash</span><span><i style="background:var(--rp)"></i>Redpoint</span></div>
+   <p class="note">Outdoor first sends only. Repeats and gym climbs are left out.</p></div>`;
+}
+function histProgress(){
+  const boulder=S.prog==='boulders';
+  const s=mineOut().filter(isNewSend).filter(a=>isB(R(a))===boulder);
+  const qs=[];for(let y=2024;y<=2026;y++)for(let q=0;q<4;q++){const k=y+' Q'+(q+1);if(k<'2024 Q4')continue;qs.push(k)}
+  const qk=d=>d.slice(0,4)+' Q'+(Math.floor(month(d)/3)+1);
+  const maxQ=qs.map(k=>{const v=s.filter(a=>qk(a.date)===k).map(a=>R(a).g).sort((a,b)=>b-a);return{k,max:v.length?v[0]:null,avg:v.length?sum(v.slice(0,5))/Math.min(5,v.length):null}});
+  const vals=maxQ.flatMap(q=>[q.max,q.avg]).filter(v=>v!=null);
+  const lo=Math.floor(Math.min(...vals))-1,hi=Math.ceil(Math.max(...vals))+1;
+  const W=340,H=190,pl=46,pr=8,pt=10,pb=24;
+  const x=i=>pl+i*(W-pl-pr)/(qs.length-1),y=v=>pt+(hi-v)*(H-pt-pb)/(hi-lo);
+  let g='';for(let v=lo;v<=hi;v++){g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width=".6"/><text x="${pl-6}" y="${y(v)+3}" text-anchor="end">${esc(gNameScope(boulder,v))}</text>`}
+  qs.forEach((k,i)=>{if(i%2===0||i===qs.length-1)g+=`<text x="${x(i)}" y="${H-8}" text-anchor="middle">${k.slice(2).replace(' ','·')}</text>`});
+  const line=(key,col,dash)=>{const p=maxQ.map((q,i)=>q[key]==null?null:[x(i),y(q[key])]).filter(Boolean);
+    return`<path d="${p.map((c,i)=>(i?'L':'M')+c[0].toFixed(1)+' '+c[1].toFixed(1)).join('')}" fill="none" stroke="${col}" stroke-width="2.2" ${dash?'stroke-dasharray="4 3"':''}/>`+p.map((c,i)=>`<circle cx="${c[0]}" cy="${c[1]}" r="${i===p.length-1?4:2.6}" fill="${col}"/>`).join('')};
+  const last=maxQ.filter(q=>q.max!=null),fq=last[0],end=last[last.length-1];
+  return`<div class="section"><div class="seg">${[['routes','Routes'],['boulders','Boulders']].map(([k,l])=>`<button class="${S.prog===k?'on':''}" data-a="prog" data-v="${k}">${l}</button>`).join('')}</div></div>
+   <div class="section"><h2>Hardest send per quarter</h2>
+   <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Grade progression">${g}${line('avg','var(--muted)',true)}${line('max','var(--accent)')}</svg>
+   <div class="legend"><span><i style="background:var(--accent)"></i>Hardest send</span><span><i style="background:var(--muted)"></i>Average of top 5</span></div>
+   ${fq&&end?`<div class="card insight"><span class="mark">+${Math.round(end.max-fq.max)}</span><p>From ${esc(gNameScope(boulder,fq.max))} in ${fq.k} to ${esc(gNameScope(boulder,end.max))} in ${end.k}. Outdoor climbs only.</p></div>`:''}</div>`;
+}
+function histExplore(){
+  const e=S.ex,M=METRICS[e.metric];
+  let as=mine().filter(a=>e.scope==='boulders'?isB(R(a)):!isB(R(a)));
+  if(e.setting!=='all')as=as.filter(a=>isIn(a)===(e.setting==='indoor'));
+  if(e.period==='12m')as=as.filter(a=>a.date>=addDays(TODAY,-365));
+  const groups={};as.forEach(a=>DIMS[e.group].get(a).forEach(v=>{(groups[v]=groups[v]||[]).push(a)}));
+  let all=DIMS[e.group].all||Object.keys(groups);
+  if(e.group==='rock'&&groups.Plastic)all=[...all,'Plastic'];
+  if(e.group==='temp'&&groups.Indoor)all=[...all,'Indoor'];
+  let rows=all.map(k=>[k,groups[k]?M.f(groups[k]):null]);
+  rows.sort((a,b)=>(b[1]??-1)-(a[1]??-1));
+  const mx=M.max||Math.max(...rows.map(r=>r[1]??0),1);
+  const opt=(id,obj,val,lbl)=>`<div class="field" style="flex:1;min-width:140px"><label for="${id}">${lbl}</label><select class="input" id="${id}" data-ex="${id.slice(3)}">${Object.entries(obj).map(([k,v])=>`<option value="${k}" ${k===val?'selected':''}>${esc(v.label||v)}</option>`).join('')}</select></div>`;
+  return`<div class="section"><div class="row wrap" style="gap:10px;align-items:flex-end">
+    ${opt('ex-metric',METRICS,e.metric,'Show')}
+    ${opt('ex-group',Object.fromEntries(Object.entries(DIMS).filter(([k])=>k!=='style'||e.metric!=='rate')),e.group,'Grouped by')}
+    ${opt('ex-scope',{routes:'Routes',boulders:'Boulders'},e.scope,'Climbing')}
+    ${opt('ex-setting',{outdoor:'Outdoor',indoor:'Indoor',all:'Indoor and outdoor'},e.setting,'Where')}
+    ${opt('ex-period',{all:'All time','12m':'Last 12 months'},e.period,'Period')}
+   </div></div>
+   <div class="section"><h2>${esc(M.label)} by ${esc(DIMS[e.group].label.toLowerCase())}</h2>
+   <div class="stack" style="gap:7px">${rows.map(([k,v])=>`<div class="bar-row" style="grid-template-columns:96px 1fr 56px"><span class="lab">${esc(k)}</span><div class="bar-track">${v!=null?`<i style="width:${M.grade?(v+1)/(mx+1)*100:v/mx*100}%;background:var(--accent)"></i>`:''}</div><span class="num">${v==null?'<span class="muted">none</span>':M.grade?esc(gNameScope(e.scope==='boulders',v)):v+(M.unit||'')}</span></div>`).join('')}</div>
+   <p class="note">Every attribute you log becomes a dimension here. Rows marked none have no climbs yet.${M.grade?' Gym climbs count when their colour has a grade range.':''}</p></div>`;
+}
+function histLog(){
+  const m=mine().slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,60);
+  return`<div class="section"><p class="note">Newest 60 of ${mine().length} logged ascents.</p>
+   <div style="overflow-x:auto"><table class="matrix" style="border-spacing:0;min-width:600px;font-size:12px">
+   <thead><tr>${['Date','Route','Grade','Style','Tries','Where','Rock','Angle','Holds','°C'].map(h=>`<th style="text-align:left;padding:6px 6px;border-bottom:1px solid var(--line)">${h}</th>`).join('')}</tr></thead>
+   <tbody>${m.map(a=>`<tr>${[esc(a.date.slice(2)),esc(R(a).name),gradeBadge(R(a),'sm'),`<span class="style s-${a.style}">${a.style}</span>`,a.att,esc(C(a).short+(R(a).wall?' · '+R(a).wall:'')),esc(C(a).rock),esc(R(a).angle),esc(R(a).holds.join(', ')),a.temp??'—'].map((v,i)=>`<td style="text-align:left;padding:5px 6px;border-bottom:1px solid var(--line);font-family:${i===0||i===4||i===9?'var(--f-mono)':'var(--f-body)'};white-space:nowrap">${v}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+}
+
+/* ---------- CV ---------- */
+const defRack=()=>Object.fromEntries(GEAR.map(g=>[g.id,g.def]));
+function rackSummary(counts){
+  const by={};GEAR.forEach(g=>{const n=counts[g.id]||0;if(n)by[g.type]=(by[g.type]||0)+n});
+  return[['cam','cam','cams'],['nut','nut set','nut sets'],['hex','hex set','hex sets'],['alpine','alpine draw','alpine draws'],['sling','sling','slings'],['draw','quickdraw','quickdraws']].filter(([k])=>by[k]).map(([k,s,p])=>by[k]+' '+(by[k]===1?s:p)).join(' · ');
+}
+function rackDeltaText(delta){return Object.entries(delta||{}).filter(([,d])=>d).map(([id,d])=>{const g=GEAR.find(x=>x.id===id);return`${d>0?'+':'−'}${Math.abs(d)} ${g?g.label:id}`})}
+function friendRackGrid(items){return`<div class="rack">${items.map(([t,l,c,n])=>`<div class="gear">${gearSVG(t,c,84)}<span>${esc(l)}</span><span class="cnt">×${n}</span></div>`).join('')}</div>`}
+function viewCV(){
+  const m=mine(),mo=mineOut(),xp=skillXP(),sends=mo.filter(isNewSend);
+  const best=(f,st)=>{const s=sends.filter(a=>f(R(a))&&(!st||st.includes(a.style)));return s.length?s.reduce((x,y)=>R(y).g>R(x).g?y:x):null};
+  const gymBest=m.filter(a=>isIn(a)&&a.style==='Flash'&&R(a).gcol&&R(a).g!=null).reduce((x,y)=>!x||R(y).g>R(x).g?y:x,null);
+  const hl=[['Sport',best(r=>r.disc==='Sport'),'redpoint'],['Sport',best(r=>r.disc==='Sport',['Onsight']),'onsight'],['Trad',best(r=>['Trad','Multipitch'].includes(r.disc)),'lead'],['Boulder',best(isB),'send'],['Gym',gymBest,'flash']];
+  const countries=[...new Set(mo.map(a=>C(a).country))];
+  const skillsFor=k=>DIMS[k].all.map(v=>{const x=xp[k+':'+v]||0,l=level(x),n=m.filter(a=>DIMS[k].get(a).includes(v)).length;return{v,l,n}});
+  const radarAx=[['Slab','angle:Slab'],['Vertical','angle:Vertical'],['Overhang','angle:Overhang'],['Roof','angle:Roof'],['Cracks',null],['Multipitch','disc:Multipitch']];
+  const crackXP=(xp['feat:Finger crack']||0)+(xp['feat:Hand crack']||0)+(xp['feat:Offwidth']||0);
+  const rv=radarAx.map(([n,k])=>Math.min(1,level(k?xp[k]:crackXP).lv/15));
+  return`<div class="top"><h1>Climbing CV</h1><button class="iconbtn" data-a="settings" aria-label="Settings">${I.gear}</button></div>
+   <div class="cvhead"><div class="stack" style="gap:4px;align-items:center"><label class="pfp" for="pfp-in" title="Change profile picture">${av('me',72)}<span class="pfp-badge">${I.cam}</span></label><input type="file" id="pfp-in" class="vh" accept="image/*">${PEOPLE.me.photo?'<button class="act" style="padding:2px 8px;font-size:11px" data-a="rmPfp">Remove</button>':''}</div>
+    <div><h2 style="font-size:24px">Christian</h2><div class="muted">All-round climber · ${countries.length} countries · ${new Set(mo.map(a=>a.date)).size} days outside since ${MON[month(START)]} ${START.slice(0,4)}</div>${PEOPLE.me.photo?'':'<p class="note" style="margin-top:4px">Tap the picture to add your own.</p>'}</div></div>
+   <div class="section"><div class="headline">${hl.filter(h=>h[1]).map(([k,a,w])=>`<div class="hl">${gradeBadge(R(a))}<span class="k">${k} ${w}</span></div>`).join('')}</div></div>
+   <div class="section"><div class="row between"><h2>Style profile</h2><span class="eyebrow">Level by terrain</span></div>${radar(radarAx.map(r=>r[0]),rv)}</div>
+   ${['disc','rock','angle','feat','holds','prot','season'].map(k=>`<div class="section"><div class="row between"><h2>${DIMS[k].label}</h2><span class="eyebrow">${skillsFor(k).filter(s=>s.n).length} of ${DIMS[k].all.length} tried</span></div><div class="skills">${skillsFor(k).map(s=>`<div class="skill ${s.n?'':'zero'}"><div class="top2"><span class="nm">${esc(s.v)}</span><span class="lv">${s.n?`<small>Lv</small>${s.l.lv}`:'<small>Not yet</small>'}</span></div><div class="meter"><i style="width:${s.n?Math.round(s.l.frac*100):0}%"></i></div><span class="sub">${s.n?`${lvName(s.l.lv)} · ${s.n} ascents`:'Gap: log one to start'}</span></div>`).join('')}</div></div>`).join('')}
+   <div class="section"><div class="row between"><h2>Experience matrix</h2><span class="eyebrow">Outdoor ascents</span></div>${matrix()}</div>
+   <div class="section"><h2>Experience</h2><div class="card" style="padding-block:4px">${experience()}</div></div>
+   <div class="section"><div class="row between"><h2>My rack</h2><button class="btn ghost sm" data-a="editRack">Edit counts</button></div>
+    <div class="seg">${['Public','Friends','Private'].map(v=>`<button class="${S.rackVis===v?'on':''}" data-a="rackVis" data-v="${v}">${v}</button>`).join('')}</div>
+    <p class="note">${{Public:'Anyone can see your rack on your profile.',Friends:'Only friends can see your rack.',Private:'Only you can see your rack.'}[S.rackVis]} Tap a piece for its details and reminders. Dashed pieces are owned but not in your default rack.</p>
+    <div class="rack">${GEAR.map(g=>`<button class="gear ${g.def?'':'off'}" data-a="openGear" data-id="${g.id}">${gearSVG(g.type,g.color,84)}<span>${esc(g.label)}</span><span class="cnt">×${g.own}</span>${statusChip(g)}</button>`).join('')}</div></div>
+   <div class="section"><div class="row between"><h2>Shoes</h2><button class="btn ghost sm" data-a="addShoe">+ Shoes</button></div>
+    <div class="shoes">${SHOES.map(s=>{const st=shoeStatus(s);return`<button class="shoe ${s.retired?'off':''}" data-a="openShoe" data-id="${s.id}">${shoeSVG(s)}<b>${esc(s.brand)} ${esc(s.model)}</b><small>Size ${esc(s.size)} · ${st.u?st.u.days+' days':''}${s.retired?'Retired':''}</small>${!s.retired?`<span class="due ${st.lvl}" style="align-self:flex-start">${st.label}</span>`:''}</button>`}).join('')}</div></div>
+   <div class="section"><h2>Endorsed by partners</h2><div class="card stack" style="gap:10px">
+    ${[['Placing trad gear',['ingrid','jonas','mats']],['Multipitch rope work',['jonas','ingrid']],['Route reading',['ane','mats']],['Calm under runouts',['jonas']]].map(([s,p])=>`<div class="row between"><b>${s}</b><div class="row" style="gap:0">${p.map(x=>av(x,24,'margin-left:-6px;border:2px solid var(--surface);')).join('')}<span class="muted" style="margin-left:6px;font-size:12px">${p.length}</span></div></div>`).join('')}
+   </div></div>
+   <div class="section"><h2>Milestones</h2>${badges()}</div>`;
+}
+function radar(labels,vals){
+  const cx=170,cy=118,R0=88,n=labels.length,ang=i=>-Math.PI/2+i*2*Math.PI/n,pt=(i,r)=>[cx+Math.cos(ang(i))*r,cy+Math.sin(ang(i))*r];
+  let s='';[.25,.5,.75,1].forEach(f=>{s+=`<polygon points="${labels.map((_,i)=>pt(i,R0*f).join(',')).join(' ')}" fill="none" stroke="var(--line)" stroke-width="1"/>`});
+  labels.forEach((l,i)=>{const[x,y]=pt(i,R0);const[lx,ly]=pt(i,R0+16);s+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--line)"/><text x="${lx}" y="${ly+3}" text-anchor="${Math.abs(lx-cx)<5?'middle':lx>cx?'start':'end'}" style="font-size:10px;fill:var(--ink);font-family:var(--f-body);font-weight:600">${l}</text>`});
+  s+=`<polygon points="${vals.map((v,i)=>pt(i,R0*Math.max(.04,v)).join(',')).join(' ')}" fill="var(--accent)" fill-opacity=".22" stroke="var(--accent)" stroke-width="2"/>`;
+  vals.forEach((v,i)=>{const[x,y]=pt(i,R0*Math.max(.04,v));s+=`<circle cx="${x}" cy="${y}" r="3" fill="var(--accent)"/>`});
+  return`<svg class="chart" viewBox="0 0 340 236" role="img" aria-label="Style profile radar">${s}</svg>`;
+}
+function matrix(){
+  const m=mineOut(),discs=['Sport','Trad','Multipitch','Alpine','Boulder'],rocks=DIMS.rock.all;
+  const cnt=(r,d)=>m.filter(a=>C(a).rock===r&&R(a).disc===d).length;const mx=Math.max(...rocks.flatMap(r=>discs.map(d=>cnt(r,d))));
+  return`<div style="overflow-x:auto"><table class="matrix"><thead><tr><th></th>${discs.map(d=>`<th>${d==='Multipitch'?'Multi':d}</th>`).join('')}</tr></thead><tbody>
+   ${rocks.map(r=>`<tr><td class="rk">${r}</td>${discs.map(d=>{const c=cnt(r,d);return c?`<td style="background:color-mix(in srgb,var(--lichen) ${Math.round(15+70*c/mx)}%,transparent);color:${c/mx>.5?'#fff':'var(--ink)'}">${c}</td>`:'<td class="none">–</td>'}).join('')}</tr>`).join('')}
+  </tbody></table></div><p class="note">Hatched cells are combinations you have never logged.</p>`;
+}
+function experience(){
+  const by={};mine().forEach(a=>{const k=R(a).crag;by[k]=by[k]||{dates:[],p:0,discs:new Set()};by[k].dates.push(a.date);by[k].p+=R(a).pitches;by[k].discs.add(isIn(a)?R(a).indoor:R(a).disc)});
+  return Object.entries(by).sort((a,b)=>b[1].dates.length-a[1].dates.length).map(([k,v])=>{const c=CRAGS[k],ds=v.dates.sort();const n=new Set(ds).size;
+    return`<div class="xp"><span class="ico">${c.short.slice(0,2).toUpperCase()}</span><b>${esc(c.name)}</b><span class="mono muted" style="font-size:11px">${n} d</span><small>${[...v.discs].join(', ')} · ${esc(c.indoor?'Indoor':c.rock)} · ${c.indoor?v.dates.length+' climbs':v.p+' pitches'} · ${MON[month(ds[0])]} ${ds[0].slice(0,4)}–${MON[month(ds[ds.length-1])]} ${ds[ds.length-1].slice(0,4)}</small></div>`}).join('');
+}
+function badges(){
+  const m=mineOut(),p=sum(m.map(a=>R(a).pitches)),crack=m.filter(a=>R(a).features.some(f=>f.includes('crack'))).length;
+  const alp=Object.values(DAYS).filter(d=>d.who==='me'&&d.elev>=1000).length,cn=new Set(m.map(a=>C(a).country)).size;
+  const list=[['500','500 pitches',p>=500],['100','100 crack pitches',crack>=100],['1K','10 days over 1000 m gain',alp>=10],['5C','5 countries',cn>=5],['OS','First onsight at 7',m.some(a=>a.style==='Onsight'&&!isB(R(a))&&R(a).g>=8)],['OW','First offwidth',false]];
+  return`<div class="badges">${list.map(([i,l,ok])=>`<div class="badge ${ok?'':'locked'}"><span class="medal">${i}</span><span>${l}</span></div>`).join('')}</div>`;
+}
+function sheetRack(){
+  return sheetWrap('Rack counts',`
+   <p class="note">Set how many you own and how many go in your default rack. When you log a trad climb, the default rack is filled in and you can adjust it for that climb.</p>
+   <div class="card" style="padding-block:4px">${GEAR.map(g=>`<div class="gearrow">${gearSVG(g.type,g.color,48)}<div class="nm">${esc(g.label)}<small>${esc(GEARTYPES[g.type])}</small></div>
+     <div class="stack" style="gap:4px;align-items:flex-end"><div class="row" style="gap:6px"><span class="lbl">Own</span>${stepper(g.own,'gearAdj',`data-id="${g.id}" data-f="own"`,'sm',g.own<=0)}</div><div class="row" style="gap:6px"><span class="lbl">Default</span>${stepper(g.def,'gearAdj',`data-id="${g.id}" data-f="def"`,'sm',g.def<=0)}</div></div></div>`).join('')}</div>
+   <div class="card stack" style="gap:10px"><h3>Add gear</h3>
+    <div class="row" style="gap:8px"><select class="input" id="gear-type" aria-label="Gear type">${Object.entries(GEARTYPES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select><input type="color" id="gear-color" value="#D2342A" aria-label="Colour"></div>
+    <input class="input" id="gear-label" placeholder="Name or size, e.g. Cam #0.2" aria-label="Name or size">
+    <button class="btn sm" data-a="addGear">Add and edit details</button></div>
+  `,`<button class="btn" data-a="close">Done</button>`);
+}
+function sheetGear(){
+  const g=GEAR.find(x=>x.id===S.gearId);if(!g){S.sheet=null;return''}
+  const u=gearUse(g.id),st=gearStatus(g),age=monthsBetween(g.made,NOWYM);
+  return sheetWrap(g.label,`
+   <div class="hero">${gearSVG(g.type,g.color,220)}</div>
+   <div class="totals">
+    <div class="stat"><div class="v">${u.climbs}</div><div class="k">Climbs on the rack</div></div>
+    <div class="stat"><div class="v">${u.days}</div><div class="k">Days used</div></div>
+    <div class="stat"><div class="v">${Math.floor(age/12)}<small style="font-size:12px"> y</small> ${age%12}<small style="font-size:12px"> m</small></div><div class="k">Age</div></div>
+   </div>
+   <p class="note">Last used ${u.last?fmtDate(u.last):'never'}. Counted from the trad climbs where this piece was in your rack.</p>
+   ${st?`<div class="card stack" style="gap:10px"><div class="row between"><h3>${st.kind==='Resling'?'Resling reminder':'Retirement'}</h3><span class="due ${st.lvl}">${st.label}</span></div>
+     ${st.kind==='Resling'?`<div class="grid2"><div class="field"><label for="gf-reslung">Last reslung</label><input class="input" type="month" id="gf-reslung" data-gf="reslung" value="${g.reslung||''}"></div>
+      <div class="field"><label for="gf-ry">Resling every</label><select class="input" id="gf-ry" data-gf="reslingYrs">${[3,4,5,6,7,8,10].map(y=>`<option value="${y}" ${g.reslingYrs===y?'selected':''}>${y} years</option>`).join('')}</select></div></div>
+      <p class="note">${g.reslung?'':'Never reslung, so counted from the production date. '}Next resling: <b>${fmtYM(st.due)}</b>${st.left<0?`, ${-st.left} months overdue`:`, in ${st.left} months`}. Check the manufacturer's guidance for your cams.</p>`
+     :`<div class="field"><label for="gf-rt">Retire after</label><select class="input" id="gf-rt" data-gf="retireYrs">${[3,5,7,10,12,15].map(y=>`<option value="${y}" ${g.retireYrs===y?'selected':''}>${y} years from production</option>`).join('')}</select></div>
+      <p class="note">Retire by <b>${fmtYM(st.due)}</b>${st.left<0?`, ${-st.left} months ago`:`, in ${st.left} months`}. Textiles lose strength with age and use, so check the manufacturer's limit.</p>`}
+     <button class="chip ${g.remind?'on':''}" style="align-self:flex-start" data-a="gearRemind" aria-pressed="${g.remind}">${g.remind?'Reminder on':'Reminder off'}</button></div>`:''}
+   <div class="card stack" style="gap:12px"><h3>Details</h3>
+    <div class="field"><label for="gf-label">Name or size</label><input class="input" id="gf-label" data-gf="label" value="${esc(g.label)}"></div>
+    <div class="grid2"><div class="field"><label for="gf-brand">Brand</label><input class="input" id="gf-brand" data-gf="brand" value="${esc(g.brand)}"></div><div class="field"><label for="gf-model">Model</label><input class="input" id="gf-model" data-gf="model" value="${esc(g.model)}"></div></div>
+    <div class="grid2"><div class="field"><label for="gf-made">Production date</label><input class="input" type="month" id="gf-made" data-gf="made" value="${g.made||''}"></div><div class="field"><label for="gf-bought">Bought</label><input class="input" type="month" id="gf-bought" data-gf="bought" value="${g.bought||''}"></div></div>
+    <div class="row between"><label for="gf-color" class="lbl">Colour</label><input type="color" id="gf-color" data-gf="color" value="${g.color}"></div>
+    <div class="field"><label for="gf-notes">Notes</label><textarea class="input" id="gf-notes" data-gf="notes" rows="2" placeholder="Serial number, falls held, retirement reasons">${esc(g.notes)}</textarea></div>
+   </div>
+   <button class="btn danger" data-a="rmGear">Remove from rack</button>
+  `,'',true);
+}
+function sheetShoe(){
+  const s=SHOES.find(x=>x.id===S.shoeId);if(!s){S.sheet=null;return''}
+  const st=shoeStatus(s),u=shoeUse(s);
+  return sheetWrap(`${s.brand} ${s.model}`,`
+   <div class="hero">${shoeSVG(s,260)}</div>
+   <div class="totals"><div class="stat"><div class="v">${u.days}</div><div class="k">Days worn</div></div><div class="stat"><div class="v">${u.climbs}</div><div class="k">Climbs</div></div><div class="stat"><div class="v">${s.resoles}</div><div class="k">Resoles</div></div></div>
+   <p class="note">Last worn ${u.last?fmtDate(u.last):'never'}. Shoes are picked per session when you log.</p>
+   <div class="card stack" style="gap:10px"><div class="row between"><h3>Resole reminder</h3>${s.retired?'':`<span class="due ${st.lvl}">${st.label}</span>`}</div>
+    <div class="grid2"><div class="field"><label for="sf-lr">Last resole</label><input class="input" type="month" id="sf-lr" data-sf="lastResole" value="${s.lastResole||''}"></div>
+     <div class="field"><label for="sf-ra">Check after</label><select class="input" id="sf-ra" data-sf="resoleAfter">${[40,60,80,100,120,150].map(n=>`<option value="${n}" ${s.resoleAfter===n?'selected':''}>${n} climbing days</option>`).join('')}</select></div></div>
+    <div class="row between"><span class="lbl">Resoles so far</span>${stepper(s.resoles,'shoeResoles','','sm',s.resoles<=0)}</div>
+    <p class="note">${u.sinceDays} climbing days since ${s.lastResole?'the last resole':'you bought them'}.</p></div>
+   <div class="card stack" style="gap:12px"><h3>Details</h3>
+    <div class="grid2"><div class="field"><label for="sf-brand">Brand</label><input class="input" id="sf-brand" data-sf="brand" value="${esc(s.brand)}"></div><div class="field"><label for="sf-model">Model</label><input class="input" id="sf-model" data-sf="model" value="${esc(s.model)}"></div></div>
+    <div class="grid2"><div class="field"><label for="sf-size">Size</label><input class="input" id="sf-size" data-sf="size" value="${esc(s.size)}"></div><div class="field"><label for="sf-bought">Bought</label><input class="input" type="month" id="sf-bought" data-sf="bought" value="${s.bought||''}"></div></div>
+    <div class="field"><span class="lbl">Closure</span>${chipGroup('closure',['Velcro','Lace','Slipper'],s.closure)}</div>
+    <div class="field"><span class="lbl">Default for</span>${chipGroup('shoefor',['gym','sport','boulder','trad'],s.for,true)}<p class="note">Used to pick these shoes automatically when you log.</p></div>
+    <div class="row between"><label for="sf-color" class="lbl">Colour</label><input type="color" id="sf-color" data-sf="color" value="${s.color}"></div>
+    <div class="field"><label for="sf-notes">Notes</label><textarea class="input" id="sf-notes" data-sf="notes" rows="2">${esc(s.notes)}</textarea></div>
+   </div>
+   <button class="btn ghost" data-a="retireShoe">${s.retired?'Bring back into use':'Retire these shoes'}</button>
+  `,'',true);
+}
+
+/* ---------- people ---------- */
+function sheetPerson(){
+  const w=S.person,p=PEOPLE[w],fr=FRIEND_RACKS[w]||{vis:'Private',items:[]},days=Object.values(DAYS).filter(d=>d.who===w).sort((a,b)=>b.date.localeCompare(a.date));
+  const canSee=fr.vis==='Public'||fr.vis==='Friends';
+  return sheetWrap(p.name,`
+   <div class="cvhead">${av(w,64)}<div><h2 style="font-size:22px">${esc(p.name)}</h2><div class="muted">Friend · climbed with you on ${Object.values(DAYS).filter(d=>d.who==='me'&&d.partners.includes(w)).length} days</div></div></div>
+   <div class="stack" style="gap:8px"><div class="row between"><h2>Rack</h2><span class="pill">${fr.vis}</span></div>
+    ${canSee&&fr.items.length?friendRackGrid(fr.items):`<div class="empty">${esc(first(w))}'s rack is private.</div>`}</div>
+   <div class="stack" style="gap:8px"><h2>Recent sessions</h2>${days.length?days.map(postHTML).join(''):'<p class="note">No sessions shared yet.</p>'}</div>`);
+}
+
+/* ---------- training ---------- */
+function spark(b,w=96,h=30){const v=b.hist.map(h=>h.v),lo=Math.min(...v),hi=Math.max(...v),x=i=>i*(w-4)/(v.length-1)+2,y=t=>h-3-(t-lo)/((hi-lo)||1)*(h-6);
+  const d=v.map((t,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(t).toFixed(1)).join('');
+  return`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${d} L${x(v.length-1)} ${h} L${x(0)} ${h}Z" fill="var(--accent)" fill-opacity=".12"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="1.6"/><circle cx="${x(v.length-1)}" cy="${y(v[v.length-1])}" r="2.6" fill="var(--accent)"/></svg>`}
+function bDelta(b){const cur=b.hist[b.hist.length-1].v,ago=b.hist.find(h=>h.date>=addDays(TODAY,-365))?.v??b.hist[0].v;const d=Math.round((cur-ago)*10)/10;const good=b.hi?d>=0:d<=0;return{cur,d,good}}
+function viewTrain(){
+  const cats=[...new Set(BENCH.map(b=>b.cat))];
+  const hang=BENCH[0],hd=bDelta(hang);
+  const s=mineOut().filter(x=>isNewSend(x)&&R(x).disc==='Sport'),old=s.filter(x=>x.date<addDays(TODAY,-365)).map(x=>R(x).g);
+  const gstep=old.length?Math.max(...s.map(x=>R(x).g))-Math.max(...old):0;
+  return`<div class="top"><h1>Training</h1><span class="pill">Example data</span></div>
+   <div class="card insight"><span class="mark">↗</span><p>Max hang is <b>${hd.d>0?'+':''}${hd.d} ${hang.unit}</b> over 12 months. In the same period your hardest outdoor sport send went up by ${gstep} grade steps.</p></div>
+   ${cats.map(c=>`<div class="section"><span class="eyebrow">${c}</span>${BENCH.filter(b=>b.cat===c).map(b=>{const{cur,d,good}=bDelta(b);const pr=b.hi?Math.max(...b.hist.map(h=>h.v)):Math.min(...b.hist.map(h=>h.v));
+     return`<button class="bench" data-a="openBench" data-id="${b.id}"><div><h3 style="font-size:14.5px">${b.name}</h3><div class="muted" style="font-size:11.5px">${b.proto}</div></div>${spark(b)}
+      <div class="big">${cur}<small>${b.unit}</small></div><div style="text-align:right"><span class="delta ${good?'up':'down'}">${d>0?'+':''}${d} in 12 mo</span>${cur===pr?' <span class="pill" style="border-style:solid;color:var(--accent);border-color:var(--accent)">PR</span>':''}</div></button>`}).join('')}</div>`).join('')}`;
+}
+function sheetBench(){
+  const b=BENCH.find(x=>x.id===S.bench),v=b.hist.map(h=>h.v);
+  const W=340,H=170,pl=36,pr=10,pt=10,pb=22,lo=Math.min(...v),hi=Math.max(...v),pad=(hi-lo)*.15||1;
+  const x=i=>pl+i*(W-pl-pr)/(v.length-1),y=t=>pt+(hi+pad-t)*(H-pt-pb)/(hi-lo+2*pad);
+  let g='';for(let k=0;k<=3;k++){const t=lo-pad+k*(hi-lo+2*pad)/3;g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)" stroke-width=".6"/><text x="${pl-5}" y="${y(t)+3}" text-anchor="end">${Math.round(t)}</text>`}
+  b.hist.forEach((h,i)=>{if(i%4===0)g+=`<text x="${x(i)}" y="${H-6}" text-anchor="middle">${MON[month(h.date)]} ${h.date.slice(2,4)}</text>`});
+  const d=v.map((t,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(t).toFixed(1)).join('');
+  const board=[['me',v[v.length-1]],...Object.entries(b.fr)].sort((a,c)=>b.hi?c[1]-a[1]:a[1]-c[1]);const bm=Math.max(...board.map(r=>r[1]),1);
+  return sheetWrap(b.name,`
+   <p class="note">${b.proto}. ${b.hi?'Higher is better.':'Lower is better.'}</p>
+   <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${b.name} over time">${g}<path d="${d} L${x(v.length-1)} ${y(lo-pad)} L${x(0)} ${y(lo-pad)}Z" fill="var(--accent)" fill-opacity=".1"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2"/>${v.map((t,i)=>`<circle cx="${x(i)}" cy="${y(t)}" r="${i===v.length-1?4:2.2}" fill="var(--accent)"><title>${b.hist[i].date}: ${t} ${b.unit}</title></circle>`).join('')}</svg>
+   <div class="card stack" style="gap:10px"><h3>Log a new result</h3><div class="row"><input class="input" id="bv" type="number" step="0.5" placeholder="${b.unit}" aria-label="New result in ${b.unit}"><button class="btn sm" data-a="saveBench">Save</button></div></div>
+   <div class="stack" style="gap:8px"><h3>Friends</h3>${board.map(([w,val])=>`<div class="bar-row" style="grid-template-columns:110px 1fr 64px"><span class="lab row" style="gap:6px">${av(w,22)}${esc(first(w))}</span><div class="bar-track"><i style="width:${val/bm*100}%;background:${w==='me'?'var(--accent)':'var(--muted)'}"></i></div><span class="num">${val} ${b.unit}</span></div>`).join('')}</div>
+   <div class="stack" style="gap:6px"><h3>History</h3>${b.hist.slice().reverse().slice(0,8).map(h=>`<div class="row between mono" style="font-size:12.5px"><span>${fmtDate(h.date)}</span><span>${h.v} ${b.unit}</span></div>`).join('')}</div>`);
+}
+
+/* ---------- settings ---------- */
+function sheetSettings(){
+  return sheetWrap('Settings',`
+   <div class="field"><span class="lbl">Colour theme</span><div class="chips">${[['rope','Chalk and rope',['#C2561A','#58782A','#1A2420']],['forest','Forest green',['#1F7A4C','#7FA83A','#13261B']]].map(([k,l,cs])=>`<button class="chip ${S.palette===k?'on':''}" data-a="palette" data-v="${k}" aria-pressed="${S.palette===k}"><span class="swatch">${cs.map(c=>`<i style="background:${c}"></i>`).join('')}</span>${l}</button>`).join('')}</div><p class="note">Light or dark follows your device.</p></div>
+   <div class="field"><span class="lbl">Route grades</span>${chipGroup('rsys',Object.values(SYS.route).map(s=>s.label),SYS.route[S.rsys].label)}</div>
+   <div class="field"><span class="lbl">Boulder grades</span>${chipGroup('bsys',Object.values(SYS.boulder).map(s=>s.label),SYS.boulder[S.bsys].label)}</div>
+   <p class="note">Every climb keeps the grade it was logged in. The app converts through a shared difficulty scale, so stats work across systems. Conversions in this prototype are approximate.</p>
+   <div class="stack" style="gap:8px"><div class="row between"><h3>Gyms and custom grades</h3><button class="btn ghost sm" data-a="addGym">+ Gym</button></div>
+    ${gyms().map(([id,g])=>`<button class="rp" style="border:1px solid var(--line);background:var(--surface)" data-a="editGym" data-id="${id}"><b>${esc(g.name)}</b><span class="swatch" style="grid-row:1/3;grid-column:2;align-self:center">${g.grading==='colour'&&GYMSCALES[g.scale]?GYMSCALES[g.scale].grades.map(c=>`<i style="background:${c.hex}"></i>`).join(''):`<span class="muted" style="font-size:12px">${g.grading==='standard'?'Standard grades':'Ungraded'}</span>`}</span><small>${g.walls.length} ${g.walls.length===1?'wall':'walls'} · ${esc(g.walls.map(w=>w.name).join(', '))}</small></button>`).join('')}</div>
+   <div class="card stack" style="gap:6px"><h3>About this prototype</h3><p class="note">All climbs, friends, crags, gyms, gear and training results are generated example data. Everything you change works, but resets when the page reloads. Your theme and profile picture are remembered in this browser.</p></div>`);
+}
+
+/* ---------- shell ---------- */
+function sheetWrap(title,body,foot='',back=false){
+  return`<div class="sheet" role="dialog" aria-label="${esc(title)}"><div class="sheet-head"><button class="iconbtn" data-a="${back?'back':'close'}" aria-label="${back?'Back':'Close'}">${back?I.back:I.close}</button><h2>${esc(title)}</h2><span style="width:34px"></span></div>
+   <div class="sheet-body">${body}</div>${foot?`<div class="sheet-foot">${foot}</div>`:''}</div>`;
+}
+function render(){
+  const sc=$('.screen')?.scrollTop||0,sb=$('.sheet-body')?.scrollTop||0,keepScreen=render.keep;
+  const views={feed:viewFeed,history:viewHistory,cv:viewCV,train:viewTrain};
+  const sheets={log:sheetLog,newroute:sheetNewRoute,topo:sheetTopo,day:sheetDay,bench:sheetBench,settings:sheetSettings,gym:sheetGym,rack:sheetRack,person:sheetPerson,gear:sheetGear,shoe:sheetShoe};
+  const tabs=[['feed','Feed',I.feed],['history','History',I.hist],['log','Log',''],['cv','CV',I.cv],['train','Training',I.train]];
+  const app=$('#app');app.dataset.palette=S.palette;
+  const sheet=S.sheet?sheets[S.sheet]():'';
+  app.innerHTML=`<main class="screen">${views[S.tab]()}</main>
+   <nav class="tabbar">${tabs.map(([k,l,ic])=>k==='log'?`<button class="tab log" data-a="openLog" aria-label="Log a session"><span class="plus">${I.plus}</span>${l}</button>`:`<button class="tab ${S.tab===k?'on':''}" data-a="tab" data-v="${k}" aria-current="${S.tab===k?'page':'false'}">${ic}${l}</button>`).join('')}</nav>
+   ${sheet}
+   ${S.toast?`<div class="toast" role="status">${esc(S.toast)}</div>`:''}`;
+  if(keepScreen&&$('.screen'))$('.screen').scrollTop=sc;
+  if(render.keepSheet&&$('.sheet-body'))$('.sheet-body').scrollTop=sb;
+  render.keep=render.keepSheet=false;
+  if(S.sheet==='topo')bindTopo();
+}
+function rerender(){render.keep=true;render.keepSheet=true;render()}
+let toastT;function toast(t){S.toast=t;clearTimeout(toastT);toastT=setTimeout(()=>{S.toast=null;const el=document.querySelector('.toast');if(el&&el.remove)el.remove()},2200)}
+function pushSheet(n){if(S.sheet)S.stack.push(S.sheet);S.sheet=n;render.keep=true;render()}
+function popSheet(){S.sheet=S.stack.pop()||null;render.keep=true;render()}
+const tog=(arr,x)=>arr.includes(x)?arr.filter(y=>y!==x):[...arr,x];
+function setStyleTries(target,style,prior){if(lockedTries(style))target.att=1;else target.att=Math.max(target.att,minTries(style,prior))}
+function loadPfp(file){
+  const url=URL.createObjectURL(file),img=new Image();
+  img.onload=()=>{const c=document.createElement('canvas');c.width=c.height=192;const x=c.getContext('2d'),s=Math.min(img.width,img.height);
+    x.drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,192,192);PEOPLE.me.photo=c.toDataURL('image/jpeg',.82);
+    try{store?.setItem('pb-pfp',PEOPLE.me.photo)}catch(e){}URL.revokeObjectURL(url);toast('Profile picture updated');rerender()};
+  img.onerror=()=>toast('That file could not be read as an image');
+  img.src=url;
+}
+
+const A={
+  tab:el=>{S.tab=el.dataset.v;S.sheet=null;S.stack=[];render();$('.screen').scrollTop=0},
+  hist:el=>{S.hist=el.dataset.v;rerender()},
+  prog:el=>{S.prog=el.dataset.v;rerender()},
+  openLog:()=>{newLog();S.stack=[];S.sheet=null;pushSheet('log')},
+  editDay:el=>{const d=DAYS[el.dataset.id];newLog();L.editDay=d.id;const c=CRAGS[d.crag];L.mode=c.indoor?'in':'out';
+    if(c.indoor){L.gym=d.crag;selectWall(c.walls[0].id)}L.title=d.title;L.desc=d.desc;L.partners=[...d.partners];L.shoe=d.shoe;pushSheet('log')},
+  openDay:el=>{S.day=el.dataset.id;pushSheet('day')},
+  openPerson:el=>{if(el.dataset.id==='me'){S.sheet=null;S.stack=[];S.tab='cv';render();$('.screen').scrollTop=0;return}S.person=el.dataset.id;pushSheet('person')},
+  openBench:el=>{S.bench=el.dataset.id;pushSheet('bench')},
+  openGear:el=>{S.gearId=el.dataset.id;pushSheet('gear')},
+  openShoe:el=>{S.shoeId=el.dataset.id;pushSheet('shoe')},
+  settings:()=>pushSheet('settings'),
+  close:()=>{S.sheet=null;S.stack=[];render.keep=true;render()},
+  back:()=>popSheet(),
+  palette:el=>{S.palette=el.dataset.v;try{store?.setItem('pb-palette',S.palette)}catch(e){}rerender()},
+  rmPfp:()=>{PEOPLE.me.photo=null;try{store?.removeItem('pb-pfp')}catch(e){}rerender()},
+  kudos:el=>{const d=DAYS[el.dataset.id];d.kudoed=!d.kudoed;rerender()},
+  share:()=>{toast('In the app this opens the share sheet with a topo card')},
+  comment:()=>{const v=$('#cmt').value.trim();if(!v)return;DAYS[S.day].comments.push({who:'me',text:v});rerender()},
+  logMode:el=>{L.mode=el.dataset.v;rememberMode(L.mode);L.media.forEach(m=>m.route='');if(L.mode==='in')selectWall(L.wall);rerender()},
+  pickRoute:el=>{L.route=el.dataset.id;const r=ROUTES[L.route];if(isB(r))L.lead='—';else if(L.lead==='—')L.lead='Lead';
+    const pr=priorFor(r.id);L.style=pr.sent?'Repeat':null;L.att=1;if(L.style)setStyleTries(L,L.style,pr.tries);L.rack=needsRack(r)?defRack():null;L.rackOpen=false;rerender()},
+  att:el=>{const d=+el.dataset.d;if(el.dataset.t==='ic'){const ic=L.ic;if(lockedTries(ic.style))return;ic.att=Math.max(minTries(ic.style,0),ic.att+d)}
+    else{if(lockedTries(L.style))return;L.att=Math.max(minTries(L.style,L.route?priorFor(L.route).tries:0),L.att+d)}rerender()},
+  addOut:(el,silent)=>{if(!L.route||!L.style)return;const r=ROUTES[L.route];let rack;if(needsRack(r)&&L.rack){rack={};GEAR.forEach(g=>{const d=(L.rack[g.id]||0)-g.def;if(d)rack[g.id]=d})}
+    L.pendOut.push({route:L.route,style:L.style,att:L.att,lead:isB(r)?'—':L.lead,feel:FEEL[L.feel],tags:[...L.tags],cond:L.cond,rack});
+    L.media.forEach(m=>{if(m.route==='cur')m.route='p'+(L.pendOut.length-1)});
+    L.route=null;L.style=null;L.att=1;L.tags=[];L.rack=null;L.rackOpen=false;L.q='';if(!silent){toast('Added. Pick the next route.');rerender()}},
+  rmOut:el=>{const i=+el.dataset.i;L.pendOut.splice(i,1);L.media.forEach(m=>{if(m.route==='p'+i)m.route='';else if(/^p\d+$/.test(m.route)&&+m.route.slice(1)>i)m.route='p'+(+m.route.slice(1)-1)});rerender()},
+  rmExisting:el=>{const id=+el.dataset.id;L.removed=tog(L.removed,id);rerender()},
+  rackOpen:()=>{L.rackOpen=!L.rackOpen;rerender()},
+  rackAdj:el=>{const g=GEAR.find(x=>x.id===el.dataset.id);L.rack[g.id]=clamp((L.rack[g.id]||0)+ +el.dataset.d,0,Math.max(g.own,g.def));rerender()},
+  pickWall:el=>{selectWall(el.dataset.id);rerender()},
+  pickShoe:el=>{L.shoe=el.dataset.id;rerender()},
+  icGrade:el=>{L.ic.gi=el.dataset.i===''?null:+el.dataset.i;rerender()},
+  addIndoor:(el,silent)=>{const ic=L.ic;if(!ic.style)return;L.pending.push({wall:L.wall,type:ic.type,gi:ic.gi,angle:ic.angle,holds:[...ic.holds],style:ic.style,att:ic.att,tags:[...ic.tags]});ic.style=null;ic.att=1;ic.tags=[];if(!silent){toast(`Added climb ${L.pending.length}`);rerender()}},
+  rmIndoor:el=>{const i=+el.dataset.i;L.pending.splice(i,1);L.media.forEach(m=>{if(m.route==='p'+i)m.route='';else if(/^p\d+$/.test(m.route)&&+m.route.slice(1)>i)m.route='p'+(+m.route.slice(1)-1)});rerender()},
+  saveLog:()=>saveLog(),
+  newRoute:()=>{newRouteState();pushSheet('newroute')},
+  saveRoute:()=>saveRoute(),
+  openTopo:()=>{newTopo();pushSheet('topo')},
+  tool:el=>{T.tool=el.dataset.t;rerender()},
+  undo:()=>{const u=T.undo.pop();if(!u)return;if(u.k==='mark')T.marks.pop();else T.pts.length=u.n;rerender()},
+  clearTopo:()=>{T.pts=[];T.marks=[];T.undo=[];rerender()},
+  addPitch:()=>{const l=T.pitches[T.pitches.length-1];T.pitches.push({g:l?l.g:NR.g,len:l?l.len:30});rerender()},
+  saveTopo:()=>{if(T.pts.length<2){toast('Draw the line first');return}NR.topo={pts:T.pts,marks:T.marks,pitches:T.pitches};NR.pitches=T.pitches.length;NR.len=sum(T.pitches.map(p=>+p.len||0))||NR.len;popSheet()},
+  saveBench:()=>{const b=BENCH.find(x=>x.id===S.bench),v=parseFloat($('#bv').value);if(isNaN(v)){toast('Enter a number first');return}b.hist.push({date:TODAY,v});toast('Result saved');rerender()},
+  editGym:el=>{S.gym=el.dataset.id;pushSheet('gym')},
+  addGym:()=>{const id='gym'+(Object.keys(CRAGS).length+1);CRAGS[id]={name:'New gym',short:'New gym',country:'Norway',rock:'Plastic',indoor:true,grading:'colour',scale:id,elev:[0,0],walls:[{id:'w1',name:'Main wall',height:14,angle:'Vertical',kind:'Rope'},{id:'w2',name:'Boulder area',height:4.5,angle:'Overhang',kind:'Boulder'}]};GYMSCALES[id]={grades:[{n:'Green',hex:'#3FA34D',bmin:null,bmax:null,rmin:null,rmax:null},{n:'Blue',hex:'#2F6FD1',bmin:null,bmax:null,rmin:null,rmax:null}]};S.gym=id;pushSheet('gym')},
+  addWall:()=>{const g=CRAGS[S.gym];g.walls.push({id:'w'+(g.walls.length+1)+'-'+(++aid),name:'New wall',height:12,angle:'Vertical',kind:'Rope'});rerender()},
+  rmWall:el=>{const g=CRAGS[S.gym];g.walls.splice(+el.dataset.i,1);if(L&&L.gym===S.gym)selectWall(g.walls[0].id);rerender()},
+  addColour:()=>{const g=CRAGS[S.gym];GYMSCALES[g.scale].grades.push({n:'New colour',hex:'#888888',bmin:null,bmax:null,rmin:null,rmax:null});rerender()},
+  rmColour:el=>{const g=CRAGS[S.gym];GYMSCALES[g.scale].grades.splice(+el.dataset.i,1);if(L&&L.gym===S.gym)L.ic.gi=null;rerender()},
+  editRack:()=>pushSheet('rack'),
+  rackVis:el=>{S.rackVis=el.dataset.v;rerender()},
+  gearAdj:el=>{const g=GEAR.find(x=>x.id===el.dataset.id),f=el.dataset.f;g[f]=Math.max(0,g[f]+ +el.dataset.d);if(f==='own'&&g.def>g.own)g.def=g.own;if(f==='def'&&g.def>g.own)g.own=g.def;rerender()},
+  addGear:()=>{const t=$('#gear-type').value,l=$('#gear-label').value.trim()||GEARTYPES[t];const g={...gearBase,id:'g'+(++aid),type:t,label:l,color:$('#gear-color').value,own:1,def:1,made:NOWYM,bought:NOWYM,remind:RESLING.includes(t)||TEXTILE.includes(t)};GEAR.push(g);S.gearId=g.id;pushSheet('gear')},
+  gearRemind:()=>{const g=GEAR.find(x=>x.id===S.gearId);g.remind=!g.remind;toast(g.remind?'Reminder on':'Reminder off');rerender()},
+  rmGear:()=>{const i=GEAR.findIndex(x=>x.id===S.gearId);const l=GEAR[i].label;GEAR.splice(i,1);toast(l+' removed');popSheet()},
+  addShoe:()=>{const s={id:'s'+(++aid),brand:'New',model:'shoes',size:'42',color:'#3F7A3A',closure:'Velcro',for:[],bought:NOWYM,resoles:0,lastResole:null,resoleAfter:100,retired:false,notes:''};SHOES.push(s);S.shoeId=s.id;pushSheet('shoe')},
+  shoeResoles:el=>{const s=SHOES.find(x=>x.id===S.shoeId);s.resoles=Math.max(0,s.resoles+ +el.dataset.d);if(+el.dataset.d>0){s.lastResole=NOWYM;toast('Resole logged for '+fmtYM(NOWYM))}rerender()},
+  retireShoe:()=>{const s=SHOES.find(x=>x.id===S.shoeId);s.retired=!s.retired;toast(s.retired?'Shoes retired':'Shoes back in use');rerender()},
+  chip:el=>{
+    const k=el.dataset.k,v=el.dataset.v,multi=el.dataset.m==='1';
+    if(S.sheet==='log'){
+      if(k==='partners'){const id=Object.keys(PEOPLE).find(p=>PEOPLE[p].name===v);L.partners=tog(L.partners,id)}
+      else if(k==='stars')L.stars=v.length;
+      else if(k==='gym'){L.gym=gyms().find(([,c])=>c.short===v)[0];L.ic.gi=null;selectWall(CRAGS[L.gym].walls[0].id)}
+      else if(k==='style'){L.style=v;setStyleTries(L,v,L.route?priorFor(L.route).tries:0)}
+      else if(k==='istyle'){L.ic.style=v;setStyleTries(L.ic,v,0)}
+      else if(['itype','iangle','iholds','itags'].includes(k)){const f=k.slice(1);if(multi)L.ic[f]=tog(L.ic[f],v);else L.ic[f]=v;if(f==='type'&&CRAGS[L.gym].grading==='standard')L.ic.gi=null}
+      else if(multi)L[k]=tog(L[k],v);else L[k]=v;
+    }else if(S.sheet==='newroute'){
+      if(k==='crag')NR.crag=outdoorCrags().find(([,c])=>c.short===v)[0];
+      else if(multi)NR[k]=tog(NR[k],v);
+      else{NR[k]=v;if(k==='disc'){const max=(v==='Boulder'?SYS.boulder[S.bsys]:SYS.route[S.rsys]).g.length-1;NR.g=Math.min(NR.g,max);if(v==='Boulder'){NR.prot='Crash pads';NR.descent='Downclimb';NR.pitches=1;NR.len=4}else if(NR.prot==='Crash pads'){NR.prot=v==='Sport'?'Bolted':'Trad';NR.descent='Lower-off'}}}
+    }else if(S.sheet==='settings'){
+      if(k==='rsys')S.rsys=Object.keys(SYS.route).find(s=>SYS.route[s].label===v);
+      if(k==='bsys')S.bsys=Object.keys(SYS.boulder).find(s=>SYS.boulder[s].label===v);
+    }else if(S.sheet==='gym'&&k==='grading'){
+      const g=CRAGS[S.gym];g.grading={'Colour scale':'colour','Standard grades':'standard','Ungraded':'none'}[v];
+      if(g.grading==='colour'){if(!g.scale)g.scale=S.gym;if(!GYMSCALES[g.scale])GYMSCALES[g.scale]={grades:[{n:'Green',hex:'#3FA34D',bmin:null,bmax:null,rmin:null,rmax:null}]}}
+      if(L&&L.gym===S.gym)L.ic.gi=null;
+    }else if(S.sheet==='shoe'){const s=SHOES.find(x=>x.id===S.shoeId);if(k==='closure')s.closure=v;if(k==='shoefor')s.for=tog(s.for,v)}
+    else if(k==='pyr')S.pyr=v;
+    rerender();
+  }
+};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el||el.disabled)return;const f=A[el.dataset.a];if(f){e.preventDefault();f(el)}});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='rq'){L.q=t.value;$('#rlist').innerHTML=routeListHTML();return}
+  if(t.id==='feel'){L.feel=+t.value;$('#feel-l').textContent=FEEL[L.feel];return}
+  if(t.id==='lg-title')L.title=t.value;
+  if(t.id==='lg-desc')L.desc=t.value;
+  if(t.id==='nr-name')NR.name=t.value;
+  if(t.id==='nr-fa')NR.fa=t.value;
+  if(t.id==='nr-p')NR.pitches=Math.max(1,+t.value||1);
+  if(t.id==='nr-l')NR.len=Math.max(1,+t.value||1);
+  if(t.dataset.pitch!=null){T.pitches[+t.dataset.pitch][t.dataset.f]=+t.value}
+  if(S.sheet==='gym'){const g=CRAGS[S.gym];
+    if(t.id==='gy-name'){g.name=t.value;g.short=t.value.split(',')[0].slice(0,18)||'Gym'}
+    if(t.dataset.wall!=null&&t.dataset.f==='name')g.walls[+t.dataset.wall].name=t.value;
+    if(t.dataset.wall!=null&&t.dataset.f==='height')g.walls[+t.dataset.wall].height=Math.max(1,+t.value||1);
+    if(t.dataset.col!=null&&(t.dataset.f==='n'||t.dataset.f==='hex'))GYMSCALES[g.scale].grades[+t.dataset.col][t.dataset.f]=t.value;}
+  if(t.dataset.gf&&!['reslingYrs','retireYrs'].includes(t.dataset.gf)){const g=GEAR.find(x=>x.id===S.gearId);g[t.dataset.gf]=t.value||(t.type==='month'?null:'')}
+  if(t.dataset.sf&&t.dataset.sf!=='resoleAfter'){const s=SHOES.find(x=>x.id===S.shoeId);s[t.dataset.sf]=t.value||(t.type==='month'?null:'')}
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.id==='nr-g')NR.g=+t.value;
+  if(t.id==='ic-g'){L.ic.gi=t.value===''?null:+t.value}
+  if(t.dataset.ex){S.ex[t.dataset.ex]=t.value;if(S.ex.metric==='rate'&&S.ex.group==='style')S.ex.group='rock';rerender()}
+  if(t.dataset.col!=null&&['bmin','bmax','rmin','rmax'].includes(t.dataset.f)){const c=GYMSCALES[CRAGS[S.gym].scale].grades[+t.dataset.col],f=t.dataset.f,v=t.value===''?null:+t.value;c[f]=v;
+    const lo=f[0]+'min',hi=f[0]+'max';if(c[lo]!=null&&c[hi]!=null&&c[lo]>c[hi]){if(f===lo)c[hi]=c[lo];else c[lo]=c[hi]}if(c[lo]!=null&&c[hi]==null)c[hi]=c[lo];rerender()}
+  if(t.dataset.wall!=null&&(t.dataset.f==='angle'||t.dataset.f==='kind')){CRAGS[S.gym].walls[+t.dataset.wall][t.dataset.f]=t.value;if(L&&L.gym===S.gym)selectWall(L.wall)}
+  if(t.dataset.lmedia!=null)L.media[+t.dataset.lmedia].route=t.value;
+  if(t.dataset.dmedia!=null){const m=DAYS[S.day].media.find(x=>x.id===t.dataset.dmedia);m.route=t.value||null;toast(t.value?'Tagged '+routeById(t.value).name:'Tag removed');rerender()}
+  if(t.dataset.gf){const g=GEAR.find(x=>x.id===S.gearId);if(['reslingYrs','retireYrs'].includes(t.dataset.gf))g[t.dataset.gf]=+t.value;rerender()}
+  if(t.dataset.sf){const s=SHOES.find(x=>x.id===S.shoeId);if(t.dataset.sf==='resoleAfter')s.resoleAfter=+t.value;rerender()}
+  if(t.id==='pfp-in'&&t.files[0])loadPfp(t.files[0]);
+  if(t.id==='media-in'||t.id==='media-day'){
+    const files=[...t.files].map(f=>({type:f.type.startsWith('video')?'video':'image',url:URL.createObjectURL(f),name:f.name,route:''}));
+    if(t.id==='media-in')L.media.push(...files);
+    else DAYS[S.day].media.push(...files.map(f=>({id:'m'+(++aid),type:f.type,url:f.url,route:null})));
+    if(files.length)toast(files.length+(files.length===1?' file added':' files added'));
+    rerender();
+  }
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='cmt')A.comment()});
+render();
+</script>
