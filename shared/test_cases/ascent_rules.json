@@ -1,5 +1,5 @@
 {
-  "about": "Style and tries rules (docs/PLAN.md decision 7). Run by sva_core (packages/sva_core/test/ascents/ascent_rules_test.dart) and, from M11-2, by the server's pgTAP tests, so both apply the same rules. Each case is one route's ascents, oldest first: by the session's local date, then the ascent's ordinal (the server must use the same order, never a client-supplied timestamp). `remove` lists indexes deleted in an edit before checking. `expect` lists the issue keys for each remaining ascent. `next` gives what a new ascent may be after the log.",
+  "about": "Style and tries rules (docs/PLAN.md decision 7). Run by sva_core (packages/sva_core/test/ascents/ascent_rules_test.dart) and, from M11-2, by the server's pgTAP tests, so both apply the same rules. Each case is one route's ascents, oldest first: by the session's local date, then the ascent's ordinal (the server must use the same order, never a client-supplied timestamp). `remove` lists indexes deleted in an edit before checking. `expect` lists the issue keys for each remaining ascent. `next` gives what a new ascent may be after the log. `route` says when the route is a boulder or a gym climb (default: an outdoor rope climb).",
   "cases": [
     { "name": "onsight on the first try", "log": [["onsight", 1]], "expect": [[]] },
     { "name": "flash on the first try", "log": [["flash", 1]], "expect": [[]] },
@@ -24,13 +24,17 @@
     { "name": "huge tries are capped and flagged", "log": [["attempt", 2147483647], ["attempt", 1], ["flash", 1]], "expect": [["tries.too_many"], [], ["style.not_first_try"]] },
     { "name": "a repeat after an invalid repeat", "log": [["repeat", 1], ["repeat", 1]], "expect": [["style.repeat_without_send"], []] },
     { "name": "an empty log has nothing to check", "log": [], "expect": [] },
-    { "name": "gym routes: no flash after an attempt", "gym": true, "log": [["attempt", 2], ["flash", 1]], "expect": [[], ["style.not_first_try"]] },
-    { "name": "gym routes: tries add up across sessions", "gym": true, "log": [["attempt", 2], ["redpoint", 3], ["repeat", 1]], "expect": [[], [], []] },
+    { "name": "gym routes: no flash after an attempt", "route": { "gym": true }, "log": [["attempt", 2], ["flash", 1]], "expect": [[], ["style.not_first_try"]] },
+    { "name": "gym routes: tries add up across sessions", "route": { "gym": true }, "log": [["attempt", 2], ["redpoint", 3], ["repeat", 1]], "expect": [[], [], []] },
     { "name": "a send that breaks a rule still counts as a send", "log": [["attempt", 1], ["flash", 1], ["redpoint", 3]], "expect": [[], ["style.not_first_try"], ["style.already_sent"]] },
     { "name": "edit: removing earlier attempts keeps a redpoint", "log": [["attempt", 2], ["redpoint", 3]], "remove": [0], "expect": [[]] },
     { "name": "edit: removing earlier attempts allows a flash", "log": [["attempt", 1], ["flash", 1]], "remove": [0], "expect": [[]] },
     { "name": "edit: removing the send breaks a later repeat", "log": [["flash", 1], ["repeat", 1]], "remove": [0], "expect": [["style.repeat_without_send"]] },
     { "name": "edit: removing one of several attempts lowers the minimum", "log": [["attempt", 1], ["attempt", 1], ["redpoint", 2]], "remove": [1], "expect": [[], []] },
+    { "name": "no onsight of a boulder", "route": { "boulder": true }, "log": [["onsight", 1]], "expect": [["style.no_onsight"]] },
+    { "name": "no onsight in the gym", "route": { "gym": true }, "log": [["onsight", 1]], "expect": [["style.no_onsight"]] },
+    { "name": "boulders flash", "route": { "boulder": true }, "log": [["flash", 1]], "expect": [[]] },
+    { "name": "next: a new boulder or gym climb has no onsight", "route": { "boulder": true, "gym": true }, "log": [], "next": { "allowed": ["flash", "redpoint", "attempt"], "min_tries": { "flash": 1, "redpoint": 2 } } },
     { "name": "next: a new route allows every first-send style", "log": [], "next": { "allowed": ["onsight", "flash", "redpoint", "attempt"], "min_tries": { "onsight": 1, "flash": 1, "redpoint": 2, "attempt": 1 }, "max_tries": { "onsight": 1, "flash": 1 } } },
     { "name": "next: after attempts only redpoint or attempt", "log": [["attempt", 3]], "next": { "allowed": ["redpoint", "attempt"], "min_tries": { "redpoint": 4, "attempt": 1 } } },
     { "name": "next: after a send only repeat or attempt", "log": [["attempt", 3], ["redpoint", 4]], "next": { "allowed": ["repeat", "attempt"], "min_tries": { "repeat": 1, "attempt": 1 } } }

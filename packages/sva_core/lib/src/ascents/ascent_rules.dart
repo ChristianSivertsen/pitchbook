@@ -27,6 +27,9 @@ enum AscentIssue {
   /// Onsight or flash after the route was tried or sent before.
   notFirstTry('style.not_first_try'),
 
+  /// Onsight is for outdoor rope climbs; boulders and gym climbs flash.
+  noOnsight('style.no_onsight'),
+
   /// Onsight, flash or redpoint of a route already sent: it is a repeat.
   alreadySent('style.already_sent'),
 
@@ -55,8 +58,14 @@ const maxLoggedTries = 9999;
 /// What earlier ascents of the same route mean for the next one.
 final class RouteHistory {
   /// History from [earlier] ascents of one route, oldest first. Gym routes
-  /// follow the same rules: tries add up across sessions (PLAN.md 4, 7).
-  factory from(Iterable<LoggedAscent> earlier) {
+  /// follow the same rules, and tries add up across sessions (PLAN.md 4, 7),
+  /// except that only outdoor rope climbs can be onsighted: boulders and
+  /// gym climbs are usually seen up close first, so they flash.
+  factory from(
+    Iterable<LoggedAscent> earlier, {
+    bool boulder = false,
+    bool gym = false,
+  }) {
     var tries = 0;
     var sent = false;
     for (final ascent in earlier) {
@@ -68,10 +77,18 @@ final class RouteHistory {
         tries += ascent.tries.clamp(1, maxLoggedTries);
       }
     }
-    return RouteHistory._(earlierTries: tries, sent: sent);
+    return RouteHistory._(
+      earlierTries: tries,
+      sent: sent,
+      onsightPossible: !boulder && !gym,
+    );
   }
 
-  const new _({required this.earlierTries, required this.sent});
+  const new _({
+    required this.earlierTries,
+    required this.sent,
+    required this.onsightPossible,
+  });
 
   /// Tries on attempts before the first send. Any logged attempt counts as
   /// at least one, so it is above zero whenever the route was tried.
@@ -80,6 +97,9 @@ final class RouteHistory {
   /// Whether the route was sent before.
   final bool sent;
 
+  /// Whether this kind of route can be onsighted at all.
+  final bool onsightPossible;
+
   /// Styles a new ascent may have. Once sent, only repeats and attempts.
   /// After an attempt, no onsight or flash.
   Set<AscentStyle> get allowedStyles => sent
@@ -87,7 +107,7 @@ final class RouteHistory {
       : earlierTries > 0
       ? {AscentStyle.redpoint, AscentStyle.attempt}
       : {
-          AscentStyle.onsight,
+          if (onsightPossible) AscentStyle.onsight,
           AscentStyle.flash,
           AscentStyle.redpoint,
           AscentStyle.attempt,
@@ -115,6 +135,8 @@ final class RouteHistory {
         AscentIssue.alreadySent
       else if (!sent && earlierTries > 0 && _firstTry(style))
         AscentIssue.notFirstTry,
+      if (style == AscentStyle.onsight && !onsightPossible)
+        AscentIssue.noOnsight,
       if (style == AscentStyle.repeat && !sent) AscentIssue.repeatWithoutSend,
       if (_firstTry(style) && ascent.tries != 1)
         AscentIssue.mustBeOneTry
@@ -134,7 +156,15 @@ final class RouteHistory {
 /// came before it. Run it again after an edit (an ascent added, changed or
 /// removed): earlier attempts that disappear can make a later onsight
 /// possible, and a removed send turns a later repeat into an issue.
-List<List<AscentIssue>> checkRouteLog(List<LoggedAscent> ascents) => [
+List<List<AscentIssue>> checkRouteLog(
+  List<LoggedAscent> ascents, {
+  bool boulder = false,
+  bool gym = false,
+}) => [
   for (var i = 0; i < ascents.length; i++)
-    RouteHistory.from(ascents.take(i)).check(ascents[i]),
+    RouteHistory.from(
+      ascents.take(i),
+      boulder: boulder,
+      gym: gym,
+    ).check(ascents[i]),
 ];

@@ -35,7 +35,12 @@ void main() {
           for (final (i, ascent) in logOf(c).indexed)
             if (!removed.contains(i)) ascent,
         ];
-        final issues = checkRouteLog(log);
+        final route = (c['route'] as Map<String, Object?>?) ?? const {};
+        final issues = checkRouteLog(
+          log,
+          boulder: route['boulder'] == true,
+          gym: route['gym'] == true,
+        );
         expect(
           [for (final list in issues) list.map((i) => i.key).toList()],
           [
@@ -49,7 +54,12 @@ void main() {
     for (final c in cases.where((c) => c.containsKey('next'))) {
       test(c['name']! as String, () {
         final next = c['next']! as Map<String, Object?>;
-        final history = RouteHistory.from(logOf(c));
+        final route = (c['route'] as Map<String, Object?>?) ?? const {};
+        final history = RouteHistory.from(
+          logOf(c),
+          boulder: route['boulder'] == true,
+          gym: route['gym'] == true,
+        );
         expect(
           history.allowedStyles,
           (next['allowed']! as List<Object?>).map(_style).toSet(),
