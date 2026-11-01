@@ -52,6 +52,7 @@ class Pitches extends Table with SyncedRow, SharedRow {
 }
 
 /// Shared grade system definitions, stored as data.
+@DataClassName('GradeSystemRow')
 class GradeSystems extends Table with SyncedRow, SharedRow {
   /// Stable key such as `nor`, `font`, `wi`.
   TextColumn get key => text()();
@@ -61,6 +62,8 @@ class GradeSystems extends Table with SyncedRow, SharedRow {
   TextColumn get region => text().nullable()();
 }
 
+/// The row class is renamed so it does not clash with sva_core's model.
+@DataClassName('GradeRow')
 class Grades extends Table with SyncedRow, SharedRow {
   TextColumn get systemKey => text()();
   TextColumn get label => text()();
