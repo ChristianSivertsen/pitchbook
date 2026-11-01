@@ -4,7 +4,7 @@ import 'package:drift_dev/api/migrations_native.dart';
 import 'package:sva_data/sva_data.dart';
 import 'package:test/test.dart';
 
-import '../generated_migrations/schema.dart';
+import '../generated_migrations/sva/generated/schema.dart';
 
 /// Every table in docs/schema.md that lives on the device. Server-only
 /// tables (device tokens, suggested edits, social) are not here.
@@ -29,6 +29,7 @@ const _tables = {
   'weather_snapshots',
   'session_members',
   'ascents',
+  'ascent_beta',
   'ascent_pitches',
   'ascent_attributes',
   'ascent_gear',
@@ -49,8 +50,6 @@ const _tables = {
 const _shared = {
   'areas',
   'gym_profiles',
-  'gym_walls',
-  'gym_colour_grades',
   'routes',
   'pitches',
   'grade_systems',
@@ -63,6 +62,23 @@ const _shared = {
 };
 
 void main() {
+  group('a new database', newDatabaseTests);
+
+  test(
+    'M1-1: migration from every earlier version to the latest works',
+    () async {
+      final verifier = SchemaVerifier(GeneratedHelper());
+      for (final version in GeneratedHelper.versions) {
+        final connection = await verifier.startAt(version);
+        final migrated = SvaDatabase(connection);
+        await verifier.migrateAndValidate(migrated, migrated.schemaVersion);
+        await migrated.close();
+      }
+    },
+  );
+}
+
+void newDatabaseTests() {
   late SvaDatabase db;
 
   setUp(() => db = SvaDatabase(NativeDatabase.memory()));
@@ -125,6 +141,8 @@ void main() {
       // would be a rule the synced tables silently lose.
       final checks = sql.replaceAll(RegExp(r'CHECK \("\w+" IN \(0, 1\)\)'), '');
       expect(checks, isNot(contains('CHECK')), reason: table);
+      // PowerSync's views ignore SQL defaults; defaults are set in Dart.
+      expect(sql, isNot(contains('DEFAULT')), reason: table);
       final unique = await query(
         "SELECT name FROM pragma_index_list('$table') "
         "WHERE \"unique\" = 1 AND origin != 'pk'",
@@ -132,17 +150,4 @@ void main() {
       expect(unique, isEmpty, reason: '$table has a unique index');
     }
   });
-
-  test(
-    'M1-1: migration from every earlier version to the latest works',
-    () async {
-      final verifier = SchemaVerifier(GeneratedHelper());
-      for (final version in GeneratedHelper.versions) {
-        final connection = await verifier.startAt(version);
-        final migrated = SvaDatabase(connection);
-        await verifier.migrateAndValidate(migrated, migrated.schemaVersion);
-        await migrated.close();
-      }
-    },
-  );
 }

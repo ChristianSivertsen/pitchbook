@@ -1,10 +1,10 @@
 import 'package:drift/drift.dart';
 import 'package:sva_data/src/database/tables/conventions.dart';
 
-@TableIndex(name: 'areas_parent', columns: {#parentId})
-@TableIndex(name: 'areas_country', columns: {#countryCode})
 /// One tree for every place, from country to boulder block or gym
 /// (docs/schema.md §2).
+@TableIndex(name: 'areas_parent', columns: {#parentId})
+@TableIndex(name: 'areas_country', columns: {#countryCode})
 class Areas extends Table with SyncedRow, SharedRow, Visible {
   TextColumn get parentId => text().nullable()();
 
@@ -12,15 +12,16 @@ class Areas extends Table with SyncedRow, SharedRow, Visible {
   /// `boulder_block`, `gym`.
   TextColumn get type => text()();
   TextColumn get name => text()();
-  TextColumn get countryCode => text().nullable()();
+
+  /// ISO 3166-1 alpha-2, set on every row for fast filtering.
+  TextColumn get countryCode => text()();
   RealColumn get latitude => real().nullable()();
   RealColumn get longitude => real().nullable()();
   IntColumn get altitudeM => integer().nullable()();
   TextColumn get rockType => text().nullable()();
   TextColumn get aspect => text().nullable()();
   IntColumn get approachMin => integer().nullable()();
-  BoolColumn get locationHidden =>
-      boolean().withDefault(const Constant(false))();
+  BoolColumn get locationHidden => boolean().clientDefault(() => false)();
   TextColumn get accessNotes => text().nullable()();
   TextColumn get mergedIntoId => text().nullable()();
 }
@@ -34,7 +35,8 @@ class GymProfiles extends Table with SyncedRow, SharedRow {
   IntColumn get routeExpiryWeeks => integer().nullable()();
 }
 
-class GymWalls extends Table with SyncedRow, SharedRow {
+/// Personal for now, like gym routes.
+class GymWalls extends Table with SyncedRow, OwnedRow {
   TextColumn get gymId => text()();
   TextColumn get name => text()();
   RealColumn get heightM => real().nullable()();
@@ -45,11 +47,12 @@ class GymWalls extends Table with SyncedRow, SharedRow {
 
   /// `YYYY-MM-DD`.
   TextColumn get lastResetOn => text().nullable()();
-  IntColumn get sort => integer().withDefault(const Constant(0))();
+  IntColumn get sort => integer().clientDefault(() => 0)();
 }
 
-/// One row per colour in a gym's grading, easiest first.
-class GymColourGrades extends Table with SyncedRow, SharedRow {
+/// One row per colour in a gym's grading, easiest first. Personal for
+/// now, like gym walls.
+class GymColourGrades extends Table with SyncedRow, OwnedRow {
   TextColumn get gymId => text()();
   IntColumn get sort => integer()();
   TextColumn get name => text()();

@@ -1,8 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:sva_data/src/database/tables/conventions.dart';
 
-@TableIndex(name: 'routes_area', columns: {#areaId})
 /// Every climbable line, outdoors or in a gym (docs/schema.md §3).
+@TableIndex(name: 'routes_area', columns: {#areaId})
 class Routes extends Table with SyncedRow, SharedRow, Visible {
   TextColumn get areaId => text()();
 
@@ -12,7 +12,7 @@ class Routes extends Table with SyncedRow, SharedRow, Visible {
 
   /// `sport`, `trad`, `boulder`, `alpine`, `ice`, `mixed`, `aid`, `dws`.
   TextColumn get discipline => text()();
-  IntColumn get pitchCount => integer().withDefault(const Constant(1))();
+  IntColumn get pitchCount => integer().clientDefault(() => 1)();
   RealColumn get lengthM => real().nullable()();
   TextColumn get angle => text().nullable()();
   TextColumn get protection => text().nullable()();
@@ -117,7 +117,7 @@ class Topos extends Table with SyncedRow, SharedRow {
 
   /// JSON: lines, symbols and labels relative to the photo.
   TextColumn get data => text()();
-  IntColumn get version => integer().withDefault(const Constant(1))();
+  IntColumn get version => integer().clientDefault(() => 1)();
 
   /// `draft` or `published`.
   TextColumn get status => text()();

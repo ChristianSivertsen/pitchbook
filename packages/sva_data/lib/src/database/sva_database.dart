@@ -11,9 +11,12 @@ part 'sva_database.g.dart';
 /// PowerSync rules in `tables/conventions.dart`.
 ///
 /// Changing a table: bump [schemaVersion], add a step to [migration], then
-/// run `dart run drift_dev make-migrations` in `packages/sva_data` to save
-/// the new schema and generate its migration test helpers. Never edit a
-/// step that has been merged.
+/// run `dart run drift_dev make-migrations` in `packages/sva_data`. It saves
+/// the new schema in `drift_schemas/` and the test helpers in
+/// `test/generated_migrations/sva/generated/`. Delete the
+/// `migration_test.dart` template it writes: `test/database/schema_test.dart`
+/// already migrates every saved version. Never edit a step that has been
+/// merged.
 @DriftDatabase(
   tables: [
     Profiles,
@@ -36,6 +39,7 @@ part 'sva_database.g.dart';
     WeatherSnapshots,
     SessionMembers,
     Ascents,
+    AscentBeta,
     AscentPitches,
     AscentAttributes,
     AscentGear,

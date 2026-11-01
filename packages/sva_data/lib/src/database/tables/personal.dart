@@ -5,7 +5,9 @@ import 'package:sva_data/src/database/tables/conventions.dart';
 
 @TableIndex(name: 'media_session', columns: {#sessionId})
 @DataClassName('MediaItem')
-class Media extends Table with SyncedRow, OwnedRow, Visible {
+class Media extends Table with SyncedRow, Visible {
+  /// Null once the photo is shared as a topo.
+  TextColumn get ownerId => text().nullable()();
   TextColumn get sessionId => text().nullable()();
   TextColumn get routeId => text().nullable()();
   TextColumn get ascentId => text().nullable()();
@@ -19,13 +21,19 @@ class Media extends Table with SyncedRow, OwnedRow, Visible {
   RealColumn get durationS => real().nullable()();
   TextColumn get caption => text().nullable()();
   DateTimeColumn get takenAt => dateTime().nullable()();
-  IntColumn get sort => integer().withDefault(const Constant(0))();
+  IntColumn get sort => integer().clientDefault(() => 0)();
 
   /// `local`, `uploading`, `uploaded`, `failed`.
   TextColumn get uploadState => text()();
 
   /// Must be true before upload.
-  BoolColumn get exifStripped => boolean().withDefault(const Constant(false))();
+  /// `none`, `pending`, `shared`, `rejected`: sharing as a topo photo.
+  TextColumn get shareState => text().clientDefault(() => 'none')();
+
+  /// The person who took a shared topo photo.
+  TextColumn get creditedTo => text().nullable()();
+
+  BoolColumn get exifStripped => boolean().clientDefault(() => false)();
 }
 
 /// Shared gear catalog.
@@ -54,9 +62,8 @@ class GearPieces extends Table with SyncedRow, OwnedRow {
   TextColumn get reslungOn => text().nullable()();
   IntColumn get reslingIntervalMonths => integer().nullable()();
   IntColumn get retireAfterMonths => integer().nullable()();
-  BoolColumn get remind => boolean().withDefault(const Constant(true))();
-  BoolColumn get inDefaultRack =>
-      boolean().withDefault(const Constant(false))();
+  BoolColumn get remind => boolean().clientDefault(() => true)();
+  BoolColumn get inDefaultRack => boolean().clientDefault(() => false)();
   TextColumn get specs => text().nullable()();
   TextColumn get retiredOn => text().nullable()();
   TextColumn get notes => text().nullable()();

@@ -224,10 +224,10 @@ class Areas extends Table with TableInfo {
   late final GeneratedColumn<String> countryCode = GeneratedColumn<String>(
     'country_code',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
     'latitude',
@@ -282,9 +282,8 @@ class Areas extends Table with TableInfo {
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT 0 CHECK (location_hidden IN (0, 1))',
-    defaultValue: const CustomExpression('0'),
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL CHECK (location_hidden IN (0, 1))',
   );
   late final GeneratedColumn<String> accessNotes = GeneratedColumn<String>(
     'access_notes',
@@ -487,13 +486,13 @@ class GymWalls extends Table with TableInfo {
     requiredDuringInsert: false,
     $customConstraints: 'NULL',
   );
-  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
-    'created_by',
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   late final GeneratedColumn<String> gymId = GeneratedColumn<String>(
     'gym_id',
@@ -548,9 +547,8 @@ class GymWalls extends Table with TableInfo {
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT 0',
-    defaultValue: const CustomExpression('0'),
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -558,7 +556,7 @@ class GymWalls extends Table with TableInfo {
     createdAt,
     updatedAt,
     deletedAt,
-    createdBy,
+    ownerId,
     gymId,
     name,
     heightM,
@@ -627,13 +625,13 @@ class GymColourGrades extends Table with TableInfo {
     requiredDuringInsert: false,
     $customConstraints: 'NULL',
   );
-  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
-    'created_by',
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   late final GeneratedColumn<String> gymId = GeneratedColumn<String>(
     'gym_id',
@@ -705,7 +703,7 @@ class GymColourGrades extends Table with TableInfo {
     createdAt,
     updatedAt,
     deletedAt,
-    createdBy,
+    ownerId,
     gymId,
     sort,
     name,
@@ -828,9 +826,8 @@ class Routes extends Table with TableInfo {
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT 1',
-    defaultValue: const CustomExpression('1'),
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   late final GeneratedColumn<double> lengthM = GeneratedColumn<double>(
     'length_m',
@@ -1875,9 +1872,8 @@ class Topos extends Table with TableInfo {
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT 1',
-    defaultValue: const CustomExpression('1'),
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
     'status',
@@ -2380,9 +2376,8 @@ class Sessions extends Table with TableInfo {
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT 0 CHECK (location_hidden IN (0, 1))',
-    defaultValue: const CustomExpression('0'),
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL CHECK (location_hidden IN (0, 1))',
   );
   late final GeneratedColumn<String> defaultShoeId = GeneratedColumn<String>(
     'default_shoe_id',
@@ -2499,6 +2494,14 @@ class WeatherSnapshots extends Table with TableInfo {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> sessionId = GeneratedColumn<String>(
     'session_id',
     aliasedName,
@@ -2586,6 +2589,7 @@ class WeatherSnapshots extends Table with TableInfo {
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     sessionId,
     source,
     tempC,
@@ -2665,6 +2669,14 @@ class SessionMembers extends Table with TableInfo {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> sessionId = GeneratedColumn<String>(
     'session_id',
     aliasedName,
@@ -2712,6 +2724,7 @@ class SessionMembers extends Table with TableInfo {
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     sessionId,
     userId,
     guestName,
@@ -2780,6 +2793,14 @@ class Ascents extends Table with TableInfo {
   );
   late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
     'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -2898,14 +2919,6 @@ class Ascents extends Table with TableInfo {
     requiredDuringInsert: false,
     $customConstraints: 'NULL',
   );
-  late final GeneratedColumn<String> betaNotes = GeneratedColumn<String>(
-    'beta_notes',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
-  );
   late final GeneratedColumn<int> durationS = GeneratedColumn<int>(
     'duration_s',
     aliasedName,
@@ -2945,6 +2958,7 @@ class Ascents extends Table with TableInfo {
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     sessionId,
     routeId,
     ordinal,
@@ -2959,7 +2973,6 @@ class Ascents extends Table with TableInfo {
     officialGradeId,
     difficultyScore,
     qualityStars,
-    betaNotes,
     durationS,
     shoeId,
     setting,
@@ -2980,6 +2993,100 @@ class Ascents extends Table with TableInfo {
   @override
   Ascents createAlias(String alias) {
     return Ascents(attachedDatabase, alias);
+  }
+
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class AscentBeta extends Table with TableInfo {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  AscentBeta(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
+  );
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<String> ascentId = GeneratedColumn<String>(
+    'ascent_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<String> betaNotes = GeneratedColumn<String>(
+    'beta_notes',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    ownerId,
+    ascentId,
+    betaNotes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'ascent_beta';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
+  }
+
+  @override
+  AscentBeta createAlias(String alias) {
+    return AscentBeta(attachedDatabase, alias);
   }
 
   @override
@@ -3027,6 +3134,14 @@ class AscentPitches extends Table with TableInfo {
   );
   late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
     'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -3112,6 +3227,7 @@ class AscentPitches extends Table with TableInfo {
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     ascentId,
     pitchId,
     number,
@@ -3190,6 +3306,14 @@ class AscentAttributes extends Table with TableInfo {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> ascentId = GeneratedColumn<String>(
     'ascent_id',
     aliasedName,
@@ -3221,6 +3345,7 @@ class AscentAttributes extends Table with TableInfo {
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     ascentId,
     attributeKey,
     value,
@@ -3293,6 +3418,14 @@ class AscentGear extends Table with TableInfo {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> ascentId = GeneratedColumn<String>(
     'ascent_id',
     aliasedName,
@@ -3314,9 +3447,8 @@ class AscentGear extends Table with TableInfo {
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT 1',
-    defaultValue: const CustomExpression('1'),
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   late final GeneratedColumn<String> borrowedFrom = GeneratedColumn<String>(
     'borrowed_from',
@@ -3333,6 +3465,7 @@ class AscentGear extends Table with TableInfo {
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     ascentId,
     gearPieceId,
     count,
@@ -3398,14 +3531,6 @@ class Media extends Table with TableInfo {
     requiredDuringInsert: false,
     $customConstraints: 'NULL',
   );
-  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
-    'owner_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
   late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
     'visibility',
     aliasedName,
@@ -3413,6 +3538,14 @@ class Media extends Table with TableInfo {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
   );
   late final GeneratedColumn<String> sessionId = GeneratedColumn<String>(
     'session_id',
@@ -3507,9 +3640,8 @@ class Media extends Table with TableInfo {
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT 0',
-    defaultValue: const CustomExpression('0'),
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   late final GeneratedColumn<String> uploadState = GeneratedColumn<String>(
     'upload_state',
@@ -3519,14 +3651,29 @@ class Media extends Table with TableInfo {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
+  late final GeneratedColumn<String> shareState = GeneratedColumn<String>(
+    'share_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<String> creditedTo = GeneratedColumn<String>(
+    'credited_to',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
+  );
   late final GeneratedColumn<int> exifStripped = GeneratedColumn<int>(
     'exif_stripped',
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT 0 CHECK (exif_stripped IN (0, 1))',
-    defaultValue: const CustomExpression('0'),
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL CHECK (exif_stripped IN (0, 1))',
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -3534,8 +3681,8 @@ class Media extends Table with TableInfo {
     createdAt,
     updatedAt,
     deletedAt,
-    ownerId,
     visibility,
+    ownerId,
     sessionId,
     routeId,
     ascentId,
@@ -3549,6 +3696,8 @@ class Media extends Table with TableInfo {
     takenAt,
     sort,
     uploadState,
+    shareState,
+    creditedTo,
     exifStripped,
   ];
   @override
@@ -3834,18 +3983,16 @@ class GearPieces extends Table with TableInfo {
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT 1 CHECK (remind IN (0, 1))',
-    defaultValue: const CustomExpression('1'),
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL CHECK (remind IN (0, 1))',
   );
   late final GeneratedColumn<int> inDefaultRack = GeneratedColumn<int>(
     'in_default_rack',
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT 0 CHECK (in_default_rack IN (0, 1))',
-    defaultValue: const CustomExpression('0'),
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL CHECK (in_default_rack IN (0, 1))',
   );
   late final GeneratedColumn<String> specs = GeneratedColumn<String>(
     'specs',
@@ -4997,6 +5144,7 @@ class DatabaseAtV1 extends GeneratedDatabase {
   late final WeatherSnapshots weatherSnapshots = WeatherSnapshots(this);
   late final SessionMembers sessionMembers = SessionMembers(this);
   late final Ascents ascents = Ascents(this);
+  late final AscentBeta ascentBeta = AscentBeta(this);
   late final AscentPitches ascentPitches = AscentPitches(this);
   late final AscentAttributes ascentAttributes = AscentAttributes(this);
   late final AscentGear ascentGear = AscentGear(this);
@@ -5080,6 +5228,7 @@ class DatabaseAtV1 extends GeneratedDatabase {
     weatherSnapshots,
     sessionMembers,
     ascents,
+    ascentBeta,
     ascentPitches,
     ascentAttributes,
     ascentGear,

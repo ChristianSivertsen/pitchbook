@@ -856,9 +856,9 @@ class $AreasTable extends Areas with TableInfo<$AreasTable, Area> {
   late final GeneratedColumn<String> countryCode = GeneratedColumn<String>(
     'country_code',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.string,
-    requiredDuringInsert: false,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _latitudeMeta = const VerificationMeta(
     'latitude',
@@ -937,7 +937,7 @@ class $AreasTable extends Areas with TableInfo<$AreasTable, Area> {
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'CHECK ("location_hidden" IN (0, 1))',
     ),
-    defaultValue: const Constant(false),
+    clientDefault: () => false,
   );
   static const VerificationMeta _accessNotesMeta = const VerificationMeta(
     'accessNotes',
@@ -1066,6 +1066,8 @@ class $AreasTable extends Areas with TableInfo<$AreasTable, Area> {
           _countryCodeMeta,
         ),
       );
+    } else if (isInserting) {
+      context.missing(_countryCodeMeta);
     }
     if (data.containsKey('latitude')) {
       context.handle(
@@ -1181,7 +1183,7 @@ class $AreasTable extends Areas with TableInfo<$AreasTable, Area> {
       countryCode: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}country_code'],
-      ),
+      )!,
       latitude: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}latitude'],
@@ -1245,7 +1247,9 @@ class Area extends DataClass implements Insertable<Area> {
   /// `boulder_block`, `gym`.
   final String type;
   final String name;
-  final String? countryCode;
+
+  /// ISO 3166-1 alpha-2, set on every row for fast filtering.
+  final String countryCode;
   final double? latitude;
   final double? longitude;
   final int? altitudeM;
@@ -1265,7 +1269,7 @@ class Area extends DataClass implements Insertable<Area> {
     this.parentId,
     required this.type,
     required this.name,
-    this.countryCode,
+    required this.countryCode,
     this.latitude,
     this.longitude,
     this.altitudeM,
@@ -1294,9 +1298,7 @@ class Area extends DataClass implements Insertable<Area> {
     }
     map['type'] = Variable<String>(type);
     map['name'] = Variable<String>(name);
-    if (!nullToAbsent || countryCode != null) {
-      map['country_code'] = Variable<String>(countryCode);
-    }
+    map['country_code'] = Variable<String>(countryCode);
     if (!nullToAbsent || latitude != null) {
       map['latitude'] = Variable<double>(latitude);
     }
@@ -1342,9 +1344,7 @@ class Area extends DataClass implements Insertable<Area> {
           : Value(parentId),
       type: Value(type),
       name: Value(name),
-      countryCode: countryCode == null && nullToAbsent
-          ? const Value.absent()
-          : Value(countryCode),
+      countryCode: Value(countryCode),
       latitude: latitude == null && nullToAbsent
           ? const Value.absent()
           : Value(latitude),
@@ -1388,7 +1388,7 @@ class Area extends DataClass implements Insertable<Area> {
       parentId: serializer.fromJson<String?>(json['parentId']),
       type: serializer.fromJson<String>(json['type']),
       name: serializer.fromJson<String>(json['name']),
-      countryCode: serializer.fromJson<String?>(json['countryCode']),
+      countryCode: serializer.fromJson<String>(json['countryCode']),
       latitude: serializer.fromJson<double?>(json['latitude']),
       longitude: serializer.fromJson<double?>(json['longitude']),
       altitudeM: serializer.fromJson<int?>(json['altitudeM']),
@@ -1413,7 +1413,7 @@ class Area extends DataClass implements Insertable<Area> {
       'parentId': serializer.toJson<String?>(parentId),
       'type': serializer.toJson<String>(type),
       'name': serializer.toJson<String>(name),
-      'countryCode': serializer.toJson<String?>(countryCode),
+      'countryCode': serializer.toJson<String>(countryCode),
       'latitude': serializer.toJson<double?>(latitude),
       'longitude': serializer.toJson<double?>(longitude),
       'altitudeM': serializer.toJson<int?>(altitudeM),
@@ -1436,7 +1436,7 @@ class Area extends DataClass implements Insertable<Area> {
     Value<String?> parentId = const Value.absent(),
     String? type,
     String? name,
-    Value<String?> countryCode = const Value.absent(),
+    String? countryCode,
     Value<double?> latitude = const Value.absent(),
     Value<double?> longitude = const Value.absent(),
     Value<int?> altitudeM = const Value.absent(),
@@ -1456,7 +1456,7 @@ class Area extends DataClass implements Insertable<Area> {
     parentId: parentId.present ? parentId.value : this.parentId,
     type: type ?? this.type,
     name: name ?? this.name,
-    countryCode: countryCode.present ? countryCode.value : this.countryCode,
+    countryCode: countryCode ?? this.countryCode,
     latitude: latitude.present ? latitude.value : this.latitude,
     longitude: longitude.present ? longitude.value : this.longitude,
     altitudeM: altitudeM.present ? altitudeM.value : this.altitudeM,
@@ -1586,7 +1586,7 @@ class AreasCompanion extends UpdateCompanion<Area> {
   final Value<String?> parentId;
   final Value<String> type;
   final Value<String> name;
-  final Value<String?> countryCode;
+  final Value<String> countryCode;
   final Value<double?> latitude;
   final Value<double?> longitude;
   final Value<int?> altitudeM;
@@ -1629,7 +1629,7 @@ class AreasCompanion extends UpdateCompanion<Area> {
     this.parentId = const Value.absent(),
     required String type,
     required String name,
-    this.countryCode = const Value.absent(),
+    required String countryCode,
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
     this.altitudeM = const Value.absent(),
@@ -1645,7 +1645,8 @@ class AreasCompanion extends UpdateCompanion<Area> {
        updatedAt = Value(updatedAt),
        visibility = Value(visibility),
        type = Value(type),
-       name = Value(name);
+       name = Value(name),
+       countryCode = Value(countryCode);
   static Insertable<Area> custom({
     Expression<String>? id,
     Expression<DateTime>? createdAt,
@@ -1702,7 +1703,7 @@ class AreasCompanion extends UpdateCompanion<Area> {
     Value<String?>? parentId,
     Value<String>? type,
     Value<String>? name,
-    Value<String?>? countryCode,
+    Value<String>? countryCode,
     Value<double?>? latitude,
     Value<double?>? longitude,
     Value<int?>? altitudeM,
@@ -2406,16 +2407,16 @@ class $GymWallsTable extends GymWalls with TableInfo<$GymWallsTable, GymWall> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _createdByMeta = const VerificationMeta(
-    'createdBy',
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
   );
   @override
-  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
-    'created_by',
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.string,
-    requiredDuringInsert: false,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _gymIdMeta = const VerificationMeta('gymId');
   @override
@@ -2483,7 +2484,7 @@ class $GymWallsTable extends GymWalls with TableInfo<$GymWallsTable, GymWall> {
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultValue: const Constant(0),
+    clientDefault: () => 0,
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -2491,7 +2492,7 @@ class $GymWallsTable extends GymWalls with TableInfo<$GymWallsTable, GymWall> {
     createdAt,
     updatedAt,
     deletedAt,
-    createdBy,
+    ownerId,
     gymId,
     name,
     heightM,
@@ -2539,11 +2540,13 @@ class $GymWallsTable extends GymWalls with TableInfo<$GymWallsTable, GymWall> {
         deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
       );
     }
-    if (data.containsKey('created_by')) {
+    if (data.containsKey('owner_id')) {
       context.handle(
-        _createdByMeta,
-        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
       );
+    } else if (isInserting) {
+      context.missing(_ownerIdMeta);
     }
     if (data.containsKey('gym_id')) {
       context.handle(
@@ -2621,10 +2624,10 @@ class $GymWallsTable extends GymWalls with TableInfo<$GymWallsTable, GymWall> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}deleted_at'],
       ),
-      createdBy: attachedDatabase.typeMapping.read(
+      ownerId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}created_by'],
-      ),
+        data['${effectivePrefix}owner_id'],
+      )!,
       gymId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}gym_id'],
@@ -2670,9 +2673,7 @@ class GymWall extends DataClass implements Insertable<GymWall> {
 
   /// Set instead of deleting; clients never hard-delete rows.
   final DateTime? deletedAt;
-
-  /// Null for rows seeded by Sva.
-  final String? createdBy;
+  final String ownerId;
   final String gymId;
   final String name;
   final double? heightM;
@@ -2689,7 +2690,7 @@ class GymWall extends DataClass implements Insertable<GymWall> {
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
-    this.createdBy,
+    required this.ownerId,
     required this.gymId,
     required this.name,
     this.heightM,
@@ -2707,9 +2708,7 @@ class GymWall extends DataClass implements Insertable<GymWall> {
     if (!nullToAbsent || deletedAt != null) {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
-    if (!nullToAbsent || createdBy != null) {
-      map['created_by'] = Variable<String>(createdBy);
-    }
+    map['owner_id'] = Variable<String>(ownerId);
     map['gym_id'] = Variable<String>(gymId);
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || heightM != null) {
@@ -2734,9 +2733,7 @@ class GymWall extends DataClass implements Insertable<GymWall> {
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(deletedAt),
-      createdBy: createdBy == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdBy),
+      ownerId: Value(ownerId),
       gymId: Value(gymId),
       name: Value(name),
       heightM: heightM == null && nullToAbsent
@@ -2763,7 +2760,7 @@ class GymWall extends DataClass implements Insertable<GymWall> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
-      createdBy: serializer.fromJson<String?>(json['createdBy']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
       gymId: serializer.fromJson<String>(json['gymId']),
       name: serializer.fromJson<String>(json['name']),
       heightM: serializer.fromJson<double?>(json['heightM']),
@@ -2781,7 +2778,7 @@ class GymWall extends DataClass implements Insertable<GymWall> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
-      'createdBy': serializer.toJson<String?>(createdBy),
+      'ownerId': serializer.toJson<String>(ownerId),
       'gymId': serializer.toJson<String>(gymId),
       'name': serializer.toJson<String>(name),
       'heightM': serializer.toJson<double?>(heightM),
@@ -2797,7 +2794,7 @@ class GymWall extends DataClass implements Insertable<GymWall> {
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
-    Value<String?> createdBy = const Value.absent(),
+    String? ownerId,
     String? gymId,
     String? name,
     Value<double?> heightM = const Value.absent(),
@@ -2810,7 +2807,7 @@ class GymWall extends DataClass implements Insertable<GymWall> {
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
-    createdBy: createdBy.present ? createdBy.value : this.createdBy,
+    ownerId: ownerId ?? this.ownerId,
     gymId: gymId ?? this.gymId,
     name: name ?? this.name,
     heightM: heightM.present ? heightM.value : this.heightM,
@@ -2825,7 +2822,7 @@ class GymWall extends DataClass implements Insertable<GymWall> {
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
-      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
       gymId: data.gymId.present ? data.gymId.value : this.gymId,
       name: data.name.present ? data.name.value : this.name,
       heightM: data.heightM.present ? data.heightM.value : this.heightM,
@@ -2845,7 +2842,7 @@ class GymWall extends DataClass implements Insertable<GymWall> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('createdBy: $createdBy, ')
+          ..write('ownerId: $ownerId, ')
           ..write('gymId: $gymId, ')
           ..write('name: $name, ')
           ..write('heightM: $heightM, ')
@@ -2863,7 +2860,7 @@ class GymWall extends DataClass implements Insertable<GymWall> {
     createdAt,
     updatedAt,
     deletedAt,
-    createdBy,
+    ownerId,
     gymId,
     name,
     heightM,
@@ -2880,7 +2877,7 @@ class GymWall extends DataClass implements Insertable<GymWall> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
-          other.createdBy == this.createdBy &&
+          other.ownerId == this.ownerId &&
           other.gymId == this.gymId &&
           other.name == this.name &&
           other.heightM == this.heightM &&
@@ -2895,7 +2892,7 @@ class GymWallsCompanion extends UpdateCompanion<GymWall> {
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
-  final Value<String?> createdBy;
+  final Value<String> ownerId;
   final Value<String> gymId;
   final Value<String> name;
   final Value<double?> heightM;
@@ -2909,7 +2906,7 @@ class GymWallsCompanion extends UpdateCompanion<GymWall> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
-    this.createdBy = const Value.absent(),
+    this.ownerId = const Value.absent(),
     this.gymId = const Value.absent(),
     this.name = const Value.absent(),
     this.heightM = const Value.absent(),
@@ -2924,7 +2921,7 @@ class GymWallsCompanion extends UpdateCompanion<GymWall> {
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
-    this.createdBy = const Value.absent(),
+    required String ownerId,
     required String gymId,
     required String name,
     this.heightM = const Value.absent(),
@@ -2936,6 +2933,7 @@ class GymWallsCompanion extends UpdateCompanion<GymWall> {
   }) : id = Value(id),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt),
+       ownerId = Value(ownerId),
        gymId = Value(gymId),
        name = Value(name),
        kind = Value(kind);
@@ -2944,7 +2942,7 @@ class GymWallsCompanion extends UpdateCompanion<GymWall> {
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
-    Expression<String>? createdBy,
+    Expression<String>? ownerId,
     Expression<String>? gymId,
     Expression<String>? name,
     Expression<double>? heightM,
@@ -2959,7 +2957,7 @@ class GymWallsCompanion extends UpdateCompanion<GymWall> {
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
-      if (createdBy != null) 'created_by': createdBy,
+      if (ownerId != null) 'owner_id': ownerId,
       if (gymId != null) 'gym_id': gymId,
       if (name != null) 'name': name,
       if (heightM != null) 'height_m': heightM,
@@ -2976,7 +2974,7 @@ class GymWallsCompanion extends UpdateCompanion<GymWall> {
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
-    Value<String?>? createdBy,
+    Value<String>? ownerId,
     Value<String>? gymId,
     Value<String>? name,
     Value<double?>? heightM,
@@ -2991,7 +2989,7 @@ class GymWallsCompanion extends UpdateCompanion<GymWall> {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
-      createdBy: createdBy ?? this.createdBy,
+      ownerId: ownerId ?? this.ownerId,
       gymId: gymId ?? this.gymId,
       name: name ?? this.name,
       heightM: heightM ?? this.heightM,
@@ -3018,8 +3016,8 @@ class GymWallsCompanion extends UpdateCompanion<GymWall> {
     if (deletedAt.present) {
       map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
-    if (createdBy.present) {
-      map['created_by'] = Variable<String>(createdBy.value);
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
     }
     if (gymId.present) {
       map['gym_id'] = Variable<String>(gymId.value);
@@ -3055,7 +3053,7 @@ class GymWallsCompanion extends UpdateCompanion<GymWall> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('createdBy: $createdBy, ')
+          ..write('ownerId: $ownerId, ')
           ..write('gymId: $gymId, ')
           ..write('name: $name, ')
           ..write('heightM: $heightM, ')
@@ -3117,16 +3115,16 @@ class $GymColourGradesTable extends GymColourGrades
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _createdByMeta = const VerificationMeta(
-    'createdBy',
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
   );
   @override
-  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
-    'created_by',
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.string,
-    requiredDuringInsert: false,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _gymIdMeta = const VerificationMeta('gymId');
   @override
@@ -3216,7 +3214,7 @@ class $GymColourGradesTable extends GymColourGrades
     createdAt,
     updatedAt,
     deletedAt,
-    createdBy,
+    ownerId,
     gymId,
     sort,
     name,
@@ -3265,11 +3263,13 @@ class $GymColourGradesTable extends GymColourGrades
         deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
       );
     }
-    if (data.containsKey('created_by')) {
+    if (data.containsKey('owner_id')) {
       context.handle(
-        _createdByMeta,
-        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
       );
+    } else if (isInserting) {
+      context.missing(_ownerIdMeta);
     }
     if (data.containsKey('gym_id')) {
       context.handle(
@@ -3364,10 +3364,10 @@ class $GymColourGradesTable extends GymColourGrades
         DriftSqlType.dateTime,
         data['${effectivePrefix}deleted_at'],
       ),
-      createdBy: attachedDatabase.typeMapping.read(
+      ownerId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}created_by'],
-      ),
+        data['${effectivePrefix}owner_id'],
+      )!,
       gymId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}gym_id'],
@@ -3417,9 +3417,7 @@ class GymColourGrade extends DataClass implements Insertable<GymColourGrade> {
 
   /// Set instead of deleting; clients never hard-delete rows.
   final DateTime? deletedAt;
-
-  /// Null for rows seeded by Sva.
-  final String? createdBy;
+  final String ownerId;
   final String gymId;
   final int sort;
   final String name;
@@ -3433,7 +3431,7 @@ class GymColourGrade extends DataClass implements Insertable<GymColourGrade> {
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
-    this.createdBy,
+    required this.ownerId,
     required this.gymId,
     required this.sort,
     required this.name,
@@ -3452,9 +3450,7 @@ class GymColourGrade extends DataClass implements Insertable<GymColourGrade> {
     if (!nullToAbsent || deletedAt != null) {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
-    if (!nullToAbsent || createdBy != null) {
-      map['created_by'] = Variable<String>(createdBy);
-    }
+    map['owner_id'] = Variable<String>(ownerId);
     map['gym_id'] = Variable<String>(gymId);
     map['sort'] = Variable<int>(sort);
     map['name'] = Variable<String>(name);
@@ -3482,9 +3478,7 @@ class GymColourGrade extends DataClass implements Insertable<GymColourGrade> {
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(deletedAt),
-      createdBy: createdBy == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdBy),
+      ownerId: Value(ownerId),
       gymId: Value(gymId),
       sort: Value(sort),
       name: Value(name),
@@ -3514,7 +3508,7 @@ class GymColourGrade extends DataClass implements Insertable<GymColourGrade> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
-      createdBy: serializer.fromJson<String?>(json['createdBy']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
       gymId: serializer.fromJson<String>(json['gymId']),
       sort: serializer.fromJson<int>(json['sort']),
       name: serializer.fromJson<String>(json['name']),
@@ -3533,7 +3527,7 @@ class GymColourGrade extends DataClass implements Insertable<GymColourGrade> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
-      'createdBy': serializer.toJson<String?>(createdBy),
+      'ownerId': serializer.toJson<String>(ownerId),
       'gymId': serializer.toJson<String>(gymId),
       'sort': serializer.toJson<int>(sort),
       'name': serializer.toJson<String>(name),
@@ -3550,7 +3544,7 @@ class GymColourGrade extends DataClass implements Insertable<GymColourGrade> {
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
-    Value<String?> createdBy = const Value.absent(),
+    String? ownerId,
     String? gymId,
     int? sort,
     String? name,
@@ -3564,7 +3558,7 @@ class GymColourGrade extends DataClass implements Insertable<GymColourGrade> {
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
-    createdBy: createdBy.present ? createdBy.value : this.createdBy,
+    ownerId: ownerId ?? this.ownerId,
     gymId: gymId ?? this.gymId,
     sort: sort ?? this.sort,
     name: name ?? this.name,
@@ -3588,7 +3582,7 @@ class GymColourGrade extends DataClass implements Insertable<GymColourGrade> {
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
-      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
       gymId: data.gymId.present ? data.gymId.value : this.gymId,
       sort: data.sort.present ? data.sort.value : this.sort,
       name: data.name.present ? data.name.value : this.name,
@@ -3615,7 +3609,7 @@ class GymColourGrade extends DataClass implements Insertable<GymColourGrade> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('createdBy: $createdBy, ')
+          ..write('ownerId: $ownerId, ')
           ..write('gymId: $gymId, ')
           ..write('sort: $sort, ')
           ..write('name: $name, ')
@@ -3634,7 +3628,7 @@ class GymColourGrade extends DataClass implements Insertable<GymColourGrade> {
     createdAt,
     updatedAt,
     deletedAt,
-    createdBy,
+    ownerId,
     gymId,
     sort,
     name,
@@ -3652,7 +3646,7 @@ class GymColourGrade extends DataClass implements Insertable<GymColourGrade> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
-          other.createdBy == this.createdBy &&
+          other.ownerId == this.ownerId &&
           other.gymId == this.gymId &&
           other.sort == this.sort &&
           other.name == this.name &&
@@ -3668,7 +3662,7 @@ class GymColourGradesCompanion extends UpdateCompanion<GymColourGrade> {
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
-  final Value<String?> createdBy;
+  final Value<String> ownerId;
   final Value<String> gymId;
   final Value<int> sort;
   final Value<String> name;
@@ -3683,7 +3677,7 @@ class GymColourGradesCompanion extends UpdateCompanion<GymColourGrade> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
-    this.createdBy = const Value.absent(),
+    this.ownerId = const Value.absent(),
     this.gymId = const Value.absent(),
     this.sort = const Value.absent(),
     this.name = const Value.absent(),
@@ -3699,7 +3693,7 @@ class GymColourGradesCompanion extends UpdateCompanion<GymColourGrade> {
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
-    this.createdBy = const Value.absent(),
+    required String ownerId,
     required String gymId,
     required int sort,
     required String name,
@@ -3712,6 +3706,7 @@ class GymColourGradesCompanion extends UpdateCompanion<GymColourGrade> {
   }) : id = Value(id),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt),
+       ownerId = Value(ownerId),
        gymId = Value(gymId),
        sort = Value(sort),
        name = Value(name),
@@ -3721,7 +3716,7 @@ class GymColourGradesCompanion extends UpdateCompanion<GymColourGrade> {
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
-    Expression<String>? createdBy,
+    Expression<String>? ownerId,
     Expression<String>? gymId,
     Expression<int>? sort,
     Expression<String>? name,
@@ -3737,7 +3732,7 @@ class GymColourGradesCompanion extends UpdateCompanion<GymColourGrade> {
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
-      if (createdBy != null) 'created_by': createdBy,
+      if (ownerId != null) 'owner_id': ownerId,
       if (gymId != null) 'gym_id': gymId,
       if (sort != null) 'sort': sort,
       if (name != null) 'name': name,
@@ -3755,7 +3750,7 @@ class GymColourGradesCompanion extends UpdateCompanion<GymColourGrade> {
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
-    Value<String?>? createdBy,
+    Value<String>? ownerId,
     Value<String>? gymId,
     Value<int>? sort,
     Value<String>? name,
@@ -3771,7 +3766,7 @@ class GymColourGradesCompanion extends UpdateCompanion<GymColourGrade> {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
-      createdBy: createdBy ?? this.createdBy,
+      ownerId: ownerId ?? this.ownerId,
       gymId: gymId ?? this.gymId,
       sort: sort ?? this.sort,
       name: name ?? this.name,
@@ -3799,8 +3794,8 @@ class GymColourGradesCompanion extends UpdateCompanion<GymColourGrade> {
     if (deletedAt.present) {
       map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
-    if (createdBy.present) {
-      map['created_by'] = Variable<String>(createdBy.value);
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
     }
     if (gymId.present) {
       map['gym_id'] = Variable<String>(gymId.value);
@@ -3839,7 +3834,7 @@ class GymColourGradesCompanion extends UpdateCompanion<GymColourGrade> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('createdBy: $createdBy, ')
+          ..write('ownerId: $ownerId, ')
           ..write('gymId: $gymId, ')
           ..write('sort: $sort, ')
           ..write('name: $name, ')
@@ -3971,7 +3966,7 @@ class $RoutesTable extends Routes with TableInfo<$RoutesTable, Route> {
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultValue: const Constant(1),
+    clientDefault: () => 1,
   );
   static const VerificationMeta _lengthMMeta = const VerificationMeta(
     'lengthM',
@@ -9458,7 +9453,7 @@ class $ToposTable extends Topos with TableInfo<$ToposTable, Topo> {
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultValue: const Constant(1),
+    clientDefault: () => 1,
   );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
@@ -11788,7 +11783,7 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'CHECK ("location_hidden" IN (0, 1))',
     ),
-    defaultValue: const Constant(false),
+    clientDefault: () => false,
   );
   static const VerificationMeta _defaultShoeIdMeta = const VerificationMeta(
     'defaultShoeId',
@@ -12793,6 +12788,17 @@ class $WeatherSnapshotsTable extends WeatherSnapshots
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _visibilityMeta = const VerificationMeta(
+    'visibility',
+  );
+  @override
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _sessionIdMeta = const VerificationMeta(
     'sessionId',
   );
@@ -12902,6 +12908,7 @@ class $WeatherSnapshotsTable extends WeatherSnapshots
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     sessionId,
     source,
     tempC,
@@ -12959,6 +12966,14 @@ class $WeatherSnapshotsTable extends WeatherSnapshots
       );
     } else if (isInserting) {
       context.missing(_ownerIdMeta);
+    }
+    if (data.containsKey('visibility')) {
+      context.handle(
+        _visibilityMeta,
+        visibility.isAcceptableOrUnknown(data['visibility']!, _visibilityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_visibilityMeta);
     }
     if (data.containsKey('session_id')) {
       context.handle(
@@ -13061,6 +13076,10 @@ class $WeatherSnapshotsTable extends WeatherSnapshots
         DriftSqlType.string,
         data['${effectivePrefix}owner_id'],
       )!,
+      visibility: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}visibility'],
+      )!,
       sessionId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}session_id'],
@@ -13119,6 +13138,7 @@ class WeatherSnapshot extends DataClass implements Insertable<WeatherSnapshot> {
   /// Set instead of deleting; clients never hard-delete rows.
   final DateTime? deletedAt;
   final String ownerId;
+  final String visibility;
   final String sessionId;
 
   /// `open_meteo`.
@@ -13139,6 +13159,7 @@ class WeatherSnapshot extends DataClass implements Insertable<WeatherSnapshot> {
     required this.updatedAt,
     this.deletedAt,
     required this.ownerId,
+    required this.visibility,
     required this.sessionId,
     required this.source,
     this.tempC,
@@ -13160,6 +13181,7 @@ class WeatherSnapshot extends DataClass implements Insertable<WeatherSnapshot> {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['owner_id'] = Variable<String>(ownerId);
+    map['visibility'] = Variable<String>(visibility);
     map['session_id'] = Variable<String>(sessionId);
     map['source'] = Variable<String>(source);
     if (!nullToAbsent || tempC != null) {
@@ -13196,6 +13218,7 @@ class WeatherSnapshot extends DataClass implements Insertable<WeatherSnapshot> {
           ? const Value.absent()
           : Value(deletedAt),
       ownerId: Value(ownerId),
+      visibility: Value(visibility),
       sessionId: Value(sessionId),
       source: Value(source),
       tempC: tempC == null && nullToAbsent
@@ -13232,6 +13255,7 @@ class WeatherSnapshot extends DataClass implements Insertable<WeatherSnapshot> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       ownerId: serializer.fromJson<String>(json['ownerId']),
+      visibility: serializer.fromJson<String>(json['visibility']),
       sessionId: serializer.fromJson<String>(json['sessionId']),
       source: serializer.fromJson<String>(json['source']),
       tempC: serializer.fromJson<double?>(json['tempC']),
@@ -13253,6 +13277,7 @@ class WeatherSnapshot extends DataClass implements Insertable<WeatherSnapshot> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'ownerId': serializer.toJson<String>(ownerId),
+      'visibility': serializer.toJson<String>(visibility),
       'sessionId': serializer.toJson<String>(sessionId),
       'source': serializer.toJson<String>(source),
       'tempC': serializer.toJson<double?>(tempC),
@@ -13272,6 +13297,7 @@ class WeatherSnapshot extends DataClass implements Insertable<WeatherSnapshot> {
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
     String? ownerId,
+    String? visibility,
     String? sessionId,
     String? source,
     Value<double?> tempC = const Value.absent(),
@@ -13288,6 +13314,7 @@ class WeatherSnapshot extends DataClass implements Insertable<WeatherSnapshot> {
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     ownerId: ownerId ?? this.ownerId,
+    visibility: visibility ?? this.visibility,
     sessionId: sessionId ?? this.sessionId,
     source: source ?? this.source,
     tempC: tempC.present ? tempC.value : this.tempC,
@@ -13306,6 +13333,9 @@ class WeatherSnapshot extends DataClass implements Insertable<WeatherSnapshot> {
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      visibility: data.visibility.present
+          ? data.visibility.value
+          : this.visibility,
       sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
       source: data.source.present ? data.source.value : this.source,
       tempC: data.tempC.present ? data.tempC.value : this.tempC,
@@ -13331,6 +13361,7 @@ class WeatherSnapshot extends DataClass implements Insertable<WeatherSnapshot> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('ownerId: $ownerId, ')
+          ..write('visibility: $visibility, ')
           ..write('sessionId: $sessionId, ')
           ..write('source: $source, ')
           ..write('tempC: $tempC, ')
@@ -13352,6 +13383,7 @@ class WeatherSnapshot extends DataClass implements Insertable<WeatherSnapshot> {
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     sessionId,
     source,
     tempC,
@@ -13372,6 +13404,7 @@ class WeatherSnapshot extends DataClass implements Insertable<WeatherSnapshot> {
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.ownerId == this.ownerId &&
+          other.visibility == this.visibility &&
           other.sessionId == this.sessionId &&
           other.source == this.source &&
           other.tempC == this.tempC &&
@@ -13390,6 +13423,7 @@ class WeatherSnapshotsCompanion extends UpdateCompanion<WeatherSnapshot> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<String> ownerId;
+  final Value<String> visibility;
   final Value<String> sessionId;
   final Value<String> source;
   final Value<double?> tempC;
@@ -13407,6 +13441,7 @@ class WeatherSnapshotsCompanion extends UpdateCompanion<WeatherSnapshot> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.ownerId = const Value.absent(),
+    this.visibility = const Value.absent(),
     this.sessionId = const Value.absent(),
     this.source = const Value.absent(),
     this.tempC = const Value.absent(),
@@ -13425,6 +13460,7 @@ class WeatherSnapshotsCompanion extends UpdateCompanion<WeatherSnapshot> {
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     required String ownerId,
+    required String visibility,
     required String sessionId,
     required String source,
     this.tempC = const Value.absent(),
@@ -13440,6 +13476,7 @@ class WeatherSnapshotsCompanion extends UpdateCompanion<WeatherSnapshot> {
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt),
        ownerId = Value(ownerId),
+       visibility = Value(visibility),
        sessionId = Value(sessionId),
        source = Value(source),
        fetchedAt = Value(fetchedAt);
@@ -13449,6 +13486,7 @@ class WeatherSnapshotsCompanion extends UpdateCompanion<WeatherSnapshot> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<String>? ownerId,
+    Expression<String>? visibility,
     Expression<String>? sessionId,
     Expression<String>? source,
     Expression<double>? tempC,
@@ -13467,6 +13505,7 @@ class WeatherSnapshotsCompanion extends UpdateCompanion<WeatherSnapshot> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (ownerId != null) 'owner_id': ownerId,
+      if (visibility != null) 'visibility': visibility,
       if (sessionId != null) 'session_id': sessionId,
       if (source != null) 'source': source,
       if (tempC != null) 'temp_c': tempC,
@@ -13487,6 +13526,7 @@ class WeatherSnapshotsCompanion extends UpdateCompanion<WeatherSnapshot> {
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
     Value<String>? ownerId,
+    Value<String>? visibility,
     Value<String>? sessionId,
     Value<String>? source,
     Value<double?>? tempC,
@@ -13505,6 +13545,7 @@ class WeatherSnapshotsCompanion extends UpdateCompanion<WeatherSnapshot> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       ownerId: ownerId ?? this.ownerId,
+      visibility: visibility ?? this.visibility,
       sessionId: sessionId ?? this.sessionId,
       source: source ?? this.source,
       tempC: tempC ?? this.tempC,
@@ -13536,6 +13577,9 @@ class WeatherSnapshotsCompanion extends UpdateCompanion<WeatherSnapshot> {
     }
     if (ownerId.present) {
       map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (visibility.present) {
+      map['visibility'] = Variable<String>(visibility.value);
     }
     if (sessionId.present) {
       map['session_id'] = Variable<String>(sessionId.value);
@@ -13581,6 +13625,7 @@ class WeatherSnapshotsCompanion extends UpdateCompanion<WeatherSnapshot> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('ownerId: $ownerId, ')
+          ..write('visibility: $visibility, ')
           ..write('sessionId: $sessionId, ')
           ..write('source: $source, ')
           ..write('tempC: $tempC, ')
@@ -13656,6 +13701,17 @@ class $SessionMembersTable extends SessionMembers
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _visibilityMeta = const VerificationMeta(
+    'visibility',
+  );
+  @override
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _sessionIdMeta = const VerificationMeta(
     'sessionId',
   );
@@ -13714,6 +13770,7 @@ class $SessionMembersTable extends SessionMembers
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     sessionId,
     userId,
     guestName,
@@ -13766,6 +13823,14 @@ class $SessionMembersTable extends SessionMembers
       );
     } else if (isInserting) {
       context.missing(_ownerIdMeta);
+    }
+    if (data.containsKey('visibility')) {
+      context.handle(
+        _visibilityMeta,
+        visibility.isAcceptableOrUnknown(data['visibility']!, _visibilityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_visibilityMeta);
     }
     if (data.containsKey('session_id')) {
       context.handle(
@@ -13830,6 +13895,10 @@ class $SessionMembersTable extends SessionMembers
         DriftSqlType.string,
         data['${effectivePrefix}owner_id'],
       )!,
+      visibility: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}visibility'],
+      )!,
       sessionId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}session_id'],
@@ -13868,6 +13937,7 @@ class SessionMember extends DataClass implements Insertable<SessionMember> {
   /// Set instead of deleting; clients never hard-delete rows.
   final DateTime? deletedAt;
   final String ownerId;
+  final String visibility;
   final String sessionId;
 
   /// Null for partners without the app.
@@ -13883,6 +13953,7 @@ class SessionMember extends DataClass implements Insertable<SessionMember> {
     required this.updatedAt,
     this.deletedAt,
     required this.ownerId,
+    required this.visibility,
     required this.sessionId,
     this.userId,
     this.guestName,
@@ -13899,6 +13970,7 @@ class SessionMember extends DataClass implements Insertable<SessionMember> {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['owner_id'] = Variable<String>(ownerId);
+    map['visibility'] = Variable<String>(visibility);
     map['session_id'] = Variable<String>(sessionId);
     if (!nullToAbsent || userId != null) {
       map['user_id'] = Variable<String>(userId);
@@ -13922,6 +13994,7 @@ class SessionMember extends DataClass implements Insertable<SessionMember> {
           ? const Value.absent()
           : Value(deletedAt),
       ownerId: Value(ownerId),
+      visibility: Value(visibility),
       sessionId: Value(sessionId),
       userId: userId == null && nullToAbsent
           ? const Value.absent()
@@ -13947,6 +14020,7 @@ class SessionMember extends DataClass implements Insertable<SessionMember> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       ownerId: serializer.fromJson<String>(json['ownerId']),
+      visibility: serializer.fromJson<String>(json['visibility']),
       sessionId: serializer.fromJson<String>(json['sessionId']),
       userId: serializer.fromJson<String?>(json['userId']),
       guestName: serializer.fromJson<String?>(json['guestName']),
@@ -13963,6 +14037,7 @@ class SessionMember extends DataClass implements Insertable<SessionMember> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'ownerId': serializer.toJson<String>(ownerId),
+      'visibility': serializer.toJson<String>(visibility),
       'sessionId': serializer.toJson<String>(sessionId),
       'userId': serializer.toJson<String?>(userId),
       'guestName': serializer.toJson<String?>(guestName),
@@ -13977,6 +14052,7 @@ class SessionMember extends DataClass implements Insertable<SessionMember> {
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
     String? ownerId,
+    String? visibility,
     String? sessionId,
     Value<String?> userId = const Value.absent(),
     Value<String?> guestName = const Value.absent(),
@@ -13988,6 +14064,7 @@ class SessionMember extends DataClass implements Insertable<SessionMember> {
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     ownerId: ownerId ?? this.ownerId,
+    visibility: visibility ?? this.visibility,
     sessionId: sessionId ?? this.sessionId,
     userId: userId.present ? userId.value : this.userId,
     guestName: guestName.present ? guestName.value : this.guestName,
@@ -14001,6 +14078,9 @@ class SessionMember extends DataClass implements Insertable<SessionMember> {
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      visibility: data.visibility.present
+          ? data.visibility.value
+          : this.visibility,
       sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
       userId: data.userId.present ? data.userId.value : this.userId,
       guestName: data.guestName.present ? data.guestName.value : this.guestName,
@@ -14017,6 +14097,7 @@ class SessionMember extends DataClass implements Insertable<SessionMember> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('ownerId: $ownerId, ')
+          ..write('visibility: $visibility, ')
           ..write('sessionId: $sessionId, ')
           ..write('userId: $userId, ')
           ..write('guestName: $guestName, ')
@@ -14033,6 +14114,7 @@ class SessionMember extends DataClass implements Insertable<SessionMember> {
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     sessionId,
     userId,
     guestName,
@@ -14048,6 +14130,7 @@ class SessionMember extends DataClass implements Insertable<SessionMember> {
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.ownerId == this.ownerId &&
+          other.visibility == this.visibility &&
           other.sessionId == this.sessionId &&
           other.userId == this.userId &&
           other.guestName == this.guestName &&
@@ -14061,6 +14144,7 @@ class SessionMembersCompanion extends UpdateCompanion<SessionMember> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<String> ownerId;
+  final Value<String> visibility;
   final Value<String> sessionId;
   final Value<String?> userId;
   final Value<String?> guestName;
@@ -14073,6 +14157,7 @@ class SessionMembersCompanion extends UpdateCompanion<SessionMember> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.ownerId = const Value.absent(),
+    this.visibility = const Value.absent(),
     this.sessionId = const Value.absent(),
     this.userId = const Value.absent(),
     this.guestName = const Value.absent(),
@@ -14086,6 +14171,7 @@ class SessionMembersCompanion extends UpdateCompanion<SessionMember> {
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     required String ownerId,
+    required String visibility,
     required String sessionId,
     this.userId = const Value.absent(),
     this.guestName = const Value.absent(),
@@ -14096,6 +14182,7 @@ class SessionMembersCompanion extends UpdateCompanion<SessionMember> {
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt),
        ownerId = Value(ownerId),
+       visibility = Value(visibility),
        sessionId = Value(sessionId),
        status = Value(status);
   static Insertable<SessionMember> custom({
@@ -14104,6 +14191,7 @@ class SessionMembersCompanion extends UpdateCompanion<SessionMember> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<String>? ownerId,
+    Expression<String>? visibility,
     Expression<String>? sessionId,
     Expression<String>? userId,
     Expression<String>? guestName,
@@ -14117,6 +14205,7 @@ class SessionMembersCompanion extends UpdateCompanion<SessionMember> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (ownerId != null) 'owner_id': ownerId,
+      if (visibility != null) 'visibility': visibility,
       if (sessionId != null) 'session_id': sessionId,
       if (userId != null) 'user_id': userId,
       if (guestName != null) 'guest_name': guestName,
@@ -14132,6 +14221,7 @@ class SessionMembersCompanion extends UpdateCompanion<SessionMember> {
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
     Value<String>? ownerId,
+    Value<String>? visibility,
     Value<String>? sessionId,
     Value<String?>? userId,
     Value<String?>? guestName,
@@ -14145,6 +14235,7 @@ class SessionMembersCompanion extends UpdateCompanion<SessionMember> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       ownerId: ownerId ?? this.ownerId,
+      visibility: visibility ?? this.visibility,
       sessionId: sessionId ?? this.sessionId,
       userId: userId ?? this.userId,
       guestName: guestName ?? this.guestName,
@@ -14171,6 +14262,9 @@ class SessionMembersCompanion extends UpdateCompanion<SessionMember> {
     }
     if (ownerId.present) {
       map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (visibility.present) {
+      map['visibility'] = Variable<String>(visibility.value);
     }
     if (sessionId.present) {
       map['session_id'] = Variable<String>(sessionId.value);
@@ -14201,6 +14295,7 @@ class SessionMembersCompanion extends UpdateCompanion<SessionMember> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('ownerId: $ownerId, ')
+          ..write('visibility: $visibility, ')
           ..write('sessionId: $sessionId, ')
           ..write('userId: $userId, ')
           ..write('guestName: $guestName, ')
@@ -14265,6 +14360,17 @@ class $AscentsTable extends Ascents with TableInfo<$AscentsTable, Ascent> {
   @override
   late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
     'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _visibilityMeta = const VerificationMeta(
+    'visibility',
+  );
+  @override
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -14414,17 +14520,6 @@ class $AscentsTable extends Ascents with TableInfo<$AscentsTable, Ascent> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _betaNotesMeta = const VerificationMeta(
-    'betaNotes',
-  );
-  @override
-  late final GeneratedColumn<String> betaNotes = GeneratedColumn<String>(
-    'beta_notes',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _durationSMeta = const VerificationMeta(
     'durationS',
   );
@@ -14474,6 +14569,7 @@ class $AscentsTable extends Ascents with TableInfo<$AscentsTable, Ascent> {
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     sessionId,
     routeId,
     ordinal,
@@ -14488,7 +14584,6 @@ class $AscentsTable extends Ascents with TableInfo<$AscentsTable, Ascent> {
     officialGradeId,
     difficultyScore,
     qualityStars,
-    betaNotes,
     durationS,
     shoeId,
     setting,
@@ -14540,6 +14635,14 @@ class $AscentsTable extends Ascents with TableInfo<$AscentsTable, Ascent> {
       );
     } else if (isInserting) {
       context.missing(_ownerIdMeta);
+    }
+    if (data.containsKey('visibility')) {
+      context.handle(
+        _visibilityMeta,
+        visibility.isAcceptableOrUnknown(data['visibility']!, _visibilityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_visibilityMeta);
     }
     if (data.containsKey('session_id')) {
       context.handle(
@@ -14649,12 +14752,6 @@ class $AscentsTable extends Ascents with TableInfo<$AscentsTable, Ascent> {
         ),
       );
     }
-    if (data.containsKey('beta_notes')) {
-      context.handle(
-        _betaNotesMeta,
-        betaNotes.isAcceptableOrUnknown(data['beta_notes']!, _betaNotesMeta),
-      );
-    }
     if (data.containsKey('duration_s')) {
       context.handle(
         _durationSMeta,
@@ -14712,6 +14809,10 @@ class $AscentsTable extends Ascents with TableInfo<$AscentsTable, Ascent> {
         DriftSqlType.string,
         data['${effectivePrefix}owner_id'],
       )!,
+      visibility: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}visibility'],
+      )!,
       sessionId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}session_id'],
@@ -14768,10 +14869,6 @@ class $AscentsTable extends Ascents with TableInfo<$AscentsTable, Ascent> {
         DriftSqlType.int,
         data['${effectivePrefix}quality_stars'],
       ),
-      betaNotes: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}beta_notes'],
-      ),
       durationS: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}duration_s'],
@@ -14806,6 +14903,7 @@ class Ascent extends DataClass implements Insertable<Ascent> {
   /// Set instead of deleting; clients never hard-delete rows.
   final DateTime? deletedAt;
   final String ownerId;
+  final String visibility;
   final String sessionId;
   final String routeId;
   final int ordinal;
@@ -14822,9 +14920,6 @@ class Ascent extends DataClass implements Insertable<Ascent> {
   final String? officialGradeId;
   final double? difficultyScore;
   final int? qualityStars;
-
-  /// Always private.
-  final String? betaNotes;
   final int? durationS;
   final String? shoeId;
 
@@ -14837,6 +14932,7 @@ class Ascent extends DataClass implements Insertable<Ascent> {
     required this.updatedAt,
     this.deletedAt,
     required this.ownerId,
+    required this.visibility,
     required this.sessionId,
     required this.routeId,
     required this.ordinal,
@@ -14851,7 +14947,6 @@ class Ascent extends DataClass implements Insertable<Ascent> {
     this.officialGradeId,
     this.difficultyScore,
     this.qualityStars,
-    this.betaNotes,
     this.durationS,
     this.shoeId,
     required this.setting,
@@ -14867,6 +14962,7 @@ class Ascent extends DataClass implements Insertable<Ascent> {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['owner_id'] = Variable<String>(ownerId);
+    map['visibility'] = Variable<String>(visibility);
     map['session_id'] = Variable<String>(sessionId);
     map['route_id'] = Variable<String>(routeId);
     map['ordinal'] = Variable<int>(ordinal);
@@ -14897,9 +14993,6 @@ class Ascent extends DataClass implements Insertable<Ascent> {
     if (!nullToAbsent || qualityStars != null) {
       map['quality_stars'] = Variable<int>(qualityStars);
     }
-    if (!nullToAbsent || betaNotes != null) {
-      map['beta_notes'] = Variable<String>(betaNotes);
-    }
     if (!nullToAbsent || durationS != null) {
       map['duration_s'] = Variable<int>(durationS);
     }
@@ -14920,6 +15013,7 @@ class Ascent extends DataClass implements Insertable<Ascent> {
           ? const Value.absent()
           : Value(deletedAt),
       ownerId: Value(ownerId),
+      visibility: Value(visibility),
       sessionId: Value(sessionId),
       routeId: Value(routeId),
       ordinal: Value(ordinal),
@@ -14948,9 +15042,6 @@ class Ascent extends DataClass implements Insertable<Ascent> {
       qualityStars: qualityStars == null && nullToAbsent
           ? const Value.absent()
           : Value(qualityStars),
-      betaNotes: betaNotes == null && nullToAbsent
-          ? const Value.absent()
-          : Value(betaNotes),
       durationS: durationS == null && nullToAbsent
           ? const Value.absent()
           : Value(durationS),
@@ -14973,6 +15064,7 @@ class Ascent extends DataClass implements Insertable<Ascent> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       ownerId: serializer.fromJson<String>(json['ownerId']),
+      visibility: serializer.fromJson<String>(json['visibility']),
       sessionId: serializer.fromJson<String>(json['sessionId']),
       routeId: serializer.fromJson<String>(json['routeId']),
       ordinal: serializer.fromJson<int>(json['ordinal']),
@@ -14987,7 +15079,6 @@ class Ascent extends DataClass implements Insertable<Ascent> {
       officialGradeId: serializer.fromJson<String?>(json['officialGradeId']),
       difficultyScore: serializer.fromJson<double?>(json['difficultyScore']),
       qualityStars: serializer.fromJson<int?>(json['qualityStars']),
-      betaNotes: serializer.fromJson<String?>(json['betaNotes']),
       durationS: serializer.fromJson<int?>(json['durationS']),
       shoeId: serializer.fromJson<String?>(json['shoeId']),
       setting: serializer.fromJson<String>(json['setting']),
@@ -15003,6 +15094,7 @@ class Ascent extends DataClass implements Insertable<Ascent> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'ownerId': serializer.toJson<String>(ownerId),
+      'visibility': serializer.toJson<String>(visibility),
       'sessionId': serializer.toJson<String>(sessionId),
       'routeId': serializer.toJson<String>(routeId),
       'ordinal': serializer.toJson<int>(ordinal),
@@ -15017,7 +15109,6 @@ class Ascent extends DataClass implements Insertable<Ascent> {
       'officialGradeId': serializer.toJson<String?>(officialGradeId),
       'difficultyScore': serializer.toJson<double?>(difficultyScore),
       'qualityStars': serializer.toJson<int?>(qualityStars),
-      'betaNotes': serializer.toJson<String?>(betaNotes),
       'durationS': serializer.toJson<int?>(durationS),
       'shoeId': serializer.toJson<String?>(shoeId),
       'setting': serializer.toJson<String>(setting),
@@ -15031,6 +15122,7 @@ class Ascent extends DataClass implements Insertable<Ascent> {
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
     String? ownerId,
+    String? visibility,
     String? sessionId,
     String? routeId,
     int? ordinal,
@@ -15045,7 +15137,6 @@ class Ascent extends DataClass implements Insertable<Ascent> {
     Value<String?> officialGradeId = const Value.absent(),
     Value<double?> difficultyScore = const Value.absent(),
     Value<int?> qualityStars = const Value.absent(),
-    Value<String?> betaNotes = const Value.absent(),
     Value<int?> durationS = const Value.absent(),
     Value<String?> shoeId = const Value.absent(),
     String? setting,
@@ -15056,6 +15147,7 @@ class Ascent extends DataClass implements Insertable<Ascent> {
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     ownerId: ownerId ?? this.ownerId,
+    visibility: visibility ?? this.visibility,
     sessionId: sessionId ?? this.sessionId,
     routeId: routeId ?? this.routeId,
     ordinal: ordinal ?? this.ordinal,
@@ -15076,7 +15168,6 @@ class Ascent extends DataClass implements Insertable<Ascent> {
         ? difficultyScore.value
         : this.difficultyScore,
     qualityStars: qualityStars.present ? qualityStars.value : this.qualityStars,
-    betaNotes: betaNotes.present ? betaNotes.value : this.betaNotes,
     durationS: durationS.present ? durationS.value : this.durationS,
     shoeId: shoeId.present ? shoeId.value : this.shoeId,
     setting: setting ?? this.setting,
@@ -15089,6 +15180,9 @@ class Ascent extends DataClass implements Insertable<Ascent> {
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      visibility: data.visibility.present
+          ? data.visibility.value
+          : this.visibility,
       sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
       routeId: data.routeId.present ? data.routeId.value : this.routeId,
       ordinal: data.ordinal.present ? data.ordinal.value : this.ordinal,
@@ -15113,7 +15207,6 @@ class Ascent extends DataClass implements Insertable<Ascent> {
       qualityStars: data.qualityStars.present
           ? data.qualityStars.value
           : this.qualityStars,
-      betaNotes: data.betaNotes.present ? data.betaNotes.value : this.betaNotes,
       durationS: data.durationS.present ? data.durationS.value : this.durationS,
       shoeId: data.shoeId.present ? data.shoeId.value : this.shoeId,
       setting: data.setting.present ? data.setting.value : this.setting,
@@ -15131,6 +15224,7 @@ class Ascent extends DataClass implements Insertable<Ascent> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('ownerId: $ownerId, ')
+          ..write('visibility: $visibility, ')
           ..write('sessionId: $sessionId, ')
           ..write('routeId: $routeId, ')
           ..write('ordinal: $ordinal, ')
@@ -15145,7 +15239,6 @@ class Ascent extends DataClass implements Insertable<Ascent> {
           ..write('officialGradeId: $officialGradeId, ')
           ..write('difficultyScore: $difficultyScore, ')
           ..write('qualityStars: $qualityStars, ')
-          ..write('betaNotes: $betaNotes, ')
           ..write('durationS: $durationS, ')
           ..write('shoeId: $shoeId, ')
           ..write('setting: $setting, ')
@@ -15161,6 +15254,7 @@ class Ascent extends DataClass implements Insertable<Ascent> {
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     sessionId,
     routeId,
     ordinal,
@@ -15175,7 +15269,6 @@ class Ascent extends DataClass implements Insertable<Ascent> {
     officialGradeId,
     difficultyScore,
     qualityStars,
-    betaNotes,
     durationS,
     shoeId,
     setting,
@@ -15190,6 +15283,7 @@ class Ascent extends DataClass implements Insertable<Ascent> {
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.ownerId == this.ownerId &&
+          other.visibility == this.visibility &&
           other.sessionId == this.sessionId &&
           other.routeId == this.routeId &&
           other.ordinal == this.ordinal &&
@@ -15204,7 +15298,6 @@ class Ascent extends DataClass implements Insertable<Ascent> {
           other.officialGradeId == this.officialGradeId &&
           other.difficultyScore == this.difficultyScore &&
           other.qualityStars == this.qualityStars &&
-          other.betaNotes == this.betaNotes &&
           other.durationS == this.durationS &&
           other.shoeId == this.shoeId &&
           other.setting == this.setting &&
@@ -15217,6 +15310,7 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<String> ownerId;
+  final Value<String> visibility;
   final Value<String> sessionId;
   final Value<String> routeId;
   final Value<int> ordinal;
@@ -15231,7 +15325,6 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
   final Value<String?> officialGradeId;
   final Value<double?> difficultyScore;
   final Value<int?> qualityStars;
-  final Value<String?> betaNotes;
   final Value<int?> durationS;
   final Value<String?> shoeId;
   final Value<String> setting;
@@ -15243,6 +15336,7 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.ownerId = const Value.absent(),
+    this.visibility = const Value.absent(),
     this.sessionId = const Value.absent(),
     this.routeId = const Value.absent(),
     this.ordinal = const Value.absent(),
@@ -15257,7 +15351,6 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
     this.officialGradeId = const Value.absent(),
     this.difficultyScore = const Value.absent(),
     this.qualityStars = const Value.absent(),
-    this.betaNotes = const Value.absent(),
     this.durationS = const Value.absent(),
     this.shoeId = const Value.absent(),
     this.setting = const Value.absent(),
@@ -15270,6 +15363,7 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     required String ownerId,
+    required String visibility,
     required String sessionId,
     required String routeId,
     required int ordinal,
@@ -15284,7 +15378,6 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
     this.officialGradeId = const Value.absent(),
     this.difficultyScore = const Value.absent(),
     this.qualityStars = const Value.absent(),
-    this.betaNotes = const Value.absent(),
     this.durationS = const Value.absent(),
     this.shoeId = const Value.absent(),
     required String setting,
@@ -15294,6 +15387,7 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt),
        ownerId = Value(ownerId),
+       visibility = Value(visibility),
        sessionId = Value(sessionId),
        routeId = Value(routeId),
        ordinal = Value(ordinal),
@@ -15308,6 +15402,7 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<String>? ownerId,
+    Expression<String>? visibility,
     Expression<String>? sessionId,
     Expression<String>? routeId,
     Expression<int>? ordinal,
@@ -15322,7 +15417,6 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
     Expression<String>? officialGradeId,
     Expression<double>? difficultyScore,
     Expression<int>? qualityStars,
-    Expression<String>? betaNotes,
     Expression<int>? durationS,
     Expression<String>? shoeId,
     Expression<String>? setting,
@@ -15335,6 +15429,7 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (ownerId != null) 'owner_id': ownerId,
+      if (visibility != null) 'visibility': visibility,
       if (sessionId != null) 'session_id': sessionId,
       if (routeId != null) 'route_id': routeId,
       if (ordinal != null) 'ordinal': ordinal,
@@ -15349,7 +15444,6 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
       if (officialGradeId != null) 'official_grade_id': officialGradeId,
       if (difficultyScore != null) 'difficulty_score': difficultyScore,
       if (qualityStars != null) 'quality_stars': qualityStars,
-      if (betaNotes != null) 'beta_notes': betaNotes,
       if (durationS != null) 'duration_s': durationS,
       if (shoeId != null) 'shoe_id': shoeId,
       if (setting != null) 'setting': setting,
@@ -15364,6 +15458,7 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
     Value<String>? ownerId,
+    Value<String>? visibility,
     Value<String>? sessionId,
     Value<String>? routeId,
     Value<int>? ordinal,
@@ -15378,7 +15473,6 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
     Value<String?>? officialGradeId,
     Value<double?>? difficultyScore,
     Value<int?>? qualityStars,
-    Value<String?>? betaNotes,
     Value<int?>? durationS,
     Value<String?>? shoeId,
     Value<String>? setting,
@@ -15391,6 +15485,7 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       ownerId: ownerId ?? this.ownerId,
+      visibility: visibility ?? this.visibility,
       sessionId: sessionId ?? this.sessionId,
       routeId: routeId ?? this.routeId,
       ordinal: ordinal ?? this.ordinal,
@@ -15405,7 +15500,6 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
       officialGradeId: officialGradeId ?? this.officialGradeId,
       difficultyScore: difficultyScore ?? this.difficultyScore,
       qualityStars: qualityStars ?? this.qualityStars,
-      betaNotes: betaNotes ?? this.betaNotes,
       durationS: durationS ?? this.durationS,
       shoeId: shoeId ?? this.shoeId,
       setting: setting ?? this.setting,
@@ -15431,6 +15525,9 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
     }
     if (ownerId.present) {
       map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (visibility.present) {
+      map['visibility'] = Variable<String>(visibility.value);
     }
     if (sessionId.present) {
       map['session_id'] = Variable<String>(sessionId.value);
@@ -15474,9 +15571,6 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
     if (qualityStars.present) {
       map['quality_stars'] = Variable<int>(qualityStars.value);
     }
-    if (betaNotes.present) {
-      map['beta_notes'] = Variable<String>(betaNotes.value);
-    }
     if (durationS.present) {
       map['duration_s'] = Variable<int>(durationS.value);
     }
@@ -15503,6 +15597,7 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('ownerId: $ownerId, ')
+          ..write('visibility: $visibility, ')
           ..write('sessionId: $sessionId, ')
           ..write('routeId: $routeId, ')
           ..write('ordinal: $ordinal, ')
@@ -15517,11 +15612,478 @@ class AscentsCompanion extends UpdateCompanion<Ascent> {
           ..write('officialGradeId: $officialGradeId, ')
           ..write('difficultyScore: $difficultyScore, ')
           ..write('qualityStars: $qualityStars, ')
-          ..write('betaNotes: $betaNotes, ')
           ..write('durationS: $durationS, ')
           ..write('shoeId: $shoeId, ')
           ..write('setting: $setting, ')
           ..write('discipline: $discipline, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AscentBetaTable extends AscentBeta
+    with TableInfo<$AscentBetaTable, AscentBetaNote> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AscentBetaTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ascentIdMeta = const VerificationMeta(
+    'ascentId',
+  );
+  @override
+  late final GeneratedColumn<String> ascentId = GeneratedColumn<String>(
+    'ascent_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _betaNotesMeta = const VerificationMeta(
+    'betaNotes',
+  );
+  @override
+  late final GeneratedColumn<String> betaNotes = GeneratedColumn<String>(
+    'beta_notes',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    ownerId,
+    ascentId,
+    betaNotes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'ascent_beta';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AscentBetaNote> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerIdMeta);
+    }
+    if (data.containsKey('ascent_id')) {
+      context.handle(
+        _ascentIdMeta,
+        ascentId.isAcceptableOrUnknown(data['ascent_id']!, _ascentIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ascentIdMeta);
+    }
+    if (data.containsKey('beta_notes')) {
+      context.handle(
+        _betaNotesMeta,
+        betaNotes.isAcceptableOrUnknown(data['beta_notes']!, _betaNotesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_betaNotesMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AscentBetaNote map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AscentBetaNote(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      ascentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ascent_id'],
+      )!,
+      betaNotes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}beta_notes'],
+      )!,
+    );
+  }
+
+  @override
+  $AscentBetaTable createAlias(String alias) {
+    return $AscentBetaTable(attachedDatabase, alias);
+  }
+}
+
+class AscentBetaNote extends DataClass implements Insertable<AscentBetaNote> {
+  /// UUIDv7, generated on the device.
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  /// Set instead of deleting; clients never hard-delete rows.
+  final DateTime? deletedAt;
+  final String ownerId;
+  final String ascentId;
+  final String betaNotes;
+  const AscentBetaNote({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.ownerId,
+    required this.ascentId,
+    required this.betaNotes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['owner_id'] = Variable<String>(ownerId);
+    map['ascent_id'] = Variable<String>(ascentId);
+    map['beta_notes'] = Variable<String>(betaNotes);
+    return map;
+  }
+
+  AscentBetaCompanion toCompanion(bool nullToAbsent) {
+    return AscentBetaCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      ownerId: Value(ownerId),
+      ascentId: Value(ascentId),
+      betaNotes: Value(betaNotes),
+    );
+  }
+
+  factory AscentBetaNote.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AscentBetaNote(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      ascentId: serializer.fromJson<String>(json['ascentId']),
+      betaNotes: serializer.fromJson<String>(json['betaNotes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'ascentId': serializer.toJson<String>(ascentId),
+      'betaNotes': serializer.toJson<String>(betaNotes),
+    };
+  }
+
+  AscentBetaNote copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? ownerId,
+    String? ascentId,
+    String? betaNotes,
+  }) => AscentBetaNote(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    ownerId: ownerId ?? this.ownerId,
+    ascentId: ascentId ?? this.ascentId,
+    betaNotes: betaNotes ?? this.betaNotes,
+  );
+  AscentBetaNote copyWithCompanion(AscentBetaCompanion data) {
+    return AscentBetaNote(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      ascentId: data.ascentId.present ? data.ascentId.value : this.ascentId,
+      betaNotes: data.betaNotes.present ? data.betaNotes.value : this.betaNotes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AscentBetaNote(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('ascentId: $ascentId, ')
+          ..write('betaNotes: $betaNotes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    ownerId,
+    ascentId,
+    betaNotes,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AscentBetaNote &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.ownerId == this.ownerId &&
+          other.ascentId == this.ascentId &&
+          other.betaNotes == this.betaNotes);
+}
+
+class AscentBetaCompanion extends UpdateCompanion<AscentBetaNote> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> ownerId;
+  final Value<String> ascentId;
+  final Value<String> betaNotes;
+  final Value<int> rowid;
+  const AscentBetaCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.ascentId = const Value.absent(),
+    this.betaNotes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AscentBetaCompanion.insert({
+    required String id,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String ownerId,
+    required String ascentId,
+    required String betaNotes,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       ownerId = Value(ownerId),
+       ascentId = Value(ascentId),
+       betaNotes = Value(betaNotes);
+  static Insertable<AscentBetaNote> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? ownerId,
+    Expression<String>? ascentId,
+    Expression<String>? betaNotes,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (ascentId != null) 'ascent_id': ascentId,
+      if (betaNotes != null) 'beta_notes': betaNotes,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AscentBetaCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? ownerId,
+    Value<String>? ascentId,
+    Value<String>? betaNotes,
+    Value<int>? rowid,
+  }) {
+    return AscentBetaCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      ownerId: ownerId ?? this.ownerId,
+      ascentId: ascentId ?? this.ascentId,
+      betaNotes: betaNotes ?? this.betaNotes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (ascentId.present) {
+      map['ascent_id'] = Variable<String>(ascentId.value);
+    }
+    if (betaNotes.present) {
+      map['beta_notes'] = Variable<String>(betaNotes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AscentBetaCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('ascentId: $ascentId, ')
+          ..write('betaNotes: $betaNotes, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -15582,6 +16144,17 @@ class $AscentPitchesTable extends AscentPitches
   @override
   late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
     'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _visibilityMeta = const VerificationMeta(
+    'visibility',
+  );
+  @override
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -15681,6 +16254,7 @@ class $AscentPitchesTable extends AscentPitches
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     ascentId,
     pitchId,
     number,
@@ -15737,6 +16311,14 @@ class $AscentPitchesTable extends AscentPitches
       );
     } else if (isInserting) {
       context.missing(_ownerIdMeta);
+    }
+    if (data.containsKey('visibility')) {
+      context.handle(
+        _visibilityMeta,
+        visibility.isAcceptableOrUnknown(data['visibility']!, _visibilityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_visibilityMeta);
     }
     if (data.containsKey('ascent_id')) {
       context.handle(
@@ -15830,6 +16412,10 @@ class $AscentPitchesTable extends AscentPitches
         DriftSqlType.string,
         data['${effectivePrefix}owner_id'],
       )!,
+      visibility: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}visibility'],
+      )!,
       ascentId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}ascent_id'],
@@ -15884,6 +16470,7 @@ class AscentPitch extends DataClass implements Insertable<AscentPitch> {
   /// Set instead of deleting; clients never hard-delete rows.
   final DateTime? deletedAt;
   final String ownerId;
+  final String visibility;
   final String ascentId;
   final String? pitchId;
   final int number;
@@ -15901,6 +16488,7 @@ class AscentPitch extends DataClass implements Insertable<AscentPitch> {
     required this.updatedAt,
     this.deletedAt,
     required this.ownerId,
+    required this.visibility,
     required this.ascentId,
     this.pitchId,
     required this.number,
@@ -15921,6 +16509,7 @@ class AscentPitch extends DataClass implements Insertable<AscentPitch> {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['owner_id'] = Variable<String>(ownerId);
+    map['visibility'] = Variable<String>(visibility);
     map['ascent_id'] = Variable<String>(ascentId);
     if (!nullToAbsent || pitchId != null) {
       map['pitch_id'] = Variable<String>(pitchId);
@@ -15954,6 +16543,7 @@ class AscentPitch extends DataClass implements Insertable<AscentPitch> {
           ? const Value.absent()
           : Value(deletedAt),
       ownerId: Value(ownerId),
+      visibility: Value(visibility),
       ascentId: Value(ascentId),
       pitchId: pitchId == null && nullToAbsent
           ? const Value.absent()
@@ -15989,6 +16579,7 @@ class AscentPitch extends DataClass implements Insertable<AscentPitch> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       ownerId: serializer.fromJson<String>(json['ownerId']),
+      visibility: serializer.fromJson<String>(json['visibility']),
       ascentId: serializer.fromJson<String>(json['ascentId']),
       pitchId: serializer.fromJson<String?>(json['pitchId']),
       number: serializer.fromJson<int>(json['number']),
@@ -16009,6 +16600,7 @@ class AscentPitch extends DataClass implements Insertable<AscentPitch> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'ownerId': serializer.toJson<String>(ownerId),
+      'visibility': serializer.toJson<String>(visibility),
       'ascentId': serializer.toJson<String>(ascentId),
       'pitchId': serializer.toJson<String?>(pitchId),
       'number': serializer.toJson<int>(number),
@@ -16027,6 +16619,7 @@ class AscentPitch extends DataClass implements Insertable<AscentPitch> {
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
     String? ownerId,
+    String? visibility,
     String? ascentId,
     Value<String?> pitchId = const Value.absent(),
     int? number,
@@ -16042,6 +16635,7 @@ class AscentPitch extends DataClass implements Insertable<AscentPitch> {
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     ownerId: ownerId ?? this.ownerId,
+    visibility: visibility ?? this.visibility,
     ascentId: ascentId ?? this.ascentId,
     pitchId: pitchId.present ? pitchId.value : this.pitchId,
     number: number ?? this.number,
@@ -16061,6 +16655,9 @@ class AscentPitch extends DataClass implements Insertable<AscentPitch> {
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      visibility: data.visibility.present
+          ? data.visibility.value
+          : this.visibility,
       ascentId: data.ascentId.present ? data.ascentId.value : this.ascentId,
       pitchId: data.pitchId.present ? data.pitchId.value : this.pitchId,
       number: data.number.present ? data.number.value : this.number,
@@ -16083,6 +16680,7 @@ class AscentPitch extends DataClass implements Insertable<AscentPitch> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('ownerId: $ownerId, ')
+          ..write('visibility: $visibility, ')
           ..write('ascentId: $ascentId, ')
           ..write('pitchId: $pitchId, ')
           ..write('number: $number, ')
@@ -16103,6 +16701,7 @@ class AscentPitch extends DataClass implements Insertable<AscentPitch> {
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     ascentId,
     pitchId,
     number,
@@ -16122,6 +16721,7 @@ class AscentPitch extends DataClass implements Insertable<AscentPitch> {
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.ownerId == this.ownerId &&
+          other.visibility == this.visibility &&
           other.ascentId == this.ascentId &&
           other.pitchId == this.pitchId &&
           other.number == this.number &&
@@ -16139,6 +16739,7 @@ class AscentPitchesCompanion extends UpdateCompanion<AscentPitch> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<String> ownerId;
+  final Value<String> visibility;
   final Value<String> ascentId;
   final Value<String?> pitchId;
   final Value<int> number;
@@ -16155,6 +16756,7 @@ class AscentPitchesCompanion extends UpdateCompanion<AscentPitch> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.ownerId = const Value.absent(),
+    this.visibility = const Value.absent(),
     this.ascentId = const Value.absent(),
     this.pitchId = const Value.absent(),
     this.number = const Value.absent(),
@@ -16172,6 +16774,7 @@ class AscentPitchesCompanion extends UpdateCompanion<AscentPitch> {
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     required String ownerId,
+    required String visibility,
     required String ascentId,
     this.pitchId = const Value.absent(),
     required int number,
@@ -16186,6 +16789,7 @@ class AscentPitchesCompanion extends UpdateCompanion<AscentPitch> {
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt),
        ownerId = Value(ownerId),
+       visibility = Value(visibility),
        ascentId = Value(ascentId),
        number = Value(number),
        leader = Value(leader);
@@ -16195,6 +16799,7 @@ class AscentPitchesCompanion extends UpdateCompanion<AscentPitch> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<String>? ownerId,
+    Expression<String>? visibility,
     Expression<String>? ascentId,
     Expression<String>? pitchId,
     Expression<int>? number,
@@ -16212,6 +16817,7 @@ class AscentPitchesCompanion extends UpdateCompanion<AscentPitch> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (ownerId != null) 'owner_id': ownerId,
+      if (visibility != null) 'visibility': visibility,
       if (ascentId != null) 'ascent_id': ascentId,
       if (pitchId != null) 'pitch_id': pitchId,
       if (number != null) 'number': number,
@@ -16231,6 +16837,7 @@ class AscentPitchesCompanion extends UpdateCompanion<AscentPitch> {
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
     Value<String>? ownerId,
+    Value<String>? visibility,
     Value<String>? ascentId,
     Value<String?>? pitchId,
     Value<int>? number,
@@ -16248,6 +16855,7 @@ class AscentPitchesCompanion extends UpdateCompanion<AscentPitch> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       ownerId: ownerId ?? this.ownerId,
+      visibility: visibility ?? this.visibility,
       ascentId: ascentId ?? this.ascentId,
       pitchId: pitchId ?? this.pitchId,
       number: number ?? this.number,
@@ -16278,6 +16886,9 @@ class AscentPitchesCompanion extends UpdateCompanion<AscentPitch> {
     }
     if (ownerId.present) {
       map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (visibility.present) {
+      map['visibility'] = Variable<String>(visibility.value);
     }
     if (ascentId.present) {
       map['ascent_id'] = Variable<String>(ascentId.value);
@@ -16320,6 +16931,7 @@ class AscentPitchesCompanion extends UpdateCompanion<AscentPitch> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('ownerId: $ownerId, ')
+          ..write('visibility: $visibility, ')
           ..write('ascentId: $ascentId, ')
           ..write('pitchId: $pitchId, ')
           ..write('number: $number, ')
@@ -16394,6 +17006,17 @@ class $AscentAttributesTable extends AscentAttributes
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _visibilityMeta = const VerificationMeta(
+    'visibility',
+  );
+  @override
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _ascentIdMeta = const VerificationMeta(
     'ascentId',
   );
@@ -16432,6 +17055,7 @@ class $AscentAttributesTable extends AscentAttributes
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     ascentId,
     attributeKey,
     value,
@@ -16482,6 +17106,14 @@ class $AscentAttributesTable extends AscentAttributes
       );
     } else if (isInserting) {
       context.missing(_ownerIdMeta);
+    }
+    if (data.containsKey('visibility')) {
+      context.handle(
+        _visibilityMeta,
+        visibility.isAcceptableOrUnknown(data['visibility']!, _visibilityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_visibilityMeta);
     }
     if (data.containsKey('ascent_id')) {
       context.handle(
@@ -16539,6 +17171,10 @@ class $AscentAttributesTable extends AscentAttributes
         DriftSqlType.string,
         data['${effectivePrefix}owner_id'],
       )!,
+      visibility: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}visibility'],
+      )!,
       ascentId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}ascent_id'],
@@ -16569,6 +17205,7 @@ class AscentAttribute extends DataClass implements Insertable<AscentAttribute> {
   /// Set instead of deleting; clients never hard-delete rows.
   final DateTime? deletedAt;
   final String ownerId;
+  final String visibility;
   final String ascentId;
   final String attributeKey;
   final String value;
@@ -16578,6 +17215,7 @@ class AscentAttribute extends DataClass implements Insertable<AscentAttribute> {
     required this.updatedAt,
     this.deletedAt,
     required this.ownerId,
+    required this.visibility,
     required this.ascentId,
     required this.attributeKey,
     required this.value,
@@ -16592,6 +17230,7 @@ class AscentAttribute extends DataClass implements Insertable<AscentAttribute> {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['owner_id'] = Variable<String>(ownerId);
+    map['visibility'] = Variable<String>(visibility);
     map['ascent_id'] = Variable<String>(ascentId);
     map['attribute_key'] = Variable<String>(attributeKey);
     map['value'] = Variable<String>(value);
@@ -16607,6 +17246,7 @@ class AscentAttribute extends DataClass implements Insertable<AscentAttribute> {
           ? const Value.absent()
           : Value(deletedAt),
       ownerId: Value(ownerId),
+      visibility: Value(visibility),
       ascentId: Value(ascentId),
       attributeKey: Value(attributeKey),
       value: Value(value),
@@ -16624,6 +17264,7 @@ class AscentAttribute extends DataClass implements Insertable<AscentAttribute> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       ownerId: serializer.fromJson<String>(json['ownerId']),
+      visibility: serializer.fromJson<String>(json['visibility']),
       ascentId: serializer.fromJson<String>(json['ascentId']),
       attributeKey: serializer.fromJson<String>(json['attributeKey']),
       value: serializer.fromJson<String>(json['value']),
@@ -16638,6 +17279,7 @@ class AscentAttribute extends DataClass implements Insertable<AscentAttribute> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'ownerId': serializer.toJson<String>(ownerId),
+      'visibility': serializer.toJson<String>(visibility),
       'ascentId': serializer.toJson<String>(ascentId),
       'attributeKey': serializer.toJson<String>(attributeKey),
       'value': serializer.toJson<String>(value),
@@ -16650,6 +17292,7 @@ class AscentAttribute extends DataClass implements Insertable<AscentAttribute> {
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
     String? ownerId,
+    String? visibility,
     String? ascentId,
     String? attributeKey,
     String? value,
@@ -16659,6 +17302,7 @@ class AscentAttribute extends DataClass implements Insertable<AscentAttribute> {
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     ownerId: ownerId ?? this.ownerId,
+    visibility: visibility ?? this.visibility,
     ascentId: ascentId ?? this.ascentId,
     attributeKey: attributeKey ?? this.attributeKey,
     value: value ?? this.value,
@@ -16670,6 +17314,9 @@ class AscentAttribute extends DataClass implements Insertable<AscentAttribute> {
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      visibility: data.visibility.present
+          ? data.visibility.value
+          : this.visibility,
       ascentId: data.ascentId.present ? data.ascentId.value : this.ascentId,
       attributeKey: data.attributeKey.present
           ? data.attributeKey.value
@@ -16686,6 +17333,7 @@ class AscentAttribute extends DataClass implements Insertable<AscentAttribute> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('ownerId: $ownerId, ')
+          ..write('visibility: $visibility, ')
           ..write('ascentId: $ascentId, ')
           ..write('attributeKey: $attributeKey, ')
           ..write('value: $value')
@@ -16700,6 +17348,7 @@ class AscentAttribute extends DataClass implements Insertable<AscentAttribute> {
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     ascentId,
     attributeKey,
     value,
@@ -16713,6 +17362,7 @@ class AscentAttribute extends DataClass implements Insertable<AscentAttribute> {
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.ownerId == this.ownerId &&
+          other.visibility == this.visibility &&
           other.ascentId == this.ascentId &&
           other.attributeKey == this.attributeKey &&
           other.value == this.value);
@@ -16724,6 +17374,7 @@ class AscentAttributesCompanion extends UpdateCompanion<AscentAttribute> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<String> ownerId;
+  final Value<String> visibility;
   final Value<String> ascentId;
   final Value<String> attributeKey;
   final Value<String> value;
@@ -16734,6 +17385,7 @@ class AscentAttributesCompanion extends UpdateCompanion<AscentAttribute> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.ownerId = const Value.absent(),
+    this.visibility = const Value.absent(),
     this.ascentId = const Value.absent(),
     this.attributeKey = const Value.absent(),
     this.value = const Value.absent(),
@@ -16745,6 +17397,7 @@ class AscentAttributesCompanion extends UpdateCompanion<AscentAttribute> {
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     required String ownerId,
+    required String visibility,
     required String ascentId,
     required String attributeKey,
     required String value,
@@ -16753,6 +17406,7 @@ class AscentAttributesCompanion extends UpdateCompanion<AscentAttribute> {
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt),
        ownerId = Value(ownerId),
+       visibility = Value(visibility),
        ascentId = Value(ascentId),
        attributeKey = Value(attributeKey),
        value = Value(value);
@@ -16762,6 +17416,7 @@ class AscentAttributesCompanion extends UpdateCompanion<AscentAttribute> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<String>? ownerId,
+    Expression<String>? visibility,
     Expression<String>? ascentId,
     Expression<String>? attributeKey,
     Expression<String>? value,
@@ -16773,6 +17428,7 @@ class AscentAttributesCompanion extends UpdateCompanion<AscentAttribute> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (ownerId != null) 'owner_id': ownerId,
+      if (visibility != null) 'visibility': visibility,
       if (ascentId != null) 'ascent_id': ascentId,
       if (attributeKey != null) 'attribute_key': attributeKey,
       if (value != null) 'value': value,
@@ -16786,6 +17442,7 @@ class AscentAttributesCompanion extends UpdateCompanion<AscentAttribute> {
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
     Value<String>? ownerId,
+    Value<String>? visibility,
     Value<String>? ascentId,
     Value<String>? attributeKey,
     Value<String>? value,
@@ -16797,6 +17454,7 @@ class AscentAttributesCompanion extends UpdateCompanion<AscentAttribute> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       ownerId: ownerId ?? this.ownerId,
+      visibility: visibility ?? this.visibility,
       ascentId: ascentId ?? this.ascentId,
       attributeKey: attributeKey ?? this.attributeKey,
       value: value ?? this.value,
@@ -16822,6 +17480,9 @@ class AscentAttributesCompanion extends UpdateCompanion<AscentAttribute> {
     if (ownerId.present) {
       map['owner_id'] = Variable<String>(ownerId.value);
     }
+    if (visibility.present) {
+      map['visibility'] = Variable<String>(visibility.value);
+    }
     if (ascentId.present) {
       map['ascent_id'] = Variable<String>(ascentId.value);
     }
@@ -16845,6 +17506,7 @@ class AscentAttributesCompanion extends UpdateCompanion<AscentAttribute> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('ownerId: $ownerId, ')
+          ..write('visibility: $visibility, ')
           ..write('ascentId: $ascentId, ')
           ..write('attributeKey: $attributeKey, ')
           ..write('value: $value, ')
@@ -16913,6 +17575,17 @@ class $AscentGearTable extends AscentGear
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _visibilityMeta = const VerificationMeta(
+    'visibility',
+  );
+  @override
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _ascentIdMeta = const VerificationMeta(
     'ascentId',
   );
@@ -16943,7 +17616,7 @@ class $AscentGearTable extends AscentGear
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultValue: const Constant(1),
+    clientDefault: () => 1,
   );
   static const VerificationMeta _borrowedFromMeta = const VerificationMeta(
     'borrowedFrom',
@@ -16963,6 +17636,7 @@ class $AscentGearTable extends AscentGear
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     ascentId,
     gearPieceId,
     count,
@@ -17014,6 +17688,14 @@ class $AscentGearTable extends AscentGear
       );
     } else if (isInserting) {
       context.missing(_ownerIdMeta);
+    }
+    if (data.containsKey('visibility')) {
+      context.handle(
+        _visibilityMeta,
+        visibility.isAcceptableOrUnknown(data['visibility']!, _visibilityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_visibilityMeta);
     }
     if (data.containsKey('ascent_id')) {
       context.handle(
@@ -17078,6 +17760,10 @@ class $AscentGearTable extends AscentGear
         DriftSqlType.string,
         data['${effectivePrefix}owner_id'],
       )!,
+      visibility: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}visibility'],
+      )!,
       ascentId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}ascent_id'],
@@ -17112,6 +17798,7 @@ class AscentGearItem extends DataClass implements Insertable<AscentGearItem> {
   /// Set instead of deleting; clients never hard-delete rows.
   final DateTime? deletedAt;
   final String ownerId;
+  final String visibility;
   final String ascentId;
   final String gearPieceId;
   final int count;
@@ -17122,6 +17809,7 @@ class AscentGearItem extends DataClass implements Insertable<AscentGearItem> {
     required this.updatedAt,
     this.deletedAt,
     required this.ownerId,
+    required this.visibility,
     required this.ascentId,
     required this.gearPieceId,
     required this.count,
@@ -17137,6 +17825,7 @@ class AscentGearItem extends DataClass implements Insertable<AscentGearItem> {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['owner_id'] = Variable<String>(ownerId);
+    map['visibility'] = Variable<String>(visibility);
     map['ascent_id'] = Variable<String>(ascentId);
     map['gear_piece_id'] = Variable<String>(gearPieceId);
     map['count'] = Variable<int>(count);
@@ -17155,6 +17844,7 @@ class AscentGearItem extends DataClass implements Insertable<AscentGearItem> {
           ? const Value.absent()
           : Value(deletedAt),
       ownerId: Value(ownerId),
+      visibility: Value(visibility),
       ascentId: Value(ascentId),
       gearPieceId: Value(gearPieceId),
       count: Value(count),
@@ -17175,6 +17865,7 @@ class AscentGearItem extends DataClass implements Insertable<AscentGearItem> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       ownerId: serializer.fromJson<String>(json['ownerId']),
+      visibility: serializer.fromJson<String>(json['visibility']),
       ascentId: serializer.fromJson<String>(json['ascentId']),
       gearPieceId: serializer.fromJson<String>(json['gearPieceId']),
       count: serializer.fromJson<int>(json['count']),
@@ -17190,6 +17881,7 @@ class AscentGearItem extends DataClass implements Insertable<AscentGearItem> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'ownerId': serializer.toJson<String>(ownerId),
+      'visibility': serializer.toJson<String>(visibility),
       'ascentId': serializer.toJson<String>(ascentId),
       'gearPieceId': serializer.toJson<String>(gearPieceId),
       'count': serializer.toJson<int>(count),
@@ -17203,6 +17895,7 @@ class AscentGearItem extends DataClass implements Insertable<AscentGearItem> {
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
     String? ownerId,
+    String? visibility,
     String? ascentId,
     String? gearPieceId,
     int? count,
@@ -17213,6 +17906,7 @@ class AscentGearItem extends DataClass implements Insertable<AscentGearItem> {
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     ownerId: ownerId ?? this.ownerId,
+    visibility: visibility ?? this.visibility,
     ascentId: ascentId ?? this.ascentId,
     gearPieceId: gearPieceId ?? this.gearPieceId,
     count: count ?? this.count,
@@ -17225,6 +17919,9 @@ class AscentGearItem extends DataClass implements Insertable<AscentGearItem> {
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      visibility: data.visibility.present
+          ? data.visibility.value
+          : this.visibility,
       ascentId: data.ascentId.present ? data.ascentId.value : this.ascentId,
       gearPieceId: data.gearPieceId.present
           ? data.gearPieceId.value
@@ -17244,6 +17941,7 @@ class AscentGearItem extends DataClass implements Insertable<AscentGearItem> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('ownerId: $ownerId, ')
+          ..write('visibility: $visibility, ')
           ..write('ascentId: $ascentId, ')
           ..write('gearPieceId: $gearPieceId, ')
           ..write('count: $count, ')
@@ -17259,6 +17957,7 @@ class AscentGearItem extends DataClass implements Insertable<AscentGearItem> {
     updatedAt,
     deletedAt,
     ownerId,
+    visibility,
     ascentId,
     gearPieceId,
     count,
@@ -17273,6 +17972,7 @@ class AscentGearItem extends DataClass implements Insertable<AscentGearItem> {
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.ownerId == this.ownerId &&
+          other.visibility == this.visibility &&
           other.ascentId == this.ascentId &&
           other.gearPieceId == this.gearPieceId &&
           other.count == this.count &&
@@ -17285,6 +17985,7 @@ class AscentGearCompanion extends UpdateCompanion<AscentGearItem> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<String> ownerId;
+  final Value<String> visibility;
   final Value<String> ascentId;
   final Value<String> gearPieceId;
   final Value<int> count;
@@ -17296,6 +17997,7 @@ class AscentGearCompanion extends UpdateCompanion<AscentGearItem> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.ownerId = const Value.absent(),
+    this.visibility = const Value.absent(),
     this.ascentId = const Value.absent(),
     this.gearPieceId = const Value.absent(),
     this.count = const Value.absent(),
@@ -17308,6 +18010,7 @@ class AscentGearCompanion extends UpdateCompanion<AscentGearItem> {
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     required String ownerId,
+    required String visibility,
     required String ascentId,
     required String gearPieceId,
     this.count = const Value.absent(),
@@ -17317,6 +18020,7 @@ class AscentGearCompanion extends UpdateCompanion<AscentGearItem> {
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt),
        ownerId = Value(ownerId),
+       visibility = Value(visibility),
        ascentId = Value(ascentId),
        gearPieceId = Value(gearPieceId);
   static Insertable<AscentGearItem> custom({
@@ -17325,6 +18029,7 @@ class AscentGearCompanion extends UpdateCompanion<AscentGearItem> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<String>? ownerId,
+    Expression<String>? visibility,
     Expression<String>? ascentId,
     Expression<String>? gearPieceId,
     Expression<int>? count,
@@ -17337,6 +18042,7 @@ class AscentGearCompanion extends UpdateCompanion<AscentGearItem> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (ownerId != null) 'owner_id': ownerId,
+      if (visibility != null) 'visibility': visibility,
       if (ascentId != null) 'ascent_id': ascentId,
       if (gearPieceId != null) 'gear_piece_id': gearPieceId,
       if (count != null) 'count': count,
@@ -17351,6 +18057,7 @@ class AscentGearCompanion extends UpdateCompanion<AscentGearItem> {
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
     Value<String>? ownerId,
+    Value<String>? visibility,
     Value<String>? ascentId,
     Value<String>? gearPieceId,
     Value<int>? count,
@@ -17363,6 +18070,7 @@ class AscentGearCompanion extends UpdateCompanion<AscentGearItem> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       ownerId: ownerId ?? this.ownerId,
+      visibility: visibility ?? this.visibility,
       ascentId: ascentId ?? this.ascentId,
       gearPieceId: gearPieceId ?? this.gearPieceId,
       count: count ?? this.count,
@@ -17388,6 +18096,9 @@ class AscentGearCompanion extends UpdateCompanion<AscentGearItem> {
     }
     if (ownerId.present) {
       map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (visibility.present) {
+      map['visibility'] = Variable<String>(visibility.value);
     }
     if (ascentId.present) {
       map['ascent_id'] = Variable<String>(ascentId.value);
@@ -17415,6 +18126,7 @@ class AscentGearCompanion extends UpdateCompanion<AscentGearItem> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('ownerId: $ownerId, ')
+          ..write('visibility: $visibility, ')
           ..write('ascentId: $ascentId, ')
           ..write('gearPieceId: $gearPieceId, ')
           ..write('count: $count, ')
@@ -17472,17 +18184,6 @@ class $MediaTable extends Media with TableInfo<$MediaTable, MediaItem> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
-    'ownerId',
-  );
-  @override
-  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
-    'owner_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _visibilityMeta = const VerificationMeta(
     'visibility',
   );
@@ -17493,6 +18194,17 @@ class $MediaTable extends Media with TableInfo<$MediaTable, MediaItem> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _sessionIdMeta = const VerificationMeta(
     'sessionId',
@@ -17617,7 +18329,7 @@ class $MediaTable extends Media with TableInfo<$MediaTable, MediaItem> {
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultValue: const Constant(0),
+    clientDefault: () => 0,
   );
   static const VerificationMeta _uploadStateMeta = const VerificationMeta(
     'uploadState',
@@ -17629,6 +18341,29 @@ class $MediaTable extends Media with TableInfo<$MediaTable, MediaItem> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _shareStateMeta = const VerificationMeta(
+    'shareState',
+  );
+  @override
+  late final GeneratedColumn<String> shareState = GeneratedColumn<String>(
+    'share_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: () => 'none',
+  );
+  static const VerificationMeta _creditedToMeta = const VerificationMeta(
+    'creditedTo',
+  );
+  @override
+  late final GeneratedColumn<String> creditedTo = GeneratedColumn<String>(
+    'credited_to',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _exifStrippedMeta = const VerificationMeta(
     'exifStripped',
@@ -17643,7 +18378,7 @@ class $MediaTable extends Media with TableInfo<$MediaTable, MediaItem> {
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'CHECK ("exif_stripped" IN (0, 1))',
     ),
-    defaultValue: const Constant(false),
+    clientDefault: () => false,
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -17651,8 +18386,8 @@ class $MediaTable extends Media with TableInfo<$MediaTable, MediaItem> {
     createdAt,
     updatedAt,
     deletedAt,
-    ownerId,
     visibility,
+    ownerId,
     sessionId,
     routeId,
     ascentId,
@@ -17666,6 +18401,8 @@ class $MediaTable extends Media with TableInfo<$MediaTable, MediaItem> {
     takenAt,
     sort,
     uploadState,
+    shareState,
+    creditedTo,
     exifStripped,
   ];
   @override
@@ -17707,14 +18444,6 @@ class $MediaTable extends Media with TableInfo<$MediaTable, MediaItem> {
         deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
       );
     }
-    if (data.containsKey('owner_id')) {
-      context.handle(
-        _ownerIdMeta,
-        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_ownerIdMeta);
-    }
     if (data.containsKey('visibility')) {
       context.handle(
         _visibilityMeta,
@@ -17722,6 +18451,12 @@ class $MediaTable extends Media with TableInfo<$MediaTable, MediaItem> {
       );
     } else if (isInserting) {
       context.missing(_visibilityMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
     }
     if (data.containsKey('session_id')) {
       context.handle(
@@ -17811,6 +18546,18 @@ class $MediaTable extends Media with TableInfo<$MediaTable, MediaItem> {
     } else if (isInserting) {
       context.missing(_uploadStateMeta);
     }
+    if (data.containsKey('share_state')) {
+      context.handle(
+        _shareStateMeta,
+        shareState.isAcceptableOrUnknown(data['share_state']!, _shareStateMeta),
+      );
+    }
+    if (data.containsKey('credited_to')) {
+      context.handle(
+        _creditedToMeta,
+        creditedTo.isAcceptableOrUnknown(data['credited_to']!, _creditedToMeta),
+      );
+    }
     if (data.containsKey('exif_stripped')) {
       context.handle(
         _exifStrippedMeta,
@@ -17845,14 +18592,14 @@ class $MediaTable extends Media with TableInfo<$MediaTable, MediaItem> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}deleted_at'],
       ),
-      ownerId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}owner_id'],
-      )!,
       visibility: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}visibility'],
       )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      ),
       sessionId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}session_id'],
@@ -17905,6 +18652,14 @@ class $MediaTable extends Media with TableInfo<$MediaTable, MediaItem> {
         DriftSqlType.string,
         data['${effectivePrefix}upload_state'],
       )!,
+      shareState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}share_state'],
+      )!,
+      creditedTo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}credited_to'],
+      ),
       exifStripped: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}exif_stripped'],
@@ -17926,8 +18681,10 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
 
   /// Set instead of deleting; clients never hard-delete rows.
   final DateTime? deletedAt;
-  final String ownerId;
   final String visibility;
+
+  /// Null once the photo is shared as a topo.
+  final String? ownerId;
   final String? sessionId;
   final String? routeId;
   final String? ascentId;
@@ -17947,14 +18704,19 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
   final String uploadState;
 
   /// Must be true before upload.
+  /// `none`, `pending`, `shared`, `rejected`: sharing as a topo photo.
+  final String shareState;
+
+  /// The person who took a shared topo photo.
+  final String? creditedTo;
   final bool exifStripped;
   const MediaItem({
     required this.id,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
-    required this.ownerId,
     required this.visibility,
+    this.ownerId,
     this.sessionId,
     this.routeId,
     this.ascentId,
@@ -17968,6 +18730,8 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
     this.takenAt,
     required this.sort,
     required this.uploadState,
+    required this.shareState,
+    this.creditedTo,
     required this.exifStripped,
   });
   @override
@@ -17979,8 +18743,10 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
     if (!nullToAbsent || deletedAt != null) {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
-    map['owner_id'] = Variable<String>(ownerId);
     map['visibility'] = Variable<String>(visibility);
+    if (!nullToAbsent || ownerId != null) {
+      map['owner_id'] = Variable<String>(ownerId);
+    }
     if (!nullToAbsent || sessionId != null) {
       map['session_id'] = Variable<String>(sessionId);
     }
@@ -18014,6 +18780,10 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
     }
     map['sort'] = Variable<int>(sort);
     map['upload_state'] = Variable<String>(uploadState);
+    map['share_state'] = Variable<String>(shareState);
+    if (!nullToAbsent || creditedTo != null) {
+      map['credited_to'] = Variable<String>(creditedTo);
+    }
     map['exif_stripped'] = Variable<bool>(exifStripped);
     return map;
   }
@@ -18026,8 +18796,10 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(deletedAt),
-      ownerId: Value(ownerId),
       visibility: Value(visibility),
+      ownerId: ownerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ownerId),
       sessionId: sessionId == null && nullToAbsent
           ? const Value.absent()
           : Value(sessionId),
@@ -18061,6 +18833,10 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
           : Value(takenAt),
       sort: Value(sort),
       uploadState: Value(uploadState),
+      shareState: Value(shareState),
+      creditedTo: creditedTo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(creditedTo),
       exifStripped: Value(exifStripped),
     );
   }
@@ -18075,8 +18851,8 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
-      ownerId: serializer.fromJson<String>(json['ownerId']),
       visibility: serializer.fromJson<String>(json['visibility']),
+      ownerId: serializer.fromJson<String?>(json['ownerId']),
       sessionId: serializer.fromJson<String?>(json['sessionId']),
       routeId: serializer.fromJson<String?>(json['routeId']),
       ascentId: serializer.fromJson<String?>(json['ascentId']),
@@ -18090,6 +18866,8 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
       takenAt: serializer.fromJson<DateTime?>(json['takenAt']),
       sort: serializer.fromJson<int>(json['sort']),
       uploadState: serializer.fromJson<String>(json['uploadState']),
+      shareState: serializer.fromJson<String>(json['shareState']),
+      creditedTo: serializer.fromJson<String?>(json['creditedTo']),
       exifStripped: serializer.fromJson<bool>(json['exifStripped']),
     );
   }
@@ -18101,8 +18879,8 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
-      'ownerId': serializer.toJson<String>(ownerId),
       'visibility': serializer.toJson<String>(visibility),
+      'ownerId': serializer.toJson<String?>(ownerId),
       'sessionId': serializer.toJson<String?>(sessionId),
       'routeId': serializer.toJson<String?>(routeId),
       'ascentId': serializer.toJson<String?>(ascentId),
@@ -18116,6 +18894,8 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
       'takenAt': serializer.toJson<DateTime?>(takenAt),
       'sort': serializer.toJson<int>(sort),
       'uploadState': serializer.toJson<String>(uploadState),
+      'shareState': serializer.toJson<String>(shareState),
+      'creditedTo': serializer.toJson<String?>(creditedTo),
       'exifStripped': serializer.toJson<bool>(exifStripped),
     };
   }
@@ -18125,8 +18905,8 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
-    String? ownerId,
     String? visibility,
+    Value<String?> ownerId = const Value.absent(),
     Value<String?> sessionId = const Value.absent(),
     Value<String?> routeId = const Value.absent(),
     Value<String?> ascentId = const Value.absent(),
@@ -18140,14 +18920,16 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
     Value<DateTime?> takenAt = const Value.absent(),
     int? sort,
     String? uploadState,
+    String? shareState,
+    Value<String?> creditedTo = const Value.absent(),
     bool? exifStripped,
   }) => MediaItem(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
-    ownerId: ownerId ?? this.ownerId,
     visibility: visibility ?? this.visibility,
+    ownerId: ownerId.present ? ownerId.value : this.ownerId,
     sessionId: sessionId.present ? sessionId.value : this.sessionId,
     routeId: routeId.present ? routeId.value : this.routeId,
     ascentId: ascentId.present ? ascentId.value : this.ascentId,
@@ -18161,6 +18943,8 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
     takenAt: takenAt.present ? takenAt.value : this.takenAt,
     sort: sort ?? this.sort,
     uploadState: uploadState ?? this.uploadState,
+    shareState: shareState ?? this.shareState,
+    creditedTo: creditedTo.present ? creditedTo.value : this.creditedTo,
     exifStripped: exifStripped ?? this.exifStripped,
   );
   MediaItem copyWithCompanion(MediaCompanion data) {
@@ -18169,10 +18953,10 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
-      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
       visibility: data.visibility.present
           ? data.visibility.value
           : this.visibility,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
       sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
       routeId: data.routeId.present ? data.routeId.value : this.routeId,
       ascentId: data.ascentId.present ? data.ascentId.value : this.ascentId,
@@ -18190,6 +18974,12 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
       uploadState: data.uploadState.present
           ? data.uploadState.value
           : this.uploadState,
+      shareState: data.shareState.present
+          ? data.shareState.value
+          : this.shareState,
+      creditedTo: data.creditedTo.present
+          ? data.creditedTo.value
+          : this.creditedTo,
       exifStripped: data.exifStripped.present
           ? data.exifStripped.value
           : this.exifStripped,
@@ -18203,8 +18993,8 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('ownerId: $ownerId, ')
           ..write('visibility: $visibility, ')
+          ..write('ownerId: $ownerId, ')
           ..write('sessionId: $sessionId, ')
           ..write('routeId: $routeId, ')
           ..write('ascentId: $ascentId, ')
@@ -18218,19 +19008,21 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
           ..write('takenAt: $takenAt, ')
           ..write('sort: $sort, ')
           ..write('uploadState: $uploadState, ')
+          ..write('shareState: $shareState, ')
+          ..write('creditedTo: $creditedTo, ')
           ..write('exifStripped: $exifStripped')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     createdAt,
     updatedAt,
     deletedAt,
-    ownerId,
     visibility,
+    ownerId,
     sessionId,
     routeId,
     ascentId,
@@ -18244,8 +19036,10 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
     takenAt,
     sort,
     uploadState,
+    shareState,
+    creditedTo,
     exifStripped,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -18254,8 +19048,8 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
-          other.ownerId == this.ownerId &&
           other.visibility == this.visibility &&
+          other.ownerId == this.ownerId &&
           other.sessionId == this.sessionId &&
           other.routeId == this.routeId &&
           other.ascentId == this.ascentId &&
@@ -18269,6 +19063,8 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
           other.takenAt == this.takenAt &&
           other.sort == this.sort &&
           other.uploadState == this.uploadState &&
+          other.shareState == this.shareState &&
+          other.creditedTo == this.creditedTo &&
           other.exifStripped == this.exifStripped);
 }
 
@@ -18277,8 +19073,8 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
-  final Value<String> ownerId;
   final Value<String> visibility;
+  final Value<String?> ownerId;
   final Value<String?> sessionId;
   final Value<String?> routeId;
   final Value<String?> ascentId;
@@ -18292,6 +19088,8 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
   final Value<DateTime?> takenAt;
   final Value<int> sort;
   final Value<String> uploadState;
+  final Value<String> shareState;
+  final Value<String?> creditedTo;
   final Value<bool> exifStripped;
   final Value<int> rowid;
   const MediaCompanion({
@@ -18299,8 +19097,8 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
-    this.ownerId = const Value.absent(),
     this.visibility = const Value.absent(),
+    this.ownerId = const Value.absent(),
     this.sessionId = const Value.absent(),
     this.routeId = const Value.absent(),
     this.ascentId = const Value.absent(),
@@ -18314,6 +19112,8 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
     this.takenAt = const Value.absent(),
     this.sort = const Value.absent(),
     this.uploadState = const Value.absent(),
+    this.shareState = const Value.absent(),
+    this.creditedTo = const Value.absent(),
     this.exifStripped = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -18322,8 +19122,8 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
-    required String ownerId,
     required String visibility,
+    this.ownerId = const Value.absent(),
     this.sessionId = const Value.absent(),
     this.routeId = const Value.absent(),
     this.ascentId = const Value.absent(),
@@ -18337,12 +19137,13 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
     this.takenAt = const Value.absent(),
     this.sort = const Value.absent(),
     required String uploadState,
+    this.shareState = const Value.absent(),
+    this.creditedTo = const Value.absent(),
     this.exifStripped = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt),
-       ownerId = Value(ownerId),
        visibility = Value(visibility),
        kind = Value(kind),
        uploadState = Value(uploadState);
@@ -18351,8 +19152,8 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
-    Expression<String>? ownerId,
     Expression<String>? visibility,
+    Expression<String>? ownerId,
     Expression<String>? sessionId,
     Expression<String>? routeId,
     Expression<String>? ascentId,
@@ -18366,6 +19167,8 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
     Expression<DateTime>? takenAt,
     Expression<int>? sort,
     Expression<String>? uploadState,
+    Expression<String>? shareState,
+    Expression<String>? creditedTo,
     Expression<bool>? exifStripped,
     Expression<int>? rowid,
   }) {
@@ -18374,8 +19177,8 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
-      if (ownerId != null) 'owner_id': ownerId,
       if (visibility != null) 'visibility': visibility,
+      if (ownerId != null) 'owner_id': ownerId,
       if (sessionId != null) 'session_id': sessionId,
       if (routeId != null) 'route_id': routeId,
       if (ascentId != null) 'ascent_id': ascentId,
@@ -18389,6 +19192,8 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
       if (takenAt != null) 'taken_at': takenAt,
       if (sort != null) 'sort': sort,
       if (uploadState != null) 'upload_state': uploadState,
+      if (shareState != null) 'share_state': shareState,
+      if (creditedTo != null) 'credited_to': creditedTo,
       if (exifStripped != null) 'exif_stripped': exifStripped,
       if (rowid != null) 'rowid': rowid,
     });
@@ -18399,8 +19204,8 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
-    Value<String>? ownerId,
     Value<String>? visibility,
+    Value<String?>? ownerId,
     Value<String?>? sessionId,
     Value<String?>? routeId,
     Value<String?>? ascentId,
@@ -18414,6 +19219,8 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
     Value<DateTime?>? takenAt,
     Value<int>? sort,
     Value<String>? uploadState,
+    Value<String>? shareState,
+    Value<String?>? creditedTo,
     Value<bool>? exifStripped,
     Value<int>? rowid,
   }) {
@@ -18422,8 +19229,8 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
-      ownerId: ownerId ?? this.ownerId,
       visibility: visibility ?? this.visibility,
+      ownerId: ownerId ?? this.ownerId,
       sessionId: sessionId ?? this.sessionId,
       routeId: routeId ?? this.routeId,
       ascentId: ascentId ?? this.ascentId,
@@ -18437,6 +19244,8 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
       takenAt: takenAt ?? this.takenAt,
       sort: sort ?? this.sort,
       uploadState: uploadState ?? this.uploadState,
+      shareState: shareState ?? this.shareState,
+      creditedTo: creditedTo ?? this.creditedTo,
       exifStripped: exifStripped ?? this.exifStripped,
       rowid: rowid ?? this.rowid,
     );
@@ -18457,11 +19266,11 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
     if (deletedAt.present) {
       map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
-    if (ownerId.present) {
-      map['owner_id'] = Variable<String>(ownerId.value);
-    }
     if (visibility.present) {
       map['visibility'] = Variable<String>(visibility.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
     }
     if (sessionId.present) {
       map['session_id'] = Variable<String>(sessionId.value);
@@ -18502,6 +19311,12 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
     if (uploadState.present) {
       map['upload_state'] = Variable<String>(uploadState.value);
     }
+    if (shareState.present) {
+      map['share_state'] = Variable<String>(shareState.value);
+    }
+    if (creditedTo.present) {
+      map['credited_to'] = Variable<String>(creditedTo.value);
+    }
     if (exifStripped.present) {
       map['exif_stripped'] = Variable<bool>(exifStripped.value);
     }
@@ -18518,8 +19333,8 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('ownerId: $ownerId, ')
           ..write('visibility: $visibility, ')
+          ..write('ownerId: $ownerId, ')
           ..write('sessionId: $sessionId, ')
           ..write('routeId: $routeId, ')
           ..write('ascentId: $ascentId, ')
@@ -18533,6 +19348,8 @@ class MediaCompanion extends UpdateCompanion<MediaItem> {
           ..write('takenAt: $takenAt, ')
           ..write('sort: $sort, ')
           ..write('uploadState: $uploadState, ')
+          ..write('shareState: $shareState, ')
+          ..write('creditedTo: $creditedTo, ')
           ..write('exifStripped: $exifStripped, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -19375,7 +20192,7 @@ class $GearPiecesTable extends GearPieces
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'CHECK ("remind" IN (0, 1))',
     ),
-    defaultValue: const Constant(true),
+    clientDefault: () => true,
   );
   static const VerificationMeta _inDefaultRackMeta = const VerificationMeta(
     'inDefaultRack',
@@ -19390,7 +20207,7 @@ class $GearPiecesTable extends GearPieces
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'CHECK ("in_default_rack" IN (0, 1))',
     ),
-    defaultValue: const Constant(false),
+    clientDefault: () => false,
   );
   static const VerificationMeta _specsMeta = const VerificationMeta('specs');
   @override
@@ -25774,6 +26591,7 @@ abstract class _$SvaDatabase extends GeneratedDatabase {
   );
   late final $SessionMembersTable sessionMembers = $SessionMembersTable(this);
   late final $AscentsTable ascents = $AscentsTable(this);
+  late final $AscentBetaTable ascentBeta = $AscentBetaTable(this);
   late final $AscentPitchesTable ascentPitches = $AscentPitchesTable(this);
   late final $AscentAttributesTable ascentAttributes = $AscentAttributesTable(
     this,
@@ -25861,6 +26679,7 @@ abstract class _$SvaDatabase extends GeneratedDatabase {
     weatherSnapshots,
     sessionMembers,
     ascents,
+    ascentBeta,
     ascentPitches,
     ascentAttributes,
     ascentGear,
@@ -26250,7 +27069,7 @@ typedef $$AreasTableCreateCompanionBuilder = AreasCompanion Function({
   Value<String?> parentId,
   required String type,
   required String name,
-  Value<String?> countryCode,
+  required String countryCode,
   Value<double?> latitude,
   Value<double?> longitude,
   Value<int?> altitudeM,
@@ -26272,7 +27091,7 @@ typedef $$AreasTableUpdateCompanionBuilder = AreasCompanion Function({
   Value<String?> parentId,
   Value<String> type,
   Value<String> name,
-  Value<String?> countryCode,
+  Value<String> countryCode,
   Value<double?> latitude,
   Value<double?> longitude,
   Value<int?> altitudeM,
@@ -26610,7 +27429,7 @@ class $$AreasTableTableManager
                 Value<String?> parentId = const Value.absent(),
                 Value<String> type = const Value.absent(),
                 Value<String> name = const Value.absent(),
-                Value<String?> countryCode = const Value.absent(),
+                Value<String> countryCode = const Value.absent(),
                 Value<double?> latitude = const Value.absent(),
                 Value<double?> longitude = const Value.absent(),
                 Value<int?> altitudeM = const Value.absent(),
@@ -26654,7 +27473,7 @@ class $$AreasTableTableManager
                 Value<String?> parentId = const Value.absent(),
                 required String type,
                 required String name,
-                Value<String?> countryCode = const Value.absent(),
+                required String countryCode,
                 Value<double?> latitude = const Value.absent(),
                 Value<double?> longitude = const Value.absent(),
                 Value<int?> altitudeM = const Value.absent(),
@@ -26991,7 +27810,7 @@ typedef $$GymWallsTableCreateCompanionBuilder = GymWallsCompanion Function({
   required DateTime createdAt,
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
-  Value<String?> createdBy,
+  required String ownerId,
   required String gymId,
   required String name,
   Value<double?> heightM,
@@ -27006,7 +27825,7 @@ typedef $$GymWallsTableUpdateCompanionBuilder = GymWallsCompanion Function({
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
-  Value<String?> createdBy,
+  Value<String> ownerId,
   Value<String> gymId,
   Value<String> name,
   Value<double?> heightM,
@@ -27046,8 +27865,8 @@ class $$GymWallsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get createdBy => $composableBuilder(
-    column: $table.createdBy,
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -27116,8 +27935,8 @@ class $$GymWallsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get createdBy => $composableBuilder(
-    column: $table.createdBy,
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -27178,8 +27997,8 @@ class $$GymWallsTableAnnotationComposer
   GeneratedColumn<DateTime> get deletedAt =>
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 
-  GeneratedColumn<String> get createdBy =>
-      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
 
   GeneratedColumn<String> get gymId =>
       $composableBuilder(column: $table.gymId, builder: (column) => column);
@@ -27237,7 +28056,7 @@ class $$GymWallsTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
-                Value<String?> createdBy = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
                 Value<String> gymId = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<double?> heightM = const Value.absent(),
@@ -27251,7 +28070,7 @@ class $$GymWallsTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
-                createdBy: createdBy,
+                ownerId: ownerId,
                 gymId: gymId,
                 name: name,
                 heightM: heightM,
@@ -27267,7 +28086,7 @@ class $$GymWallsTableTableManager
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
-                Value<String?> createdBy = const Value.absent(),
+                required String ownerId,
                 required String gymId,
                 required String name,
                 Value<double?> heightM = const Value.absent(),
@@ -27281,7 +28100,7 @@ class $$GymWallsTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
-                createdBy: createdBy,
+                ownerId: ownerId,
                 gymId: gymId,
                 name: name,
                 heightM: heightM,
@@ -27328,7 +28147,7 @@ typedef $$GymColourGradesTableCreateCompanionBuilder =
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<DateTime?> deletedAt,
-      Value<String?> createdBy,
+      required String ownerId,
       required String gymId,
       required int sort,
       required String name,
@@ -27345,7 +28164,7 @@ typedef $$GymColourGradesTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
-      Value<String?> createdBy,
+      Value<String> ownerId,
       Value<String> gymId,
       Value<int> sort,
       Value<String> name,
@@ -27386,8 +28205,8 @@ class $$GymColourGradesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get createdBy => $composableBuilder(
-    column: $table.createdBy,
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -27461,8 +28280,8 @@ class $$GymColourGradesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get createdBy => $composableBuilder(
-    column: $table.createdBy,
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -27528,8 +28347,8 @@ class $$GymColourGradesTableAnnotationComposer
   GeneratedColumn<DateTime> get deletedAt =>
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 
-  GeneratedColumn<String> get createdBy =>
-      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
 
   GeneratedColumn<String> get gymId =>
       $composableBuilder(column: $table.gymId, builder: (column) => column);
@@ -27605,7 +28424,7 @@ class $$GymColourGradesTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
-                Value<String?> createdBy = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
                 Value<String> gymId = const Value.absent(),
                 Value<int> sort = const Value.absent(),
                 Value<String> name = const Value.absent(),
@@ -27620,7 +28439,7 @@ class $$GymColourGradesTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
-                createdBy: createdBy,
+                ownerId: ownerId,
                 gymId: gymId,
                 sort: sort,
                 name: name,
@@ -27637,7 +28456,7 @@ class $$GymColourGradesTableTableManager
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
-                Value<String?> createdBy = const Value.absent(),
+                required String ownerId,
                 required String gymId,
                 required int sort,
                 required String name,
@@ -27652,7 +28471,7 @@ class $$GymColourGradesTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
-                createdBy: createdBy,
+                ownerId: ownerId,
                 gymId: gymId,
                 sort: sort,
                 name: name,
@@ -31915,6 +32734,7 @@ typedef $$WeatherSnapshotsTableCreateCompanionBuilder =
       required DateTime updatedAt,
       Value<DateTime?> deletedAt,
       required String ownerId,
+      required String visibility,
       required String sessionId,
       required String source,
       Value<double?> tempC,
@@ -31934,6 +32754,7 @@ typedef $$WeatherSnapshotsTableUpdateCompanionBuilder =
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
       Value<String> ownerId,
+      Value<String> visibility,
       Value<String> sessionId,
       Value<String> source,
       Value<double?> tempC,
@@ -31978,6 +32799,11 @@ class $$WeatherSnapshotsTableFilterComposer
 
   ColumnFilters<String> get ownerId => $composableBuilder(
     column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get visibility => $composableBuilder(
+    column: $table.visibility,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -32066,6 +32892,11 @@ class $$WeatherSnapshotsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get sessionId => $composableBuilder(
     column: $table.sessionId,
     builder: (column) => ColumnOrderings(column),
@@ -32140,6 +32971,11 @@ class $$WeatherSnapshotsTableAnnotationComposer
 
   GeneratedColumn<String> get ownerId =>
       $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get sessionId =>
       $composableBuilder(column: $table.sessionId, builder: (column) => column);
@@ -32218,6 +33054,7 @@ class $$WeatherSnapshotsTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String> ownerId = const Value.absent(),
+                Value<String> visibility = const Value.absent(),
                 Value<String> sessionId = const Value.absent(),
                 Value<String> source = const Value.absent(),
                 Value<double?> tempC = const Value.absent(),
@@ -32235,6 +33072,7 @@ class $$WeatherSnapshotsTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 ownerId: ownerId,
+                visibility: visibility,
                 sessionId: sessionId,
                 source: source,
                 tempC: tempC,
@@ -32254,6 +33092,7 @@ class $$WeatherSnapshotsTableTableManager
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
                 required String ownerId,
+                required String visibility,
                 required String sessionId,
                 required String source,
                 Value<double?> tempC = const Value.absent(),
@@ -32271,6 +33110,7 @@ class $$WeatherSnapshotsTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 ownerId: ownerId,
+                visibility: visibility,
                 sessionId: sessionId,
                 source: source,
                 tempC: tempC,
@@ -32324,6 +33164,7 @@ typedef $$SessionMembersTableCreateCompanionBuilder =
       required DateTime updatedAt,
       Value<DateTime?> deletedAt,
       required String ownerId,
+      required String visibility,
       required String sessionId,
       Value<String?> userId,
       Value<String?> guestName,
@@ -32338,6 +33179,7 @@ typedef $$SessionMembersTableUpdateCompanionBuilder =
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
       Value<String> ownerId,
+      Value<String> visibility,
       Value<String> sessionId,
       Value<String?> userId,
       Value<String?> guestName,
@@ -32377,6 +33219,11 @@ class $$SessionMembersTableFilterComposer
 
   ColumnFilters<String> get ownerId => $composableBuilder(
     column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get visibility => $composableBuilder(
+    column: $table.visibility,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -32440,6 +33287,11 @@ class $$SessionMembersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get sessionId => $composableBuilder(
     column: $table.sessionId,
     builder: (column) => ColumnOrderings(column),
@@ -32489,6 +33341,11 @@ class $$SessionMembersTableAnnotationComposer
 
   GeneratedColumn<String> get ownerId =>
       $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get sessionId =>
       $composableBuilder(column: $table.sessionId, builder: (column) => column);
@@ -32544,6 +33401,7 @@ class $$SessionMembersTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String> ownerId = const Value.absent(),
+                Value<String> visibility = const Value.absent(),
                 Value<String> sessionId = const Value.absent(),
                 Value<String?> userId = const Value.absent(),
                 Value<String?> guestName = const Value.absent(),
@@ -32556,6 +33414,7 @@ class $$SessionMembersTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 ownerId: ownerId,
+                visibility: visibility,
                 sessionId: sessionId,
                 userId: userId,
                 guestName: guestName,
@@ -32570,6 +33429,7 @@ class $$SessionMembersTableTableManager
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
                 required String ownerId,
+                required String visibility,
                 required String sessionId,
                 Value<String?> userId = const Value.absent(),
                 Value<String?> guestName = const Value.absent(),
@@ -32582,6 +33442,7 @@ class $$SessionMembersTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 ownerId: ownerId,
+                visibility: visibility,
                 sessionId: sessionId,
                 userId: userId,
                 guestName: guestName,
@@ -32629,6 +33490,7 @@ typedef $$AscentsTableCreateCompanionBuilder = AscentsCompanion Function({
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
   required String ownerId,
+  required String visibility,
   required String sessionId,
   required String routeId,
   required int ordinal,
@@ -32643,7 +33505,6 @@ typedef $$AscentsTableCreateCompanionBuilder = AscentsCompanion Function({
   Value<String?> officialGradeId,
   Value<double?> difficultyScore,
   Value<int?> qualityStars,
-  Value<String?> betaNotes,
   Value<int?> durationS,
   Value<String?> shoeId,
   required String setting,
@@ -32656,6 +33517,7 @@ typedef $$AscentsTableUpdateCompanionBuilder = AscentsCompanion Function({
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
   Value<String> ownerId,
+  Value<String> visibility,
   Value<String> sessionId,
   Value<String> routeId,
   Value<int> ordinal,
@@ -32670,7 +33532,6 @@ typedef $$AscentsTableUpdateCompanionBuilder = AscentsCompanion Function({
   Value<String?> officialGradeId,
   Value<double?> difficultyScore,
   Value<int?> qualityStars,
-  Value<String?> betaNotes,
   Value<int?> durationS,
   Value<String?> shoeId,
   Value<String> setting,
@@ -32709,6 +33570,11 @@ class $$AscentsTableFilterComposer
 
   ColumnFilters<String> get ownerId => $composableBuilder(
     column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get visibility => $composableBuilder(
+    column: $table.visibility,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -32782,11 +33648,6 @@ class $$AscentsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get betaNotes => $composableBuilder(
-    column: $table.betaNotes,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<int> get durationS => $composableBuilder(
     column: $table.durationS,
     builder: (column) => ColumnFilters(column),
@@ -32839,6 +33700,11 @@ class $$AscentsTableOrderingComposer
 
   ColumnOrderings<String> get ownerId => $composableBuilder(
     column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get visibility => $composableBuilder(
+    column: $table.visibility,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -32912,11 +33778,6 @@ class $$AscentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get betaNotes => $composableBuilder(
-    column: $table.betaNotes,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<int> get durationS => $composableBuilder(
     column: $table.durationS,
     builder: (column) => ColumnOrderings(column),
@@ -32961,6 +33822,11 @@ class $$AscentsTableAnnotationComposer
 
   GeneratedColumn<String> get ownerId =>
       $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get sessionId =>
       $composableBuilder(column: $table.sessionId, builder: (column) => column);
@@ -33014,9 +33880,6 @@ class $$AscentsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get betaNotes =>
-      $composableBuilder(column: $table.betaNotes, builder: (column) => column);
-
   GeneratedColumn<int> get durationS =>
       $composableBuilder(column: $table.durationS, builder: (column) => column);
 
@@ -33065,6 +33928,7 @@ class $$AscentsTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String> ownerId = const Value.absent(),
+                Value<String> visibility = const Value.absent(),
                 Value<String> sessionId = const Value.absent(),
                 Value<String> routeId = const Value.absent(),
                 Value<int> ordinal = const Value.absent(),
@@ -33079,7 +33943,6 @@ class $$AscentsTableTableManager
                 Value<String?> officialGradeId = const Value.absent(),
                 Value<double?> difficultyScore = const Value.absent(),
                 Value<int?> qualityStars = const Value.absent(),
-                Value<String?> betaNotes = const Value.absent(),
                 Value<int?> durationS = const Value.absent(),
                 Value<String?> shoeId = const Value.absent(),
                 Value<String> setting = const Value.absent(),
@@ -33091,6 +33954,7 @@ class $$AscentsTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 ownerId: ownerId,
+                visibility: visibility,
                 sessionId: sessionId,
                 routeId: routeId,
                 ordinal: ordinal,
@@ -33105,7 +33969,6 @@ class $$AscentsTableTableManager
                 officialGradeId: officialGradeId,
                 difficultyScore: difficultyScore,
                 qualityStars: qualityStars,
-                betaNotes: betaNotes,
                 durationS: durationS,
                 shoeId: shoeId,
                 setting: setting,
@@ -33119,6 +33982,7 @@ class $$AscentsTableTableManager
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
                 required String ownerId,
+                required String visibility,
                 required String sessionId,
                 required String routeId,
                 required int ordinal,
@@ -33133,7 +33997,6 @@ class $$AscentsTableTableManager
                 Value<String?> officialGradeId = const Value.absent(),
                 Value<double?> difficultyScore = const Value.absent(),
                 Value<int?> qualityStars = const Value.absent(),
-                Value<String?> betaNotes = const Value.absent(),
                 Value<int?> durationS = const Value.absent(),
                 Value<String?> shoeId = const Value.absent(),
                 required String setting,
@@ -33145,6 +34008,7 @@ class $$AscentsTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 ownerId: ownerId,
+                visibility: visibility,
                 sessionId: sessionId,
                 routeId: routeId,
                 ordinal: ordinal,
@@ -33159,7 +34023,6 @@ class $$AscentsTableTableManager
                 officialGradeId: officialGradeId,
                 difficultyScore: difficultyScore,
                 qualityStars: qualityStars,
-                betaNotes: betaNotes,
                 durationS: durationS,
                 shoeId: shoeId,
                 setting: setting,
@@ -33197,6 +34060,251 @@ typedef $$AscentsTableProcessedTableManager =
       Ascent,
       PrefetchHooks Function()
     >;
+typedef $$AscentBetaTableCreateCompanionBuilder = AscentBetaCompanion Function({
+  required String id,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  required String ownerId,
+  required String ascentId,
+  required String betaNotes,
+  Value<int> rowid,
+});
+typedef $$AscentBetaTableUpdateCompanionBuilder = AscentBetaCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<String> ownerId,
+  Value<String> ascentId,
+  Value<String> betaNotes,
+  Value<int> rowid,
+});
+
+class $$AscentBetaTableFilterComposer
+    extends Composer<_$SvaDatabase, $AscentBetaTable> {
+  $$AscentBetaTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ascentId => $composableBuilder(
+    column: $table.ascentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get betaNotes => $composableBuilder(
+    column: $table.betaNotes,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AscentBetaTableOrderingComposer
+    extends Composer<_$SvaDatabase, $AscentBetaTable> {
+  $$AscentBetaTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ascentId => $composableBuilder(
+    column: $table.ascentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get betaNotes => $composableBuilder(
+    column: $table.betaNotes,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AscentBetaTableAnnotationComposer
+    extends Composer<_$SvaDatabase, $AscentBetaTable> {
+  $$AscentBetaTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get ascentId =>
+      $composableBuilder(column: $table.ascentId, builder: (column) => column);
+
+  GeneratedColumn<String> get betaNotes =>
+      $composableBuilder(column: $table.betaNotes, builder: (column) => column);
+}
+
+class $$AscentBetaTableTableManager
+    extends
+        RootTableManager<
+          _$SvaDatabase,
+          $AscentBetaTable,
+          AscentBetaNote,
+          $$AscentBetaTableFilterComposer,
+          $$AscentBetaTableOrderingComposer,
+          $$AscentBetaTableAnnotationComposer,
+          $$AscentBetaTableCreateCompanionBuilder,
+          $$AscentBetaTableUpdateCompanionBuilder,
+          (
+            AscentBetaNote,
+            BaseReferences<_$SvaDatabase, $AscentBetaTable, AscentBetaNote>,
+          ),
+          AscentBetaNote,
+          PrefetchHooks Function()
+        > {
+  $$AscentBetaTableTableManager(_$SvaDatabase db, $AscentBetaTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AscentBetaTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AscentBetaTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AscentBetaTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> ascentId = const Value.absent(),
+                Value<String> betaNotes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AscentBetaCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                ownerId: ownerId,
+                ascentId: ascentId,
+                betaNotes: betaNotes,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String ownerId,
+                required String ascentId,
+                required String betaNotes,
+                Value<int> rowid = const Value.absent(),
+              }) => AscentBetaCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                ownerId: ownerId,
+                ascentId: ascentId,
+                betaNotes: betaNotes,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AscentBetaTable, AscentBetaNote>(table),
+                  BaseReferences<
+                    _$SvaDatabase,
+                    $AscentBetaTable,
+                    AscentBetaNote
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AscentBetaTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SvaDatabase,
+      $AscentBetaTable,
+      AscentBetaNote,
+      $$AscentBetaTableFilterComposer,
+      $$AscentBetaTableOrderingComposer,
+      $$AscentBetaTableAnnotationComposer,
+      $$AscentBetaTableCreateCompanionBuilder,
+      $$AscentBetaTableUpdateCompanionBuilder,
+      (
+        AscentBetaNote,
+        BaseReferences<_$SvaDatabase, $AscentBetaTable, AscentBetaNote>,
+      ),
+      AscentBetaNote,
+      PrefetchHooks Function()
+    >;
 typedef $$AscentPitchesTableCreateCompanionBuilder =
     AscentPitchesCompanion Function({
       required String id,
@@ -33204,6 +34312,7 @@ typedef $$AscentPitchesTableCreateCompanionBuilder =
       required DateTime updatedAt,
       Value<DateTime?> deletedAt,
       required String ownerId,
+      required String visibility,
       required String ascentId,
       Value<String?> pitchId,
       required int number,
@@ -33222,6 +34331,7 @@ typedef $$AscentPitchesTableUpdateCompanionBuilder =
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
       Value<String> ownerId,
+      Value<String> visibility,
       Value<String> ascentId,
       Value<String?> pitchId,
       Value<int> number,
@@ -33265,6 +34375,11 @@ class $$AscentPitchesTableFilterComposer
 
   ColumnFilters<String> get ownerId => $composableBuilder(
     column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get visibility => $composableBuilder(
+    column: $table.visibility,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -33348,6 +34463,11 @@ class $$AscentPitchesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get ascentId => $composableBuilder(
     column: $table.ascentId,
     builder: (column) => ColumnOrderings(column),
@@ -33418,6 +34538,11 @@ class $$AscentPitchesTableAnnotationComposer
   GeneratedColumn<String> get ownerId =>
       $composableBuilder(column: $table.ownerId, builder: (column) => column);
 
+  GeneratedColumn<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get ascentId =>
       $composableBuilder(column: $table.ascentId, builder: (column) => column);
 
@@ -33484,6 +34609,7 @@ class $$AscentPitchesTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String> ownerId = const Value.absent(),
+                Value<String> visibility = const Value.absent(),
                 Value<String> ascentId = const Value.absent(),
                 Value<String?> pitchId = const Value.absent(),
                 Value<int> number = const Value.absent(),
@@ -33500,6 +34626,7 @@ class $$AscentPitchesTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 ownerId: ownerId,
+                visibility: visibility,
                 ascentId: ascentId,
                 pitchId: pitchId,
                 number: number,
@@ -33518,6 +34645,7 @@ class $$AscentPitchesTableTableManager
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
                 required String ownerId,
+                required String visibility,
                 required String ascentId,
                 Value<String?> pitchId = const Value.absent(),
                 required int number,
@@ -33534,6 +34662,7 @@ class $$AscentPitchesTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 ownerId: ownerId,
+                visibility: visibility,
                 ascentId: ascentId,
                 pitchId: pitchId,
                 number: number,
@@ -33586,6 +34715,7 @@ typedef $$AscentAttributesTableCreateCompanionBuilder =
       required DateTime updatedAt,
       Value<DateTime?> deletedAt,
       required String ownerId,
+      required String visibility,
       required String ascentId,
       required String attributeKey,
       required String value,
@@ -33598,6 +34728,7 @@ typedef $$AscentAttributesTableUpdateCompanionBuilder =
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
       Value<String> ownerId,
+      Value<String> visibility,
       Value<String> ascentId,
       Value<String> attributeKey,
       Value<String> value,
@@ -33635,6 +34766,11 @@ class $$AscentAttributesTableFilterComposer
 
   ColumnFilters<String> get ownerId => $composableBuilder(
     column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get visibility => $composableBuilder(
+    column: $table.visibility,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -33688,6 +34824,11 @@ class $$AscentAttributesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get ascentId => $composableBuilder(
     column: $table.ascentId,
     builder: (column) => ColumnOrderings(column),
@@ -33727,6 +34868,11 @@ class $$AscentAttributesTableAnnotationComposer
 
   GeneratedColumn<String> get ownerId =>
       $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get ascentId =>
       $composableBuilder(column: $table.ascentId, builder: (column) => column);
@@ -33782,6 +34928,7 @@ class $$AscentAttributesTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String> ownerId = const Value.absent(),
+                Value<String> visibility = const Value.absent(),
                 Value<String> ascentId = const Value.absent(),
                 Value<String> attributeKey = const Value.absent(),
                 Value<String> value = const Value.absent(),
@@ -33792,6 +34939,7 @@ class $$AscentAttributesTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 ownerId: ownerId,
+                visibility: visibility,
                 ascentId: ascentId,
                 attributeKey: attributeKey,
                 value: value,
@@ -33804,6 +34952,7 @@ class $$AscentAttributesTableTableManager
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
                 required String ownerId,
+                required String visibility,
                 required String ascentId,
                 required String attributeKey,
                 required String value,
@@ -33814,6 +34963,7 @@ class $$AscentAttributesTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 ownerId: ownerId,
+                visibility: visibility,
                 ascentId: ascentId,
                 attributeKey: attributeKey,
                 value: value,
@@ -33859,6 +35009,7 @@ typedef $$AscentGearTableCreateCompanionBuilder = AscentGearCompanion Function({
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
   required String ownerId,
+  required String visibility,
   required String ascentId,
   required String gearPieceId,
   Value<int> count,
@@ -33871,6 +35022,7 @@ typedef $$AscentGearTableUpdateCompanionBuilder = AscentGearCompanion Function({
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
   Value<String> ownerId,
+  Value<String> visibility,
   Value<String> ascentId,
   Value<String> gearPieceId,
   Value<int> count,
@@ -33909,6 +35061,11 @@ class $$AscentGearTableFilterComposer
 
   ColumnFilters<String> get ownerId => $composableBuilder(
     column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get visibility => $composableBuilder(
+    column: $table.visibility,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -33967,6 +35124,11 @@ class $$AscentGearTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get ascentId => $composableBuilder(
     column: $table.ascentId,
     builder: (column) => ColumnOrderings(column),
@@ -34011,6 +35173,11 @@ class $$AscentGearTableAnnotationComposer
 
   GeneratedColumn<String> get ownerId =>
       $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get ascentId =>
       $composableBuilder(column: $table.ascentId, builder: (column) => column);
@@ -34065,6 +35232,7 @@ class $$AscentGearTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String> ownerId = const Value.absent(),
+                Value<String> visibility = const Value.absent(),
                 Value<String> ascentId = const Value.absent(),
                 Value<String> gearPieceId = const Value.absent(),
                 Value<int> count = const Value.absent(),
@@ -34076,6 +35244,7 @@ class $$AscentGearTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 ownerId: ownerId,
+                visibility: visibility,
                 ascentId: ascentId,
                 gearPieceId: gearPieceId,
                 count: count,
@@ -34089,6 +35258,7 @@ class $$AscentGearTableTableManager
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
                 required String ownerId,
+                required String visibility,
                 required String ascentId,
                 required String gearPieceId,
                 Value<int> count = const Value.absent(),
@@ -34100,6 +35270,7 @@ class $$AscentGearTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 ownerId: ownerId,
+                visibility: visibility,
                 ascentId: ascentId,
                 gearPieceId: gearPieceId,
                 count: count,
@@ -34145,8 +35316,8 @@ typedef $$MediaTableCreateCompanionBuilder = MediaCompanion Function({
   required DateTime createdAt,
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
-  required String ownerId,
   required String visibility,
+  Value<String?> ownerId,
   Value<String?> sessionId,
   Value<String?> routeId,
   Value<String?> ascentId,
@@ -34160,6 +35331,8 @@ typedef $$MediaTableCreateCompanionBuilder = MediaCompanion Function({
   Value<DateTime?> takenAt,
   Value<int> sort,
   required String uploadState,
+  Value<String> shareState,
+  Value<String?> creditedTo,
   Value<bool> exifStripped,
   Value<int> rowid,
 });
@@ -34168,8 +35341,8 @@ typedef $$MediaTableUpdateCompanionBuilder = MediaCompanion Function({
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
-  Value<String> ownerId,
   Value<String> visibility,
+  Value<String?> ownerId,
   Value<String?> sessionId,
   Value<String?> routeId,
   Value<String?> ascentId,
@@ -34183,6 +35356,8 @@ typedef $$MediaTableUpdateCompanionBuilder = MediaCompanion Function({
   Value<DateTime?> takenAt,
   Value<int> sort,
   Value<String> uploadState,
+  Value<String> shareState,
+  Value<String?> creditedTo,
   Value<bool> exifStripped,
   Value<int> rowid,
 });
@@ -34215,13 +35390,13 @@ class $$MediaTableFilterComposer extends Composer<_$SvaDatabase, $MediaTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get ownerId => $composableBuilder(
-    column: $table.ownerId,
+  ColumnFilters<String> get visibility => $composableBuilder(
+    column: $table.visibility,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get visibility => $composableBuilder(
-    column: $table.visibility,
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -34290,6 +35465,16 @@ class $$MediaTableFilterComposer extends Composer<_$SvaDatabase, $MediaTable> {
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get shareState => $composableBuilder(
+    column: $table.shareState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get creditedTo => $composableBuilder(
+    column: $table.creditedTo,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<bool> get exifStripped => $composableBuilder(
     column: $table.exifStripped,
     builder: (column) => ColumnFilters(column),
@@ -34325,13 +35510,13 @@ class $$MediaTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get ownerId => $composableBuilder(
-    column: $table.ownerId,
+  ColumnOrderings<String> get visibility => $composableBuilder(
+    column: $table.visibility,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get visibility => $composableBuilder(
-    column: $table.visibility,
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -34400,6 +35585,16 @@ class $$MediaTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get shareState => $composableBuilder(
+    column: $table.shareState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get creditedTo => $composableBuilder(
+    column: $table.creditedTo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get exifStripped => $composableBuilder(
     column: $table.exifStripped,
     builder: (column) => ColumnOrderings(column),
@@ -34427,13 +35622,13 @@ class $$MediaTableAnnotationComposer
   GeneratedColumn<DateTime> get deletedAt =>
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 
-  GeneratedColumn<String> get ownerId =>
-      $composableBuilder(column: $table.ownerId, builder: (column) => column);
-
   GeneratedColumn<String> get visibility => $composableBuilder(
     column: $table.visibility,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
 
   GeneratedColumn<String> get sessionId =>
       $composableBuilder(column: $table.sessionId, builder: (column) => column);
@@ -34478,6 +35673,16 @@ class $$MediaTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get shareState => $composableBuilder(
+    column: $table.shareState,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get creditedTo => $composableBuilder(
+    column: $table.creditedTo,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<bool> get exifStripped => $composableBuilder(
     column: $table.exifStripped,
     builder: (column) => column,
@@ -34516,8 +35721,8 @@ class $$MediaTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
-                Value<String> ownerId = const Value.absent(),
                 Value<String> visibility = const Value.absent(),
+                Value<String?> ownerId = const Value.absent(),
                 Value<String?> sessionId = const Value.absent(),
                 Value<String?> routeId = const Value.absent(),
                 Value<String?> ascentId = const Value.absent(),
@@ -34531,6 +35736,8 @@ class $$MediaTableTableManager
                 Value<DateTime?> takenAt = const Value.absent(),
                 Value<int> sort = const Value.absent(),
                 Value<String> uploadState = const Value.absent(),
+                Value<String> shareState = const Value.absent(),
+                Value<String?> creditedTo = const Value.absent(),
                 Value<bool> exifStripped = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MediaCompanion(
@@ -34538,8 +35745,8 @@ class $$MediaTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
-                ownerId: ownerId,
                 visibility: visibility,
+                ownerId: ownerId,
                 sessionId: sessionId,
                 routeId: routeId,
                 ascentId: ascentId,
@@ -34553,6 +35760,8 @@ class $$MediaTableTableManager
                 takenAt: takenAt,
                 sort: sort,
                 uploadState: uploadState,
+                shareState: shareState,
+                creditedTo: creditedTo,
                 exifStripped: exifStripped,
                 rowid: rowid,
               ),
@@ -34562,8 +35771,8 @@ class $$MediaTableTableManager
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
-                required String ownerId,
                 required String visibility,
+                Value<String?> ownerId = const Value.absent(),
                 Value<String?> sessionId = const Value.absent(),
                 Value<String?> routeId = const Value.absent(),
                 Value<String?> ascentId = const Value.absent(),
@@ -34577,6 +35786,8 @@ class $$MediaTableTableManager
                 Value<DateTime?> takenAt = const Value.absent(),
                 Value<int> sort = const Value.absent(),
                 required String uploadState,
+                Value<String> shareState = const Value.absent(),
+                Value<String?> creditedTo = const Value.absent(),
                 Value<bool> exifStripped = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MediaCompanion.insert(
@@ -34584,8 +35795,8 @@ class $$MediaTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
-                ownerId: ownerId,
                 visibility: visibility,
+                ownerId: ownerId,
                 sessionId: sessionId,
                 routeId: routeId,
                 ascentId: ascentId,
@@ -34599,6 +35810,8 @@ class $$MediaTableTableManager
                 takenAt: takenAt,
                 sort: sort,
                 uploadState: uploadState,
+                shareState: shareState,
+                creditedTo: creditedTo,
                 exifStripped: exifStripped,
                 rowid: rowid,
               ),
@@ -38109,6 +39322,8 @@ class $SvaDatabaseManager {
       $$SessionMembersTableTableManager(_db, _db.sessionMembers);
   $$AscentsTableTableManager get ascents =>
       $$AscentsTableTableManager(_db, _db.ascents);
+  $$AscentBetaTableTableManager get ascentBeta =>
+      $$AscentBetaTableTableManager(_db, _db.ascentBeta);
   $$AscentPitchesTableTableManager get ascentPitches =>
       $$AscentPitchesTableTableManager(_db, _db.ascentPitches);
   $$AscentAttributesTableTableManager get ascentAttributes =>

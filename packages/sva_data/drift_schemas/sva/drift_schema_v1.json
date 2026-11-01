@@ -246,7 +246,7 @@
             "name": "country_code",
             "getter_name": "countryCode",
             "moor_type": "string",
-            "nullable": true,
+            "nullable": false,
             "customConstraints": null,
             "default_dart": null,
             "default_client_dart": null,
@@ -322,8 +322,8 @@
             "dialectAwareDefaultConstraints": {
               "sqlite": "CHECK (\"location_hidden\" IN (0, 1))"
             },
-            "default_dart": "const CustomExpression('0')",
-            "default_client_dart": null,
+            "default_dart": null,
+            "default_client_dart": "() => false",
             "dsl_features": []
           },
           {
@@ -501,10 +501,10 @@
             "dsl_features": []
           },
           {
-            "name": "created_by",
-            "getter_name": "createdBy",
+            "name": "owner_id",
+            "getter_name": "ownerId",
             "moor_type": "string",
-            "nullable": true,
+            "nullable": false,
             "customConstraints": null,
             "default_dart": null,
             "default_client_dart": null,
@@ -576,8 +576,8 @@
             "moor_type": "int",
             "nullable": false,
             "customConstraints": null,
-            "default_dart": "const CustomExpression('0')",
-            "default_client_dart": null,
+            "default_dart": null,
+            "default_client_dart": "() => 0",
             "dsl_features": []
           }
         ],
@@ -638,10 +638,10 @@
             "dsl_features": []
           },
           {
-            "name": "created_by",
-            "getter_name": "createdBy",
+            "name": "owner_id",
+            "getter_name": "ownerId",
             "moor_type": "string",
-            "nullable": true,
+            "nullable": false,
             "customConstraints": null,
             "default_dart": null,
             "default_client_dart": null,
@@ -850,8 +850,8 @@
             "moor_type": "int",
             "nullable": false,
             "customConstraints": null,
-            "default_dart": "const CustomExpression('1')",
-            "default_client_dart": null,
+            "default_dart": null,
+            "default_client_dart": "() => 1",
             "dsl_features": []
           },
           {
@@ -1893,8 +1893,8 @@
             "moor_type": "int",
             "nullable": false,
             "customConstraints": null,
-            "default_dart": "const CustomExpression('1')",
-            "default_client_dart": null,
+            "default_dart": null,
+            "default_client_dart": "() => 1",
             "dsl_features": []
           },
           {
@@ -2395,8 +2395,8 @@
             "dialectAwareDefaultConstraints": {
               "sqlite": "CHECK (\"location_hidden\" IN (0, 1))"
             },
-            "default_dart": "const CustomExpression('0')",
-            "default_client_dart": null,
+            "default_dart": null,
+            "default_client_dart": "() => false",
             "dsl_features": []
           },
           {
@@ -2489,6 +2489,16 @@
           {
             "name": "owner_id",
             "getter_name": "ownerId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "visibility",
+            "getter_name": "visibility",
             "moor_type": "string",
             "nullable": false,
             "customConstraints": null,
@@ -2664,6 +2674,16 @@
             "dsl_features": []
           },
           {
+            "name": "visibility",
+            "getter_name": "visibility",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
             "name": "session_id",
             "getter_name": "sessionId",
             "moor_type": "string",
@@ -2773,6 +2793,16 @@
           {
             "name": "owner_id",
             "getter_name": "ownerId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "visibility",
+            "getter_name": "visibility",
             "moor_type": "string",
             "nullable": false,
             "customConstraints": null,
@@ -2921,16 +2951,6 @@
             "dsl_features": []
           },
           {
-            "name": "beta_notes",
-            "getter_name": "betaNotes",
-            "moor_type": "string",
-            "nullable": true,
-            "customConstraints": null,
-            "default_dart": null,
-            "default_client_dart": null,
-            "dsl_features": []
-          },
-          {
             "name": "duration_s",
             "getter_name": "durationS",
             "moor_type": "int",
@@ -2984,6 +3004,93 @@
       "references": [],
       "type": "table",
       "data": {
+        "name": "ascent_beta",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "created_at",
+            "getter_name": "createdAt",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "updated_at",
+            "getter_name": "updatedAt",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "deleted_at",
+            "getter_name": "deletedAt",
+            "moor_type": "dateTime",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "owner_id",
+            "getter_name": "ownerId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "ascent_id",
+            "getter_name": "ascentId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "beta_notes",
+            "getter_name": "betaNotes",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "id"
+        ]
+      }
+    },
+    {
+      "id": 21,
+      "references": [],
+      "type": "table",
+      "data": {
         "name": "ascent_pitches",
         "was_declared_in_moor": false,
         "columns": [
@@ -3030,6 +3137,16 @@
           {
             "name": "owner_id",
             "getter_name": "ownerId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "visibility",
+            "getter_name": "visibility",
             "moor_type": "string",
             "nullable": false,
             "customConstraints": null,
@@ -3137,7 +3254,7 @@
       }
     },
     {
-      "id": 21,
+      "id": 22,
       "references": [],
       "type": "table",
       "data": {
@@ -3195,6 +3312,16 @@
             "dsl_features": []
           },
           {
+            "name": "visibility",
+            "getter_name": "visibility",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
             "name": "ascent_id",
             "getter_name": "ascentId",
             "moor_type": "string",
@@ -3234,7 +3361,7 @@
       }
     },
     {
-      "id": 22,
+      "id": 23,
       "references": [],
       "type": "table",
       "data": {
@@ -3292,6 +3419,16 @@
             "dsl_features": []
           },
           {
+            "name": "visibility",
+            "getter_name": "visibility",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
             "name": "ascent_id",
             "getter_name": "ascentId",
             "moor_type": "string",
@@ -3317,8 +3454,8 @@
             "moor_type": "int",
             "nullable": false,
             "customConstraints": null,
-            "default_dart": "const CustomExpression('1')",
-            "default_client_dart": null,
+            "default_dart": null,
+            "default_client_dart": "() => 1",
             "dsl_features": []
           },
           {
@@ -3341,7 +3478,7 @@
       }
     },
     {
-      "id": 23,
+      "id": 24,
       "references": [],
       "type": "table",
       "data": {
@@ -3389,8 +3526,8 @@
             "dsl_features": []
           },
           {
-            "name": "owner_id",
-            "getter_name": "ownerId",
+            "name": "visibility",
+            "getter_name": "visibility",
             "moor_type": "string",
             "nullable": false,
             "customConstraints": null,
@@ -3399,10 +3536,10 @@
             "dsl_features": []
           },
           {
-            "name": "visibility",
-            "getter_name": "visibility",
+            "name": "owner_id",
+            "getter_name": "ownerId",
             "moor_type": "string",
-            "nullable": false,
+            "nullable": true,
             "customConstraints": null,
             "default_dart": null,
             "default_client_dart": null,
@@ -3524,8 +3661,8 @@
             "moor_type": "int",
             "nullable": false,
             "customConstraints": null,
-            "default_dart": "const CustomExpression('0')",
-            "default_client_dart": null,
+            "default_dart": null,
+            "default_client_dart": "() => 0",
             "dsl_features": []
           },
           {
@@ -3533,6 +3670,26 @@
             "getter_name": "uploadState",
             "moor_type": "string",
             "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "share_state",
+            "getter_name": "shareState",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": "() => 'none'",
+            "dsl_features": []
+          },
+          {
+            "name": "credited_to",
+            "getter_name": "creditedTo",
+            "moor_type": "string",
+            "nullable": true,
             "customConstraints": null,
             "default_dart": null,
             "default_client_dart": null,
@@ -3548,8 +3705,8 @@
             "dialectAwareDefaultConstraints": {
               "sqlite": "CHECK (\"exif_stripped\" IN (0, 1))"
             },
-            "default_dart": "const CustomExpression('0')",
-            "default_client_dart": null,
+            "default_dart": null,
+            "default_client_dart": "() => false",
             "dsl_features": []
           }
         ],
@@ -3562,7 +3719,7 @@
       }
     },
     {
-      "id": 24,
+      "id": 25,
       "references": [],
       "type": "table",
       "data": {
@@ -3689,7 +3846,7 @@
       }
     },
     {
-      "id": 25,
+      "id": 26,
       "references": [],
       "type": "table",
       "data": {
@@ -3856,8 +4013,8 @@
             "dialectAwareDefaultConstraints": {
               "sqlite": "CHECK (\"remind\" IN (0, 1))"
             },
-            "default_dart": "const CustomExpression('1')",
-            "default_client_dart": null,
+            "default_dart": null,
+            "default_client_dart": "() => true",
             "dsl_features": []
           },
           {
@@ -3870,8 +4027,8 @@
             "dialectAwareDefaultConstraints": {
               "sqlite": "CHECK (\"in_default_rack\" IN (0, 1))"
             },
-            "default_dart": "const CustomExpression('0')",
-            "default_client_dart": null,
+            "default_dart": null,
+            "default_client_dart": "() => false",
             "dsl_features": []
           },
           {
@@ -3914,7 +4071,7 @@
       }
     },
     {
-      "id": 26,
+      "id": 27,
       "references": [],
       "type": "table",
       "data": {
@@ -4021,7 +4178,7 @@
       }
     },
     {
-      "id": 27,
+      "id": 28,
       "references": [],
       "type": "table",
       "data": {
@@ -4188,7 +4345,7 @@
       }
     },
     {
-      "id": 28,
+      "id": 29,
       "references": [],
       "type": "table",
       "data": {
@@ -4285,7 +4442,7 @@
       }
     },
     {
-      "id": 29,
+      "id": 30,
       "references": [],
       "type": "table",
       "data": {
@@ -4402,7 +4559,7 @@
       }
     },
     {
-      "id": 30,
+      "id": 31,
       "references": [],
       "type": "table",
       "data": {
@@ -4529,7 +4686,7 @@
       }
     },
     {
-      "id": 31,
+      "id": 32,
       "references": [],
       "type": "table",
       "data": {
@@ -4666,7 +4823,7 @@
       }
     },
     {
-      "id": 32,
+      "id": 33,
       "references": [],
       "type": "table",
       "data": {
@@ -4787,7 +4944,7 @@
       }
     },
     {
-      "id": 33,
+      "id": 34,
       "references": [],
       "type": "table",
       "data": {
@@ -4954,7 +5111,7 @@
       }
     },
     {
-      "id": 34,
+      "id": 35,
       "references": [
         1
       ],
@@ -4973,7 +5130,7 @@
       }
     },
     {
-      "id": 35,
+      "id": 36,
       "references": [
         1
       ],
@@ -4992,7 +5149,7 @@
       }
     },
     {
-      "id": 36,
+      "id": 37,
       "references": [
         5
       ],
@@ -5011,7 +5168,7 @@
       }
     },
     {
-      "id": 37,
+      "id": 38,
       "references": [
         11
       ],
@@ -5034,7 +5191,7 @@
       }
     },
     {
-      "id": 38,
+      "id": 39,
       "references": [
         16
       ],
@@ -5057,7 +5214,7 @@
       }
     },
     {
-      "id": 39,
+      "id": 40,
       "references": [
         18
       ],
@@ -5080,7 +5237,7 @@
       }
     },
     {
-      "id": 40,
+      "id": 41,
       "references": [
         19
       ],
@@ -5107,7 +5264,7 @@
       }
     },
     {
-      "id": 41,
+      "id": 42,
       "references": [
         19
       ],
@@ -5130,7 +5287,7 @@
       }
     },
     {
-      "id": 42,
+      "id": 43,
       "references": [
         19
       ],
@@ -5149,13 +5306,13 @@
       }
     },
     {
-      "id": 43,
+      "id": 44,
       "references": [
-        21
+        22
       ],
       "type": "index",
       "data": {
-        "on": 21,
+        "on": 22,
         "name": "ascent_attributes_key_value",
         "sql": null,
         "unique": false,
@@ -5172,13 +5329,13 @@
       }
     },
     {
-      "id": 44,
+      "id": 45,
       "references": [
-        23
+        24
       ],
       "type": "index",
       "data": {
-        "on": 23,
+        "on": 24,
         "name": "media_session",
         "sql": null,
         "unique": false,
@@ -5206,7 +5363,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"areas\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"created_by\" TEXT NULL, \"visibility\" TEXT NOT NULL, \"parent_id\" TEXT NULL, \"type\" TEXT NOT NULL, \"name\" TEXT NOT NULL, \"country_code\" TEXT NULL, \"latitude\" REAL NULL, \"longitude\" REAL NULL, \"altitude_m\" INTEGER NULL, \"rock_type\" TEXT NULL, \"aspect\" TEXT NULL, \"approach_min\" INTEGER NULL, \"location_hidden\" INTEGER NOT NULL DEFAULT 0 CHECK (\"location_hidden\" IN (0, 1)), \"access_notes\" TEXT NULL, \"merged_into_id\" TEXT NULL, PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"areas\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"created_by\" TEXT NULL, \"visibility\" TEXT NOT NULL, \"parent_id\" TEXT NULL, \"type\" TEXT NOT NULL, \"name\" TEXT NOT NULL, \"country_code\" TEXT NOT NULL, \"latitude\" REAL NULL, \"longitude\" REAL NULL, \"altitude_m\" INTEGER NULL, \"rock_type\" TEXT NULL, \"aspect\" TEXT NULL, \"approach_min\" INTEGER NULL, \"location_hidden\" INTEGER NOT NULL CHECK (\"location_hidden\" IN (0, 1)), \"access_notes\" TEXT NULL, \"merged_into_id\" TEXT NULL, PRIMARY KEY (\"id\"));"
         }
       ]
     },
@@ -5224,7 +5381,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"gym_walls\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"created_by\" TEXT NULL, \"gym_id\" TEXT NOT NULL, \"name\" TEXT NOT NULL, \"height_m\" REAL NULL, \"angle\" TEXT NULL, \"kind\" TEXT NOT NULL, \"last_reset_on\" TEXT NULL, \"sort\" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"gym_walls\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"gym_id\" TEXT NOT NULL, \"name\" TEXT NOT NULL, \"height_m\" REAL NULL, \"angle\" TEXT NULL, \"kind\" TEXT NOT NULL, \"last_reset_on\" TEXT NULL, \"sort\" INTEGER NOT NULL, PRIMARY KEY (\"id\"));"
         }
       ]
     },
@@ -5233,7 +5390,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"gym_colour_grades\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"created_by\" TEXT NULL, \"gym_id\" TEXT NOT NULL, \"sort\" INTEGER NOT NULL, \"name\" TEXT NOT NULL, \"colour_hex\" TEXT NOT NULL, \"boulder_min_score\" REAL NULL, \"boulder_max_score\" REAL NULL, \"route_min_score\" REAL NULL, \"route_max_score\" REAL NULL, PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"gym_colour_grades\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"gym_id\" TEXT NOT NULL, \"sort\" INTEGER NOT NULL, \"name\" TEXT NOT NULL, \"colour_hex\" TEXT NOT NULL, \"boulder_min_score\" REAL NULL, \"boulder_max_score\" REAL NULL, \"route_min_score\" REAL NULL, \"route_max_score\" REAL NULL, PRIMARY KEY (\"id\"));"
         }
       ]
     },
@@ -5242,7 +5399,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"routes\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"created_by\" TEXT NULL, \"visibility\" TEXT NOT NULL, \"area_id\" TEXT NOT NULL, \"kind\" TEXT NOT NULL, \"name\" TEXT NULL, \"discipline\" TEXT NOT NULL, \"pitch_count\" INTEGER NOT NULL DEFAULT 1, \"length_m\" REAL NULL, \"angle\" TEXT NULL, \"protection\" TEXT NULL, \"descent\" TEXT NULL, \"rope_length_m\" INTEGER NULL, \"rope_type\" TEXT NULL, \"water_depth_m\" REAL NULL, \"tide_dependent\" INTEGER NULL CHECK (\"tide_dependent\" IN (0, 1)), \"season_notes\" TEXT NULL, \"first_ascent\" TEXT NULL, \"first_ascent_year\" INTEGER NULL, \"status\" TEXT NOT NULL, \"consensus_score\" REAL NULL, \"quality_avg\" REAL NULL, \"gym_wall_id\" TEXT NULL, \"gym_colour_grade_id\" TEXT NULL, \"set_on\" TEXT NULL, \"expires_on\" TEXT NULL, \"setter_note\" TEXT NULL, \"merged_into_id\" TEXT NULL, PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"routes\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"created_by\" TEXT NULL, \"visibility\" TEXT NOT NULL, \"area_id\" TEXT NOT NULL, \"kind\" TEXT NOT NULL, \"name\" TEXT NULL, \"discipline\" TEXT NOT NULL, \"pitch_count\" INTEGER NOT NULL, \"length_m\" REAL NULL, \"angle\" TEXT NULL, \"protection\" TEXT NULL, \"descent\" TEXT NULL, \"rope_length_m\" INTEGER NULL, \"rope_type\" TEXT NULL, \"water_depth_m\" REAL NULL, \"tide_dependent\" INTEGER NULL CHECK (\"tide_dependent\" IN (0, 1)), \"season_notes\" TEXT NULL, \"first_ascent\" TEXT NULL, \"first_ascent_year\" INTEGER NULL, \"status\" TEXT NOT NULL, \"consensus_score\" REAL NULL, \"quality_avg\" REAL NULL, \"gym_wall_id\" TEXT NULL, \"gym_colour_grade_id\" TEXT NULL, \"set_on\" TEXT NULL, \"expires_on\" TEXT NULL, \"setter_note\" TEXT NULL, \"merged_into_id\" TEXT NULL, PRIMARY KEY (\"id\"));"
         }
       ]
     },
@@ -5305,7 +5462,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"topos\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"created_by\" TEXT NULL, \"route_id\" TEXT NULL, \"area_id\" TEXT NULL, \"media_id\" TEXT NOT NULL, \"data\" TEXT NOT NULL, \"version\" INTEGER NOT NULL DEFAULT 1, \"status\" TEXT NOT NULL, PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"topos\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"created_by\" TEXT NULL, \"route_id\" TEXT NULL, \"area_id\" TEXT NULL, \"media_id\" TEXT NOT NULL, \"data\" TEXT NOT NULL, \"version\" INTEGER NOT NULL, \"status\" TEXT NOT NULL, PRIMARY KEY (\"id\"));"
         }
       ]
     },
@@ -5341,7 +5498,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"sessions\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"visibility\" TEXT NOT NULL, \"trip_id\" TEXT NULL, \"climb_group_id\" TEXT NULL, \"area_id\" TEXT NULL, \"setting\" TEXT NOT NULL, \"local_date\" TEXT NOT NULL, \"tz\" TEXT NOT NULL, \"start_at\" TEXT NULL, \"end_at\" TEXT NULL, \"title\" TEXT NULL, \"description\" TEXT NULL, \"location_hidden\" INTEGER NOT NULL DEFAULT 0 CHECK (\"location_hidden\" IN (0, 1)), \"default_shoe_id\" TEXT NULL, \"elevation_gain_m\" INTEGER NULL, \"conditions\" TEXT NULL, PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"sessions\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"visibility\" TEXT NOT NULL, \"trip_id\" TEXT NULL, \"climb_group_id\" TEXT NULL, \"area_id\" TEXT NULL, \"setting\" TEXT NOT NULL, \"local_date\" TEXT NOT NULL, \"tz\" TEXT NOT NULL, \"start_at\" TEXT NULL, \"end_at\" TEXT NULL, \"title\" TEXT NULL, \"description\" TEXT NULL, \"location_hidden\" INTEGER NOT NULL CHECK (\"location_hidden\" IN (0, 1)), \"default_shoe_id\" TEXT NULL, \"elevation_gain_m\" INTEGER NULL, \"conditions\" TEXT NULL, PRIMARY KEY (\"id\"));"
         }
       ]
     },
@@ -5350,7 +5507,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"weather_snapshots\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"session_id\" TEXT NOT NULL, \"source\" TEXT NOT NULL, \"temp_c\" REAL NULL, \"precip_mm\" REAL NULL, \"wind_ms\" REAL NULL, \"humidity_pct\" REAL NULL, \"cloud_pct\" REAL NULL, \"water_temp_c\" REAL NULL, \"raw\" TEXT NULL, \"fetched_at\" TEXT NOT NULL, PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"weather_snapshots\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"visibility\" TEXT NOT NULL, \"session_id\" TEXT NOT NULL, \"source\" TEXT NOT NULL, \"temp_c\" REAL NULL, \"precip_mm\" REAL NULL, \"wind_ms\" REAL NULL, \"humidity_pct\" REAL NULL, \"cloud_pct\" REAL NULL, \"water_temp_c\" REAL NULL, \"raw\" TEXT NULL, \"fetched_at\" TEXT NOT NULL, PRIMARY KEY (\"id\"));"
         }
       ]
     },
@@ -5359,7 +5516,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"session_members\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"session_id\" TEXT NOT NULL, \"user_id\" TEXT NULL, \"guest_name\" TEXT NULL, \"status\" TEXT NOT NULL, \"invited_by\" TEXT NULL, PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"session_members\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"visibility\" TEXT NOT NULL, \"session_id\" TEXT NOT NULL, \"user_id\" TEXT NULL, \"guest_name\" TEXT NULL, \"status\" TEXT NOT NULL, \"invited_by\" TEXT NULL, PRIMARY KEY (\"id\"));"
         }
       ]
     },
@@ -5368,7 +5525,16 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"ascents\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"session_id\" TEXT NOT NULL, \"route_id\" TEXT NOT NULL, \"ordinal\" INTEGER NOT NULL, \"ascent_type\" TEXT NOT NULL, \"style\" TEXT NOT NULL, \"tries\" INTEGER NOT NULL, \"falls\" INTEGER NULL, \"rests\" INTEGER NULL, \"high_point\" TEXT NULL, \"feel\" TEXT NULL, \"personal_grade_id\" TEXT NULL, \"official_grade_id\" TEXT NULL, \"difficulty_score\" REAL NULL, \"quality_stars\" INTEGER NULL, \"beta_notes\" TEXT NULL, \"duration_s\" INTEGER NULL, \"shoe_id\" TEXT NULL, \"setting\" TEXT NOT NULL, \"discipline\" TEXT NOT NULL, PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"ascents\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"visibility\" TEXT NOT NULL, \"session_id\" TEXT NOT NULL, \"route_id\" TEXT NOT NULL, \"ordinal\" INTEGER NOT NULL, \"ascent_type\" TEXT NOT NULL, \"style\" TEXT NOT NULL, \"tries\" INTEGER NOT NULL, \"falls\" INTEGER NULL, \"rests\" INTEGER NULL, \"high_point\" TEXT NULL, \"feel\" TEXT NULL, \"personal_grade_id\" TEXT NULL, \"official_grade_id\" TEXT NULL, \"difficulty_score\" REAL NULL, \"quality_stars\" INTEGER NULL, \"duration_s\" INTEGER NULL, \"shoe_id\" TEXT NULL, \"setting\" TEXT NOT NULL, \"discipline\" TEXT NOT NULL, PRIMARY KEY (\"id\"));"
+        }
+      ]
+    },
+    {
+      "name": "ascent_beta",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"ascent_beta\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"ascent_id\" TEXT NOT NULL, \"beta_notes\" TEXT NOT NULL, PRIMARY KEY (\"id\"));"
         }
       ]
     },
@@ -5377,7 +5543,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"ascent_pitches\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"ascent_id\" TEXT NOT NULL, \"pitch_id\" TEXT NULL, \"number\" INTEGER NOT NULL, \"leader\" TEXT NOT NULL, \"leader_member_id\" TEXT NULL, \"style\" TEXT NULL, \"falls\" INTEGER NULL, \"rests\" INTEGER NULL, \"notes\" TEXT NULL, PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"ascent_pitches\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"visibility\" TEXT NOT NULL, \"ascent_id\" TEXT NOT NULL, \"pitch_id\" TEXT NULL, \"number\" INTEGER NOT NULL, \"leader\" TEXT NOT NULL, \"leader_member_id\" TEXT NULL, \"style\" TEXT NULL, \"falls\" INTEGER NULL, \"rests\" INTEGER NULL, \"notes\" TEXT NULL, PRIMARY KEY (\"id\"));"
         }
       ]
     },
@@ -5386,7 +5552,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"ascent_attributes\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"ascent_id\" TEXT NOT NULL, \"attribute_key\" TEXT NOT NULL, \"value\" TEXT NOT NULL, PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"ascent_attributes\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"visibility\" TEXT NOT NULL, \"ascent_id\" TEXT NOT NULL, \"attribute_key\" TEXT NOT NULL, \"value\" TEXT NOT NULL, PRIMARY KEY (\"id\"));"
         }
       ]
     },
@@ -5395,7 +5561,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"ascent_gear\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"ascent_id\" TEXT NOT NULL, \"gear_piece_id\" TEXT NOT NULL, \"count\" INTEGER NOT NULL DEFAULT 1, \"borrowed_from\" TEXT NULL, PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"ascent_gear\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"visibility\" TEXT NOT NULL, \"ascent_id\" TEXT NOT NULL, \"gear_piece_id\" TEXT NOT NULL, \"count\" INTEGER NOT NULL, \"borrowed_from\" TEXT NULL, PRIMARY KEY (\"id\"));"
         }
       ]
     },
@@ -5404,7 +5570,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"media\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"visibility\" TEXT NOT NULL, \"session_id\" TEXT NULL, \"route_id\" TEXT NULL, \"ascent_id\" TEXT NULL, \"kind\" TEXT NOT NULL, \"storage_path\" TEXT NULL, \"thumb_path\" TEXT NULL, \"width\" INTEGER NULL, \"height\" INTEGER NULL, \"duration_s\" REAL NULL, \"caption\" TEXT NULL, \"taken_at\" TEXT NULL, \"sort\" INTEGER NOT NULL DEFAULT 0, \"upload_state\" TEXT NOT NULL, \"exif_stripped\" INTEGER NOT NULL DEFAULT 0 CHECK (\"exif_stripped\" IN (0, 1)), PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"media\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"visibility\" TEXT NOT NULL, \"owner_id\" TEXT NULL, \"session_id\" TEXT NULL, \"route_id\" TEXT NULL, \"ascent_id\" TEXT NULL, \"kind\" TEXT NOT NULL, \"storage_path\" TEXT NULL, \"thumb_path\" TEXT NULL, \"width\" INTEGER NULL, \"height\" INTEGER NULL, \"duration_s\" REAL NULL, \"caption\" TEXT NULL, \"taken_at\" TEXT NULL, \"sort\" INTEGER NOT NULL, \"upload_state\" TEXT NOT NULL, \"share_state\" TEXT NOT NULL, \"credited_to\" TEXT NULL, \"exif_stripped\" INTEGER NOT NULL CHECK (\"exif_stripped\" IN (0, 1)), PRIMARY KEY (\"id\"));"
         }
       ]
     },
@@ -5422,7 +5588,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"gear_pieces\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"model_id\" TEXT NULL, \"category\" TEXT NOT NULL, \"label\" TEXT NOT NULL, \"colour_hex\" TEXT NULL, \"serial\" TEXT NULL, \"made_on\" TEXT NULL, \"bought_on\" TEXT NULL, \"reslung_on\" TEXT NULL, \"resling_interval_months\" INTEGER NULL, \"retire_after_months\" INTEGER NULL, \"remind\" INTEGER NOT NULL DEFAULT 1 CHECK (\"remind\" IN (0, 1)), \"in_default_rack\" INTEGER NOT NULL DEFAULT 0 CHECK (\"in_default_rack\" IN (0, 1)), \"specs\" TEXT NULL, \"retired_on\" TEXT NULL, \"notes\" TEXT NULL, PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"gear_pieces\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"model_id\" TEXT NULL, \"category\" TEXT NOT NULL, \"label\" TEXT NOT NULL, \"colour_hex\" TEXT NULL, \"serial\" TEXT NULL, \"made_on\" TEXT NULL, \"bought_on\" TEXT NULL, \"reslung_on\" TEXT NULL, \"resling_interval_months\" INTEGER NULL, \"retire_after_months\" INTEGER NULL, \"remind\" INTEGER NOT NULL CHECK (\"remind\" IN (0, 1)), \"in_default_rack\" INTEGER NOT NULL CHECK (\"in_default_rack\" IN (0, 1)), \"specs\" TEXT NULL, \"retired_on\" TEXT NULL, \"notes\" TEXT NULL, PRIMARY KEY (\"id\"));"
         }
       ]
     },
