@@ -8206,7 +8206,7 @@ class RouteGradesCompanion extends UpdateCompanion<RouteGrade> {
 }
 
 class $AttributeDefsTable extends AttributeDefs
-    with TableInfo<$AttributeDefsTable, AttributeDef> {
+    with TableInfo<$AttributeDefsTable, AttributeDefRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -8333,7 +8333,7 @@ class $AttributeDefsTable extends AttributeDefs
   static const String $name = 'attribute_defs';
   @override
   VerificationContext validateIntegrity(
-    Insertable<AttributeDef> instance, {
+    Insertable<AttributeDefRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -8415,9 +8415,9 @@ class $AttributeDefsTable extends AttributeDefs
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  AttributeDef map(Map<String, dynamic> data, {String? tablePrefix}) {
+  AttributeDefRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return AttributeDef(
+    return AttributeDefRow(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -8467,7 +8467,7 @@ class $AttributeDefsTable extends AttributeDefs
   }
 }
 
-class AttributeDef extends DataClass implements Insertable<AttributeDef> {
+class AttributeDefRow extends DataClass implements Insertable<AttributeDefRow> {
   /// UUIDv7, generated on the device.
   final String id;
   final DateTime createdAt;
@@ -8489,7 +8489,7 @@ class AttributeDef extends DataClass implements Insertable<AttributeDef> {
   /// JSON array of allowed value keys.
   final String? valueKeys;
   final int sort;
-  const AttributeDef({
+  const AttributeDefRow({
     required this.id,
     required this.createdAt,
     required this.updatedAt,
@@ -8544,12 +8544,12 @@ class AttributeDef extends DataClass implements Insertable<AttributeDef> {
     );
   }
 
-  factory AttributeDef.fromJson(
+  factory AttributeDefRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return AttributeDef(
+    return AttributeDefRow(
       id: serializer.fromJson<String>(json['id']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -8579,7 +8579,7 @@ class AttributeDef extends DataClass implements Insertable<AttributeDef> {
     };
   }
 
-  AttributeDef copyWith({
+  AttributeDefRow copyWith({
     String? id,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -8590,7 +8590,7 @@ class AttributeDef extends DataClass implements Insertable<AttributeDef> {
     String? valueType,
     Value<String?> valueKeys = const Value.absent(),
     int? sort,
-  }) => AttributeDef(
+  }) => AttributeDefRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -8602,8 +8602,8 @@ class AttributeDef extends DataClass implements Insertable<AttributeDef> {
     valueKeys: valueKeys.present ? valueKeys.value : this.valueKeys,
     sort: sort ?? this.sort,
   );
-  AttributeDef copyWithCompanion(AttributeDefsCompanion data) {
-    return AttributeDef(
+  AttributeDefRow copyWithCompanion(AttributeDefsCompanion data) {
+    return AttributeDefRow(
       id: data.id.present ? data.id.value : this.id,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -8619,7 +8619,7 @@ class AttributeDef extends DataClass implements Insertable<AttributeDef> {
 
   @override
   String toString() {
-    return (StringBuffer('AttributeDef(')
+    return (StringBuffer('AttributeDefRow(')
           ..write('id: $id, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -8650,7 +8650,7 @@ class AttributeDef extends DataClass implements Insertable<AttributeDef> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is AttributeDef &&
+      (other is AttributeDefRow &&
           other.id == this.id &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -8663,7 +8663,7 @@ class AttributeDef extends DataClass implements Insertable<AttributeDef> {
           other.sort == this.sort);
 }
 
-class AttributeDefsCompanion extends UpdateCompanion<AttributeDef> {
+class AttributeDefsCompanion extends UpdateCompanion<AttributeDefRow> {
   final Value<String> id;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -8707,7 +8707,7 @@ class AttributeDefsCompanion extends UpdateCompanion<AttributeDef> {
        level = Value(level),
        valueType = Value(valueType),
        sort = Value(sort);
-  static Insertable<AttributeDef> custom({
+  static Insertable<AttributeDefRow> custom({
     Expression<String>? id,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -30717,17 +30717,17 @@ class $$AttributeDefsTableTableManager
         RootTableManager<
           _$SvaDatabase,
           $AttributeDefsTable,
-          AttributeDef,
+          AttributeDefRow,
           $$AttributeDefsTableFilterComposer,
           $$AttributeDefsTableOrderingComposer,
           $$AttributeDefsTableAnnotationComposer,
           $$AttributeDefsTableCreateCompanionBuilder,
           $$AttributeDefsTableUpdateCompanionBuilder,
           (
-            AttributeDef,
-            BaseReferences<_$SvaDatabase, $AttributeDefsTable, AttributeDef>,
+            AttributeDefRow,
+            BaseReferences<_$SvaDatabase, $AttributeDefsTable, AttributeDefRow>,
           ),
-          AttributeDef,
+          AttributeDefRow,
           PrefetchHooks Function()
         > {
   $$AttributeDefsTableTableManager(_$SvaDatabase db, $AttributeDefsTable table)
@@ -30796,11 +30796,11 @@ class $$AttributeDefsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable<$AttributeDefsTable, AttributeDef>(table),
+                  e.readTable<$AttributeDefsTable, AttributeDefRow>(table),
                   BaseReferences<
                     _$SvaDatabase,
                     $AttributeDefsTable,
-                    AttributeDef
+                    AttributeDefRow
                   >(db, table, e),
                 ),
               )
@@ -30814,17 +30814,17 @@ typedef $$AttributeDefsTableProcessedTableManager =
     ProcessedTableManager<
       _$SvaDatabase,
       $AttributeDefsTable,
-      AttributeDef,
+      AttributeDefRow,
       $$AttributeDefsTableFilterComposer,
       $$AttributeDefsTableOrderingComposer,
       $$AttributeDefsTableAnnotationComposer,
       $$AttributeDefsTableCreateCompanionBuilder,
       $$AttributeDefsTableUpdateCompanionBuilder,
       (
-        AttributeDef,
-        BaseReferences<_$SvaDatabase, $AttributeDefsTable, AttributeDef>,
+        AttributeDefRow,
+        BaseReferences<_$SvaDatabase, $AttributeDefsTable, AttributeDefRow>,
       ),
-      AttributeDef,
+      AttributeDefRow,
       PrefetchHooks Function()
     >;
 typedef $$RouteAttributesTableCreateCompanionBuilder =

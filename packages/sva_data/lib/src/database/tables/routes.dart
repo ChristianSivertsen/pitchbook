@@ -84,6 +84,8 @@ class RouteGrades extends Table with SyncedRow, SharedRow {
 }
 
 /// Definitions for the long tail of details (features, holds, tags).
+/// The row class is renamed so it does not clash with sva_core's model.
+@DataClassName('AttributeDefRow')
 class AttributeDefs extends Table with SyncedRow, SharedRow {
   TextColumn get key => text()();
 
