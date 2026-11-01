@@ -1,7 +1,7 @@
 # Checks every pull request and every push to main (and can be run by
-# hand): formatting, analysis and tests, plus debug builds for Android
-# and iOS. Third-party actions
-# are pinned to commit SHAs; the comment after each SHA is its tag.
+# hand): formatting, analysis and tests, debug builds for Android and
+# iOS, and flow tests on an Android emulator. Third-party actions are
+# pinned to commit SHAs; the comment after each SHA is its tag.
 name: CI
 
 on:
@@ -81,3 +81,64 @@ jobs:
         run: |
           flutter pub get --enforce-lockfile
           flutter build ios --debug --no-codesign
+
+  flows:
+    name: Flow tests
+    runs-on: ubuntu-latest
+    # A cold run builds the emulator snapshot; warm runs take a few minutes.
+    timeout-minutes: 30
+    env:
+      API_LEVEL: "34"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Enable hardware acceleration for the emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Get packages from the lock file
+        working-directory: app
+        run: flutter pub get --enforce-lockfile
+      - name: Restore the emulator snapshot
+        id: avd-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          # Only the emulator; adb makes a fresh key each run, so its
+          # private key is never shared through the cache.
+          path: ~/.android/avd/*
+          key: avd-${{ env.API_LEVEL }}-google_apis-x86_64
+      - name: Create the emulator snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: ReactiveCircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: ${{ env.API_LEVEL }}
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Created the emulator snapshot for the cache."
+      - name: Run flow tests
+        uses: ReactiveCircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: ${{ env.API_LEVEL }}
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          working-directory: app
+          script: flutter test integration_test

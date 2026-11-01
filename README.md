@@ -21,4 +21,10 @@ dart format .            # fix formatting
 cd app && flutter run    # run the app on a simulator, emulator or device
 ```
 
+Flow tests (end-to-end journeys) need a running simulator or emulator, so `tool/check.sh` leaves them out. CI runs them on an Android emulator. To run them yourself, start a simulator or emulator, then:
+
+```bash
+cd app && flutter test integration_test
+```
+
 Analysis rules live in the root `analysis_options.yaml` and apply to the app and every package.
