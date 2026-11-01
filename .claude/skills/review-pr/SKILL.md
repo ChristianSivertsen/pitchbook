@@ -1,6 +1,6 @@
 ---
 name: review-pr
-description: Review a Pitchbook pull request with two independent reviewer agents, one for security and one for code quality, then post the findings on the PR and fix what is in scope. Use when asked to review a PR or as step 8 of ship-ticket.
+description: Review a Sva pull request with two independent reviewer agents, one for security and one for code quality, then post the findings on the PR and fix what is in scope. Use when asked to review a PR or as step 8 of ship-ticket.
 ---
 
 # Review a pull request
@@ -22,7 +22,7 @@ Send both Agent calls in one message so they run at the same time. Give each the
 
 ### Security reviewer prompt
 
-> You are the security reviewer for pull request #<pr> in the Pitchbook repository (Flutter app with a Supabase backend; the repository is public). Read `CLAUDE.md` (especially Safety rules), then the diff at `<path>` and any files it touches. Review only what this PR changes or exposes.
+> You are the security reviewer for pull request #<pr> in the Sva repository (Flutter app with a Supabase backend; the repository is public). Read `CLAUDE.md` (especially Safety rules), then the diff at `<path>` and any files it touches. Review only what this PR changes or exposes.
 >
 > Check for: secrets or keys in code, config, tests or history; the Supabase service-role key reachable from the app; tables or views without row-level security, or policies that let a user read or write another user's private rows (consider `visibility`, friendships, blocks); SQL built from strings; unvalidated input from the network, deep links, notifications or files; personal data in logs, crash reports or analytics; photos uploaded with GPS data; insecure storage of tokens on the device; over-broad app permissions; dependencies that are unmaintained, have a non-permissive licence or known vulnerabilities; anything that deletes user data without confirmation.
 >
@@ -30,9 +30,9 @@ Send both Agent calls in one message so they run at the same time. Give each the
 
 ### Code quality reviewer prompt
 
-> You are the code reviewer for pull request #<pr> in the Pitchbook repository. Read `CLAUDE.md`, `docs/PLAN.md` and `docs/schema.md`, the linked issue below, then the diff at `<path>` and the surrounding code.
+> You are the code reviewer for pull request #<pr> in the Sva repository. Read `CLAUDE.md`, `docs/PLAN.md` and `docs/schema.md`, the linked issue below, then the diff at `<path>` and the surrounding code.
 >
-> Check that the change: does what the issue asks and nothing outside its scope; follows the package boundaries (`pitchbook_core` pure Dart, no SQL in screens, no business logic in `pitchbook_ui`); matches the schema and naming conventions; is readable (clear names, small functions, no dead code, comments only where the why is not obvious); handles errors and empty states; is covered by meaningful tests, including edge cases and the issue's "Done when" items; avoids duplication with existing code; uses Dart and Flutter idioms correctly (immutability, async handling, widget rebuilds, disposal); keeps accessibility (semantic labels, text scaling); matches the prototype's behaviour and copy.
+> Check that the change: does what the issue asks and nothing outside its scope; follows the package boundaries (`sva_core` pure Dart, no SQL in screens, no business logic in `sva_ui`); matches the schema and naming conventions; is readable (clear names, small functions, no dead code, comments only where the why is not obvious); handles errors and empty states; is covered by meaningful tests, including edge cases and the issue's "Done when" items; avoids duplication with existing code; uses Dart and Flutter idioms correctly (immutability, async handling, widget rebuilds, disposal); keeps accessibility (semantic labels, text scaling); follows `docs/DESIGN.md` for UI (theme tokens only, no raw colours, one primary action per screen, writing rules); matches the prototype's behaviour.
 >
 > For each finding give: severity (blocking, should-fix, nit), file and line, the problem, and a specific fix. Verify each against the code; drop anything speculative. Keep nits few. If the PR is good, say so plainly. Do not edit files.
 >

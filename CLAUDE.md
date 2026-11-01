@@ -1,9 +1,10 @@
-# Pitchbook: working rules
+# Sva: working rules
 
-Pitchbook is a Flutter app (iOS and Android) with a Supabase backend. Read these before changing anything:
+Sva is a Flutter app (iOS and Android) with a Supabase backend. Read these before changing anything:
 
 - [docs/PLAN.md](docs/PLAN.md): stack, API-first architecture, decisions, milestones
 - [docs/schema.md](docs/schema.md): the data model, shared by drift and Postgres
+- [docs/DESIGN.md](docs/DESIGN.md): the Sva design language (colour, type, components, writing). Wins over the prototype on look and feel
 - [prototype/index.html](prototype/index.html): reference for screens and behaviour
 - `docs/API.md` once it exists (M11-1): the contract every client uses
 
@@ -60,14 +61,14 @@ After both review agents pass and CI is green:
 
 ## Code standards
 
-- `pitchbook_core` is pure Dart: no Flutter, no database, no I/O. Rules, grade conversion, stats maths, insights and XP live here, with unit tests.
-- `pitchbook_data` owns drift tables, migrations, repositories and sync. Screens never write SQL.
-- `pitchbook_ui` holds theme tokens, shared widgets and illustrations. No business logic.
+- `sva_core` is pure Dart: no Flutter, no database, no I/O. Rules, grade conversion, stats maths, insights and XP live here, with unit tests.
+- `sva_data` owns drift tables, migrations, repositories and sync. Screens never write SQL.
+- `sva_ui` holds theme tokens, shared widgets and illustrations. No business logic.
 - `app/` holds screens, navigation and Riverpod providers.
 - Rules that also exist on the server (style and tries, gym route expiry) use shared JSON test cases run against both Dart and Postgres.
 - Every behaviour change has tests. Bug fixes start with a failing test.
 - Units are SI in storage; convert only for display. Enumerations are stable keys such as `hold.crimp`.
-- UI text follows the prototype's voice: short, direct, sentence case, no exclamation marks.
+- UI follows `docs/DESIGN.md`: only theme tokens, never raw colours or font sizes in screens; one primary action per screen; writing rules for all text.
 - Accessibility: every interactive widget has a semantic label; respect text scaling.
 
 ## Commands

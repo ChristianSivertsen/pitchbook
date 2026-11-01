@@ -1,4 +1,4 @@
-# Pitchbook data schema
+# Sva data schema
 
 This is the data model for the app's local SQLite database (drift) and the Supabase Postgres database. Both use the same tables and column names, so PowerSync can sync them and a future web app can use the same API.
 
@@ -387,7 +387,7 @@ Pieces are grouped by model in the UI, so two #1 cams show as "×2" but keep the
 
 - Row-level security on every table. Owners write their own rows. Reads follow `visibility`, friendships and blocks.
 - Postgres functions for multi-row operations: accept a shared session, merge routes or areas, apply a suggested edit, respond to a friend request.
-- Triggers check style and tries rules on ascents, using the same test cases as `pitchbook_core`.
+- Triggers check style and tries rules on ascents, using the same test cases as `sva_core`.
 - Scheduled jobs: expire gym routes, recompute consensus grades and quality.
 - Account deletion: personal rows are deleted. Ascents on shared routes are kept without an owner and marked private, so consensus grades stay correct.
 

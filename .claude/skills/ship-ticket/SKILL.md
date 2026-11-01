@@ -1,6 +1,6 @@
 ---
 name: ship-ticket
-description: Plan, build, test and open a pull request for one Pitchbook GitHub issue, staying inside its scope and following CLAUDE.md. Use when asked to work on, ship or implement a ticket, issue number or the next ticket.
+description: Plan, build, test and open a pull request for one Sva GitHub issue, staying inside its scope and following CLAUDE.md. Use when asked to work on, ship or implement a ticket, issue number or the next ticket.
 ---
 
 # Ship a ticket
@@ -15,7 +15,7 @@ Read `CLAUDE.md` first. Its rules win over anything here.
    `gh issue list --state open --milestone "<lowest open milestone>" --json number,title`
    and take the lowest code (`[M2-1]` before `[M2-2]`). Skip issues labelled `future` or `needs-user-review`.
 2. Read the issue: `gh issue view <n> --json title,body,milestone,labels`.
-3. Read what it depends on: the relevant parts of `docs/PLAN.md`, `docs/schema.md`, `docs/API.md` if present, and the matching screen in `prototype/index.html`.
+3. Read what it depends on: the relevant parts of `docs/PLAN.md`, `docs/schema.md`, `docs/API.md` if present, `docs/DESIGN.md` for any UI work, and the matching screen in `prototype/index.html`.
 4. Check that earlier tickets it builds on are merged. If one is still open in review, branch from that PR's branch and say so in the PR, or pick an independent ticket.
 
 ## 2. Decide the scope
@@ -32,7 +32,7 @@ If the ticket is too large for one reviewable PR (roughly over 600 changed lines
 
 ## 3. Plan
 
-Write a short plan: files to add or change, tests to write, risks. Keep it in the session's task list. For logic in `pitchbook_core`, write tests first.
+Write a short plan: files to add or change, tests to write, risks. Keep it in the session's task list. For logic in `sva_core`, write tests first.
 
 ## 4. Branch
 
@@ -44,7 +44,7 @@ git checkout -b <n>-<short-slug>
 ## 5. Build
 
 - Follow the package boundaries and code standards in `CLAUDE.md`.
-- Match the prototype's behaviour and copy unless the issue says otherwise.
+- Match the prototype's behaviour unless the issue says otherwise. Look, feel and wording follow `docs/DESIGN.md`.
 - New dependencies only under the rules in `CLAUDE.md`, with the reason noted for the PR.
 - Never put secrets in code, config or tests.
 - Commit in small steps with Conventional Commit messages, each with `Refs #<n>` and the co-author trailer.

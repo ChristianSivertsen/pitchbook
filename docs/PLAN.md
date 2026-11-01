@@ -1,8 +1,8 @@
-# Pitchbook implementation plan
+# Sva implementation plan
 
-Pitchbook is an app for iPhone and Android for logging climbing in as much detail as you want, then turning that log into insights and a climbing CV. This plan breaks the work into milestones. Each milestone is a set of GitHub issues, and each issue is one pull request small enough to review in one sitting.
+Sva is an app for iPhone and Android for logging climbing in as much detail as you want, then turning that log into insights and a climbing CV. This plan breaks the work into milestones. Each milestone is a set of GitHub issues, and each issue is one pull request small enough to review in one sitting.
 
-The clickable prototype in [`prototype/index.html`](../prototype/index.html) is the reference for screens and behaviour.
+The look and feel follows the Sva design language in [`DESIGN.md`](DESIGN.md). The clickable prototype in [`prototype/index.html`](../prototype/index.html) is the reference for screens and behaviour.
 
 ## How the work is reviewed
 
@@ -63,9 +63,9 @@ Rules that exist in both Dart and Postgres (style and tries, gym route expiry) s
 ```text
 app/                       Flutter app (iOS and Android): screens, navigation, state
 packages/
-  pitchbook_core/          Pure Dart: models, grade conversion, ascent rules, stats, insights, XP
-  pitchbook_data/          drift schema, migrations, repositories, PowerSync setup
-  pitchbook_ui/            Theme tokens, shared widgets, illustrations (gear, shoes, topo, wall)
+  sva_core/          Pure Dart: models, grade conversion, ascent rules, stats, insights, XP
+  sva_data/          drift schema, migrations, repositories, PowerSync setup
+  sva_ui/            Theme tokens, shared widgets, illustrations (gear, shoes, topo, wall)
 supabase/
   migrations/              Postgres schema, row-level security, triggers and functions
   functions/               Edge Functions (push, weather, share images)
@@ -74,7 +74,7 @@ docs/                      This plan, API.md, schema notes
 prototype/                 HTML prototype (reference only)
 ```
 
-`pitchbook_core` has no UI, database or Flutter code, so the important rules are easy to test, review and reuse in a future web app.
+`sva_core` has no UI, database or Flutter code, so the important rules are easy to test, review and reuse in a future web app.
 
 ## Decisions already made
 
@@ -120,13 +120,13 @@ These need you, because they involve your accounts and payment:
 **iPhone (TestFlight)**
 1. Install the full Xcode from the App Store, then run `sudo xcode-select -s /Applications/Xcode.app`. Flutter needs it to build for iOS on this Mac. This Mac currently points at the command-line tools only. Codemagic can build in the cloud instead.
 2. Join the Apple Developer Program at developer.apple.com/programs (paid yearly).
-3. In App Store Connect, create the app record with a bundle ID such as `com.christiansivertsen.pitchbook`. The store name must be unique, so "Pitchbook" may need a variation.
+3. In App Store Connect, create the app record with a bundle ID such as `com.christiansivertsen.sva`. The store name must be unique, so "Sva" may need a variation.
 4. Add yourself as an internal tester in TestFlight.
 5. Create an App Store Connect API key for automated uploads (issue M0-6 lists the secrets).
 
 **Android (Google Play internal testing)**
 1. Create a Google Play Console developer account (one-time fee).
-2. Create the app with the package name `com.christiansivertsen.pitchbook`.
+2. Create the app with the package name `com.christiansivertsen.sva`.
 3. Create an upload key and a service account for automated uploads (issue M0-7 lists the secrets).
 
 Until the Play Console account exists, Android builds can be shared with friends as an APK file.

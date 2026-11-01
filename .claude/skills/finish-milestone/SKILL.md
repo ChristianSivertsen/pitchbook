@@ -1,6 +1,6 @@
 ---
 name: finish-milestone
-description: Close a Pitchbook milestone once all its tickets are merged - verify main, tag a release, write release notes and send test builds to TestFlight and Android testing. Use when the last ticket of a milestone is merged or when asked to release a milestone.
+description: Close a Sva milestone once all its tickets are merged - verify main, tag a release, write release notes and send test builds to TestFlight and Android testing. Use when the last ticket of a milestone is merged or when asked to release a milestone.
 ---
 
 # Finish a milestone
