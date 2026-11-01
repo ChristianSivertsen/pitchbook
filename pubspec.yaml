@@ -1,5 +1,5 @@
-name: pitchbook_workspace
-description: Workspace root for the Pitchbook app and its packages.
+name: sva_workspace
+description: Workspace root for the Sva app and its packages.
 publish_to: none
 
 environment:
@@ -7,6 +7,6 @@ environment:
 
 workspace:
   - app
-  - packages/pitchbook_core
-  - packages/pitchbook_data
-  - packages/pitchbook_ui
+  - packages/sva_core
+  - packages/sva_data
+  - packages/sva_ui

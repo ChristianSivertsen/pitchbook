@@ -1,5 +1,5 @@
-name: pitchbook_ui
-description: Theme tokens, shared widgets and illustrations for Pitchbook.
+name: sva_ui
+description: Theme tokens, shared widgets and illustrations for Sva.
 publish_to: none
 resolution: workspace
 

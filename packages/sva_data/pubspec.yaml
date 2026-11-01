@@ -1,5 +1,5 @@
-name: pitchbook_data
-description: Local database, repositories and sync for Pitchbook.
+name: sva_data
+description: Local database, repositories and sync for Sva.
 publish_to: none
 resolution: workspace
 
@@ -7,8 +7,8 @@ environment:
   sdk: ^3.13.0
 
 dependencies:
-  pitchbook_core:
-    path: ../pitchbook_core
+  sva_core:
+    path: ../sva_core
 
 dev_dependencies:
   lints: ^6.0.0

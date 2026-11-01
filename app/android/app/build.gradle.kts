@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.christiansivertsen.pitchbook"
+    namespace = "com.christiansivertsen.sva"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -15,7 +15,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.christiansivertsen.pitchbook"
+        applicationId = "com.christiansivertsen.sva"
         minSdk = 26
         targetSdk = flutter.targetSdkVersion
         // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION

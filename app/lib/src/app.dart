@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'router.dart';
 
 /// Root widget. The theme tokens (M0-4) replace the default theme.
-class PitchbookApp extends ConsumerWidget {
-  const PitchbookApp({super.key});
+class SvaApp extends ConsumerWidget {
+  const SvaApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
-      title: 'Pitchbook',
+      title: 'Sva',
       routerConfig: ref.watch(routerProvider),
     );
   }

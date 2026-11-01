@@ -1,4 +1,4 @@
-package com.christiansivertsen.pitchbook
+package com.christiansivertsen.sva
 
 import io.flutter.embedding.android.FlutterActivity
 

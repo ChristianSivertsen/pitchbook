@@ -1,5 +1,5 @@
-name: pitchbook_core
-description: Pure Dart rules, models, grade conversion and stats for Pitchbook.
+name: sva_core
+description: Pure Dart rules, models, grade conversion and stats for Sva.
 publish_to: none
 resolution: workspace
 
