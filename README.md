@@ -14,7 +14,7 @@ Requires Flutter (stable channel). Building for iOS also needs Xcode; building f
 
 ```bash
 flutter pub get          # resolve the workspace
-tool/check.sh            # formatting, analysis and all tests, same as CI
+tool/check.sh            # formatting, analysis and all tests, as CI runs them
 dart format .            # fix formatting
 cd app && flutter run    # run the app on a simulator, emulator or device
 ```

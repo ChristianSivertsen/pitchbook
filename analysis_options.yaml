@@ -14,6 +14,8 @@ analyzer:
     - "app/android/**"
     - "app/ios/**"
     - "prototype/**"
+  # Already set by very_good_analysis; repeated here so the strictness is
+  # explicit and survives a future change of lint package.
   language:
     strict-casts: true
     strict-inference: true
@@ -21,6 +23,6 @@ analyzer:
 
 linter:
   rules:
-    # Public API docs are required in the packages by convention, but the app
-    # and tests do not need them; enforcing them everywhere adds noise.
+    # Docs on every public member add noise in an app. Document what is not
+    # obvious; this can be turned back on per package later if needed.
     public_member_api_docs: false
