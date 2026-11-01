@@ -15,7 +15,7 @@ Supported climbing: sport, trad, bouldering, multipitch, alpine, ice, mixed, aid
 | Units | Always SI: metres (`_m`), kilograms (`_kg`), °C (`_c`), seconds (`_s`), millimetres only where the domain uses them (`edge_mm`, `diameter_mm`). Converted only for display |
 | Enumerations | Stored as text keys with a check constraint, not Postgres enum types, so values can be added with a simple migration. Keys are stable identifiers such as `hold.crimp`; display text comes from translations |
 | Visibility | `visibility` is `public`, `friends` or `private` wherever a row can be seen by others |
-| Shared rows | Areas, routes, grade systems, attribute definitions and the gear catalog are shared. Clients never update shared rows directly; they go through suggested edits or server functions |
+| Shared rows | Public areas and routes, grade systems, attribute definitions and the gear catalog are shared. Nobody owns them; `created_by` is credit, not ownership. Clients never update shared rows directly; they go through moderated requests (`suggested_edits`) or server functions |
 | Year-month dates | Gear and shoe dates where only the month is known use `YYYY-MM` text |
 | Types across databases | UUID: `uuid` in Postgres, text in SQLite. JSON: `jsonb` / text. Booleans: `boolean` / integer. Location: `latitude`, `longitude` columns in both, plus a PostGIS `geography` column on the server for nearby searches |
 | Migrations | Never edit a merged migration. Add a new one |
@@ -28,7 +28,9 @@ erDiagram
   profiles ||--o{ trips : plans
   trips ||--o{ sessions : groups
   areas ||--o{ areas : contains
+  areas ||--o{ area_moderators : "moderated by"
   areas ||--o{ routes : has
+  areas ||--o{ suggested_edits : "requests for"
   areas ||--o| gym_profiles : "is a gym"
   gym_profiles ||--o{ gym_walls : has
   gym_profiles ||--o{ gym_colour_grades : uses
@@ -93,12 +95,18 @@ erDiagram
 | approach_min | integer | Walk-in time |
 | location_hidden | boolean | Hide exact location from others |
 | access_notes | text | Closures, bird nesting, parking |
-| visibility | text | `public` for the shared database, `private` for secret spots |
+| visibility | text | `public` for the shared database, `private` for secret spots and for new areas waiting for a moderator |
 | merged_into_id | uuid → areas | Set when this duplicate was merged |
-| created_by | uuid → profiles | |
+| created_by | uuid → profiles | Credit only. While the area is private, only this user can see and edit it |
 | created_at, updated_at, deleted_at | | |
 
-**gym_profiles**: extra settings for areas of type `gym`.
+The outdoor tree is a set of nested folders: crag → sector → routes. A sector may be split further into walls or boulder blocks. A trigger checks the nesting: a sector's parent is a crag, and an outdoor route's area is a sector, wall or boulder block.
+
+**area_moderators**: who approves requests for a crag or gym. `area_id` → areas, `user_id` → profiles, `granted_by` → profiles, `created_at`. Primary key on (`area_id`, `user_id`).
+
+A request about a row is handled by the moderators of the nearest crag or gym above it (or the row itself, when it is the crag or gym). If that place has no moderators, the request goes up the tree to the region, the country and finally the app admins, so no request is left without someone to decide it. App admins appoint moderators to begin with.
+
+**gym_profiles**: extra settings for areas of type `gym`. The gym and its profile are shared and moderated like a crag.
 
 | Column | Type | Notes |
 |---|---|---|
@@ -106,13 +114,14 @@ erDiagram
 | grading | text | `colour`, `standard`, `none` |
 | route_expiry_weeks | integer | When gym routes expire if no reset is logged |
 
-**gym_walls**: `id`, `gym_id` → areas, `name`, `height_m`, `angle` (`angle.slab`, `angle.vertical`, `angle.overhang`, `angle.roof`), `kind` (`rope`, `boulder`), `last_reset_on` (date), `sort`.
+**gym_walls**: personal for now, like gym routes. `id`, `owner_id`, `gym_id` → areas, `name`, `height_m`, `angle` (`angle.slab`, `angle.vertical`, `angle.overhang`, `angle.roof`), `kind` (`rope`, `boulder`), `last_reset_on` (date), `sort`.
 
-**gym_colour_grades**: one row per colour, easiest first.
+**gym_colour_grades**: one row per colour, easiest first. Personal for now, like gym walls.
 
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | |
+| owner_id | uuid → profiles | |
 | gym_id | uuid → areas | |
 | sort | integer | |
 | name | text | `Blue` |
@@ -131,9 +140,9 @@ erDiagram
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | |
-| area_id | uuid → areas | Crag, sector, wall, boulder block or gym |
+| area_id | uuid → areas | Sector, wall or boulder block outdoors; the gym indoors |
 | kind | text | `outdoor` or `gym` |
-| name | text | Null allowed for gym routes |
+| name | text | Null allowed for gym routes, which are shown as colour, grade, wall and date set, for example "Blue 6a · Cave wall · set 12 Oct" |
 | discipline | text | `sport`, `trad`, `boulder`, `alpine`, `ice`, `mixed`, `aid`, `dws` |
 | pitch_count | integer | Multipitch when greater than 1 |
 | length_m | numeric | For gym routes, copied from the wall height |
@@ -148,8 +157,8 @@ erDiagram
 | first_ascent | text | Names |
 | first_ascent_year | integer | |
 | status | text | `open`, `closed`, `seasonal`, `retired` (for example, a broken hold) |
-| visibility | text | `public` (shared) or `private` |
-| consensus_score | numeric | Server-computed from personal grades |
+| visibility | text | `public` (shared) or `private`. Gym routes are always `private` for now |
+| consensus_score | numeric | Server-computed from the personal grades on ascents. Public routes only |
 | quality_avg | numeric | Server-computed cache |
 | gym_wall_id | uuid → gym_walls | Gym routes only |
 | gym_colour_grade_id | uuid → gym_colour_grades | Gym routes with colour grading |
@@ -157,8 +166,20 @@ erDiagram
 | expires_on | date | Gym routes only; from the gym's expiry weeks or the wall reset |
 | setter_note | text | Gym routes, for example "the blue in the cave corner" |
 | merged_into_id | uuid → routes | Set when merged into another route |
-| created_by | uuid → profiles | |
+| created_by | uuid → profiles | Credit only. While the route is private, only this user can see and edit it |
 | created_at, updated_at, deleted_at | | |
+
+**How a route becomes shared.** A new outdoor route starts as the creator's private route, with an `add_route` request to the moderators of its crag. The creator can log ascents, add photos and tick it straight away, also offline. The moderator then:
+
+- accepts: the route becomes `public` under the sector the creator chose
+- rejects: the route stays the creator's private route, and their ascents are kept
+- marks it as the same as an existing route: the two are merged, the creator's ascents and photos move to the existing route, and the name they used becomes an alias
+
+New sectors and crags follow the same steps with `add_area` requests. Once a row is public, every change goes through an `edit` request.
+
+**Duplicate checks.** When someone adds a route, the app searches for similar routes before saving: names and aliases with `pg_trgm` similarity and `unaccent` (so "Fløyen" matches "Floyen"), in the same crag or within about 200 m. Offline, it searches the rows on the device. The moderator sees the same candidates with the request. There is no unique constraint on names, since real duplicates exist (many crags have a route called "Project").
+
+**Gym routes** are private to the user who logs them: no requests, no duplicate checks across users and no consensus grade. They are identified by gym, wall, colour, grade and date set. A friend who sees a shared session sees a gym route only as its label, not the route row. Public gym routes can be added later through `visibility` without moving data.
 
 **pitches**: `id`, `route_id`, `number`, `length_m`, `angle`, `protection`, `description`, `anchor` (`anchor.bolts`, `.gear`, `.tree`, `.ice_threads`), `belay_notes`. Single-pitch routes have one pitch row.
 
@@ -200,9 +221,26 @@ A trad route might have `free_route` E3 + 5c, `danger` R and `commitment` III. A
 
 Common filters (discipline, angle, protection, rock type) are typed columns. Attribute tables hold the rest.
 
-**suggested_edits**: `id`, `target_type`, `target_id`, `changes` (jsonb: field → new value), `reason`, `status` (`open`, `applied`, `rejected`), `created_by`, `created_at`, `resolved_at`.
+**suggested_edits**: requests to change shared data. Anyone can make one; a moderator of the crag or gym decides.
 
-**edit_votes**: `edit_id`, `user_id`, `vote` (`up`, `down`).
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | |
+| kind | text | `edit`, `add_route`, `add_area`, `share_topo` |
+| target_type | text | `area`, `route`, `pitch`, `media` |
+| target_id | uuid | The row to change, or the new private row to accept |
+| moderating_area_id | uuid → areas | The crag or gym whose moderators decide, set by the server when the request is saved |
+| changes | jsonb | Field → new value, for `edit` |
+| old_values | jsonb | Field → value when the request was made. A request is stale if the row has changed since |
+| reason | text | |
+| status | text | `open`, `applied`, `rejected`, `merged` (accepted as the same as an existing row) |
+| merged_into_id | uuid | The existing row, when `status` is `merged` |
+| created_by | uuid → profiles | |
+| resolved_by | uuid → profiles | The moderator |
+| moderator_note | text | Shown to the person who made the request |
+| created_at, resolved_at | timestamptz | |
+
+**edit_votes**: `edit_id`, `user_id`, `vote` (`up`, `down`). Shown to moderators as a hint; votes do not apply a request.
 
 **route_history**: `id`, `route_id`, `field`, `old_value`, `new_value`, `changed_at`, `suggested_edit_id`. Records grade changes, retro-bolting and similar.
 
@@ -294,7 +332,7 @@ Common filters (discipline, angle, protection, rock type) are typed columns. Att
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | |
-| owner_id | uuid → profiles | |
+| owner_id | uuid → profiles | Null once the photo is shared as a topo |
 | session_id | uuid → sessions | Null for profile pictures and topo photos |
 | route_id | uuid → routes | Optional route tag |
 | ascent_id | uuid → ascents | Optional, when it belongs to one ascent |
@@ -308,6 +346,10 @@ Common filters (discipline, angle, protection, rock type) are typed columns. Att
 | upload_state | text | `local`, `uploading`, `uploaded`, `failed` |
 | exif_stripped | boolean | Must be true before upload |
 | visibility | text | Inherits the session's by default |
+| share_state | text | `none`, `pending`, `shared`, `rejected`. For sharing a photo as a topo |
+| credited_to | uuid → profiles | The person who took a shared topo photo |
+
+**Sharing a topo photo.** A user can offer a photo of a route or wall as a shared topo, after agreeing to a short consent text. That creates a `share_topo` request and sets `share_state` to `pending`. When a moderator accepts, the photo becomes shared content: `owner_id` is cleared, `credited_to` keeps the credit, and the photo stays if the account is deleted. When rejected, the photo stays the user's own and follows its `visibility`.
 
 ## 6. Gear and shoes
 
@@ -386,10 +428,12 @@ Pieces are grouped by model in the UI, so two #1 cams show as "×2" but keep the
 ## Server rules
 
 - Row-level security on every table. Owners write their own rows. Reads follow `visibility`, friendships and blocks.
-- Postgres functions for multi-row operations: accept a shared session, merge routes or areas, apply a suggested edit, respond to a friend request.
+- Postgres functions for multi-row operations: accept a shared session, merge routes or areas, decide a request (accept, reject or merge), respond to a friend request. Only a moderator of the request's `moderating_area_id`, or an app admin, may decide it.
+- Merging moves everyone's ascents, media, topos, ticklist items and projects to the remaining row, keeps the old name as an alias and keeps the old row with `merged_into_id` set. A trigger on new ascents and media follows `merged_into_id` to the remaining row, for devices that were offline during the merge.
+- When a request is saved, a trigger notifies each moderator of its crag or gym (`mod.request`). When it is decided, the person who made it is notified (`mod.resolved`).
 - Triggers check style and tries rules on ascents, using the same test cases as `sva_core`.
 - Scheduled jobs: expire gym routes, recompute consensus grades and quality.
-- Account deletion: personal rows are deleted. Ascents on shared routes are kept without an owner and marked private, so consensus grades stay correct.
+- Account deletion: personal rows are deleted, including private routes, gym routes and open requests. Ascents on shared routes are kept without an owner and marked private, so consensus grades stay correct. Shared topo photos are kept, without the credit.
 
 ## Sync scope
 
@@ -405,4 +449,7 @@ Pieces are grouped by model in the UI, so two #1 cams show as "×2" but keep the
 
 ## Open questions
 
+- Small crags often have no sectors. Either a route may sit directly under a crag, or the app creates a hidden default sector.
+- Whether a shared topo photo can be withdrawn after a moderator has accepted it. The consent text must say which.
+- Whether moderators of a crag can appoint other moderators, or only app admins can.
 - Via ferrata and ski touring are not included. They can be added as disciplines later without schema changes beyond new keys.

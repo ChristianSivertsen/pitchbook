@@ -41,7 +41,7 @@ Apple Watch, widgets and Health are later additions, written as small native add
 A web version is likely later, so the backend is the shared API for every client: the iPhone and Android app now, a web app later. Supabase already provides this API, so there is no separate server to build:
 
 - **Tables and views** are exposed as a REST API, protected by row-level security. The same rules apply to every client.
-- **Postgres functions** carry operations that change several things at once, such as accepting a shared session, merging routes or applying a suggested edit. Every client calls the same function.
+- **Postgres functions** carry operations that change several things at once, such as accepting a shared session, merging routes or deciding a moderator request. Every client calls the same function.
 - **Edge Functions** (TypeScript) handle anything that talks to the outside world: push notifications, weather lookups and share images.
 - **Auth and Storage** are the same for every client.
 
@@ -51,7 +51,7 @@ The rule is: **anything that must be correct lives on the server.** The app runs
 |---|---|---|
 | Data integrity: style and tries rules, repeats, gym route expiry, who can see a post | Postgres (constraints, triggers, functions) | No client or app version can break the data |
 | Social operations: friend requests, accepting shared sessions, kudos, endorsements, blocking | Postgres functions | One code path for all clients |
-| Shared route data: consensus grades, merges, suggested edits | Postgres functions and scheduled jobs | Computed once on the server |
+| Shared route data: consensus grades, merges, moderator requests | Postgres functions and scheduled jobs | Computed once on the server |
 | Grade systems, attribute definitions, gym colour scales | Data in tables | Every client reads the same definitions |
 | Stats, insights, skill levels | Shared Dart package on the local database | Must work offline; Flutter web can reuse it |
 | Push, weather, share images | Edge Functions | Server-side and the same for every client |
@@ -78,11 +78,11 @@ prototype/                 HTML prototype (reference only)
 
 ## Decisions already made
 
-1. **Routes.** One shared route database. Each route has a consensus grade. Each ascent stores the official grade at the time of logging and your personal grade or feel. New routes are checked against nearby routes with similar names to avoid duplicates. Duplicates can be merged later without losing history. Anyone can suggest edits. Private routes exist for secret boulders and projects.
+1. **Routes.** One shared route database, organised as crag → sector → route. Crags, sectors and routes belong to nobody; ascents, grade opinions and photos are each person's own rows that point at them. Each route has a consensus grade. Each ascent stores the official grade at the time of logging and your personal grade or feel. Each crag or gym has moderators. Anyone can request an edit or add a route, but a moderator of that crag accepts or rejects it, and is notified of every request. A new route is the creator's private route until it is accepted. New routes are checked against nearby routes with similar names to avoid duplicates, and a moderator can merge a duplicate without losing history. Users can offer a photo as a shared topo, which a moderator must accept. Private routes exist for secret boulders and projects.
 2. **Partner tagging.** Tagging sends a request. When accepted, a linked copy of the session is added to the partner's log, which they edit themselves. On multipitch routes you choose who led each pitch, and each climber's rack is recorded.
 3. **Trips.** Optional level above sessions, with a name, dates, place and people.
-4. **Gym climbs.** Temporary gym routes identified by wall, colour and date set. They expire after a per-gym number of weeks or when a wall is marked as reset. Tries add up across sessions, so the same style rules work indoors and outdoors. Gym routes never appear in the outdoor route list.
-5. **Sync.** Offline-first. Every write goes to the local database, then syncs. Each row has one owner. Shared sessions are linked copies, and shared routes change only through suggested edits. Conflicts on your own data are resolved per field, last edit wins. Deletes are soft. Media uploads in the background.
+4. **Gym climbs.** Temporary gym routes identified by wall, colour and date set. They expire after a per-gym number of weeks or when a wall is marked as reset. Tries add up across sessions, so the same style rules work indoors and outdoors. Gym routes never appear in the outdoor route list. For now, gym routes, walls and colour grades are private to each user; only the gym itself is shared.
+5. **Sync.** Offline-first. Every write goes to the local database, then syncs. Each row has one owner. Shared sessions are linked copies, and shared routes change only through requests a moderator accepts. Conflicts on your own data are resolved per field, last edit wins. Deletes are soft. Media uploads in the background.
 6. **Privacy.** Each post is public, friends-only or private, with a default in settings. Photo GPS data is stripped on upload, and a crag or boulder location can be hidden.
 7. **Style and tries.** Onsight and flash mean 1 try. A redpoint needs at least 2 tries, counting earlier logged attempts on the same route. A route you have sent before logs as a repeat.
 8. **Platforms.** Flutter for iPhone and Android. Supabase is the API for every client, including a future web app.
@@ -105,9 +105,9 @@ The first ten milestones build a complete personal logbook that works offline wi
 | M9 | Gear and shoes | Rack, gear details, rack per climb, shoes, local reminders |
 | M10 | Training benchmarks | Strength and mobility tests with history |
 | M11 | Accounts, API and sync | API contract, server-side rules, sign-in, profile, sync across devices |
-| M12 | Shared route database | Consensus grades, duplicate checks, suggested edits, private routes |
+| M12 | Shared route database | Consensus grades, duplicate checks, crag moderators, edit and new-route requests, shared topo photos, private routes |
 | M13 | Social | Friends, feed, kudos, comments, privacy, shared sessions, endorsements |
-| M14 | Notifications | Push for social events, notification centre, settings |
+| M14 | Notifications | Push for social events and moderator requests, notification centre, settings |
 | M15 | Topo maker | Draw topos on photos, pitch tables, share images |
 | M16 | Polish and release | Share cards, accessibility, performance, App Store and Google Play readiness |
 
