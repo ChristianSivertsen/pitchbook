@@ -21,7 +21,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 
 class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen();
+  const new();
 
   @override
   Widget build(BuildContext context) {
