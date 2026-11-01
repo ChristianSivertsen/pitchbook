@@ -79,6 +79,9 @@ After both review agents pass and CI is green:
 dart format --set-exit-if-changed .
 flutter analyze
 flutter test                      # in app/ and each package
+tool/check.sh                     # everything CI runs (except flow tests)
+cd packages/sva_data && dart run build_runner build   # after changing drift tables
+cd packages/sva_data && dart run drift_dev make-migrations   # after bumping schemaVersion
 ```
 
 Add new commands here as tooling is set up.

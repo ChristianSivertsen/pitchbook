@@ -1,0 +1,12 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          # Text timestamps (ISO 8601, UTC) match how PowerSync stores
+          # Postgres timestamptz values, so synced rows read back the same.
+          store_date_time_values_as_text: true
+          databases:
+            sva: lib/src/database/sva_database.dart
+          schema_dir: drift_schemas/
+          test_dir: test/generated_migrations/

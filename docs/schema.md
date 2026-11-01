@@ -8,17 +8,18 @@ Supported climbing: sport, trad, bouldering, multipitch, alpine, ice, mixed, aid
 
 | Rule | Detail |
 |---|---|
-| IDs | `id` is a UUIDv7, generated on the device. Works offline and sorts by creation time |
-| Ownership | `owner_id` on every user-owned row. Only the owner may change it |
+| IDs | `id` is a UUIDv7, generated on the device. Works offline and sorts by creation time. Every table has a text `id` primary key, join tables included (PowerSync needs it) |
+| Ownership | `owner_id` on every user-owned row, child rows included (an ascent's pitches, attributes and gear carry the same owner), so sync rules and row-level security never need a join. Only the owner may change it. Shared rows have `created_by` instead |
 | Timestamps | `created_at`, `updated_at` in UTC. `deleted_at` for soft deletes; rows are never hard-deleted by clients |
 | Local dates | Sessions store `local_date` (`YYYY-MM-DD`) and `tz` (IANA name, for example `Europe/Oslo`) so a session abroad lands on the right day |
 | Units | Always SI: metres (`_m`), kilograms (`_kg`), °C (`_c`), seconds (`_s`), millimetres only where the domain uses them (`edge_mm`, `diameter_mm`). Converted only for display |
 | Enumerations | Stored as text keys with a check constraint, not Postgres enum types, so values can be added with a simple migration. Keys are stable identifiers such as `hold.crimp`; display text comes from translations |
-| Visibility | `visibility` is `public`, `friends` or `private` wherever a row can be seen by others |
+| Visibility | `visibility` is `public`, `friends` or `private` wherever a row can be seen by others. A session's child rows (ascents and their pitches, attributes and gear, session members, weather) carry a copy of the session's visibility, so sync rules and row-level security decide on the row alone. Repositories update the copies when the session's visibility changes |
 | Shared rows | Public areas and routes, grade systems, attribute definitions and the gear catalog are shared. Nobody owns them; `created_by` is credit, not ownership. Clients never update shared rows directly; they go through moderated requests (`suggested_edits`) or server functions |
 | Year-month dates | Gear and shoe dates where only the month is known use `YYYY-MM` text |
 | Types across databases | UUID: `uuid` in Postgres, text in SQLite. JSON: `jsonb` / text. Booleans: `boolean` / integer. Location: `latitude`, `longitude` columns in both, plus a PostGIS `geography` column on the server for nearby searches |
 | Migrations | Never edit a merged migration. Add a new one |
+| PowerSync-ready | On the device, PowerSync owns the synced tables from M11-4 and stores them without foreign keys, check constraints or unique indexes, using only text, integer and real columns. The local schema follows those limits from the start: booleans are integers, JSON and dates are text, timestamps are ISO 8601 text in UTC, and column defaults are set in Dart rather than SQL, because PowerSync's views ignore SQL defaults. Rules such as allowed enumeration keys, references and uniqueness are enforced in `sva_core`, the repositories and Postgres, which keeps full foreign keys, checks and unique constraints |
 
 ## Overview
 
@@ -41,6 +42,15 @@ erDiagram
   grade_systems ||--o{ grades : defines
   grades ||--o{ route_grades : value
   sessions ||--o{ ascents : contains
+  sessions ||--o| weather_snapshots : weather
+  trips ||--o{ trip_members : invites
+  ascents ||--o{ ascent_attributes : tags
+  ascents ||--o| ascent_beta : "private beta"
+  routes ||--o{ route_attributes : details
+  attribute_defs ||--o{ route_attributes : defines
+  gear_pieces ||--o{ gear_events : history
+  shoes ||--o{ shoe_resoles : resoled
+  routes ||--o{ ticklist_items : ticked
   sessions ||--o{ session_members : tags
   climb_groups ||--o{ sessions : links
   routes ||--o{ ascents : "climbed in"
@@ -71,7 +81,7 @@ erDiagram
 | default_visibility | text | Default for new sessions |
 | rack_visibility | text | Who can see your rack |
 | grade_prefs | jsonb | Display system per grade type, for example `{"free_route": "nor", "boulder": "font", "ice": "wi"}` |
-| theme | text | `rope` or `forest` |
+| theme | text | `system`, `midnight` or `daylight` |
 | quiet_hours | jsonb | Start and end for notifications |
 | created_at, updated_at, deleted_at | timestamptz | |
 
@@ -106,11 +116,12 @@ The outdoor tree is a set of nested folders: crag → sector → routes. A secto
 
 A request about a row is handled by the moderators of the nearest crag or gym above it (or the row itself, when it is the crag or gym). If that place has no moderators, the request goes up the tree to the region, the country and finally the app admins, so no request is left without someone to decide it. App admins appoint moderators to begin with.
 
-**gym_profiles**: extra settings for areas of type `gym`. The gym and its profile are shared and moderated like a crag.
+**gym_profiles**: extra settings for areas of type `gym`, one per gym. The gym and its profile are shared and moderated like a crag.
 
 | Column | Type | Notes |
 |---|---|---|
-| area_id | uuid → areas | Primary key |
+| id | uuid | |
+| area_id | uuid → areas | One row per gym (unique on the server) |
 | grading | text | `colour`, `standard`, `none` |
 | route_expiry_weeks | integer | When gym routes expire if no reset is logged |
 
@@ -198,7 +209,7 @@ New sectors and crags follow the same steps with `add_area` requests. Once a row
 | `danger` | `danger` | G, PG, PG-13, R, X |
 | `dws_s` | `dws` | S0 to S3 (danger of the fall into water) |
 
-Columns: `key`, `name`, `grade_type`, `sort`, `region`.
+Columns: `id`, `key` (unique on the server), `name`, `grade_type`, `sort`, `region`.
 
 **grades**: `id`, `system_key`, `label`, `sort`, `score` (numeric on the shared difficulty scale for that grade type; null for types that are not compared, such as danger), `score_low`, `score_high` (for grades that span a range).
 
@@ -215,9 +226,9 @@ Columns: `key`, `name`, `grade_type`, `sort`, `region`.
 
 A trad route might have `free_route` E3 + 5c, `danger` R and `commitment` III. An alpine route might have `alpine` D, `free_route` 5+ and `ice` WI3.
 
-**attribute_defs**: shared definitions for the long tail of details. `key`, `level` (`area`, `route`, `pitch`, `ascent`, `session`), `value_type` (`single`, `multi`, `number`, `bool`), `values` (json array of value keys), `sort`. Seeded with features (`feature.finger_crack`, `.hand_crack`, `.offwidth`, `.chimney`, `.corner`, `.arete`, `.tufa`, `.ice_pillar`, `.ice_curtain`, `.mixed_dry_tool`), holds, ascent tags (`tag.pumpy` …), conditions.
+**attribute_defs**: shared definitions for the long tail of details. `id`, `key` (unique on the server), `level` (`area`, `route`, `pitch`, `ascent`, `session`), `value_type` (`single`, `multi`, `number`, `bool`), `value_keys` (json array of allowed value keys; `values` is a reserved word in SQL), `sort`. Seeded with features (`feature.finger_crack`, `.hand_crack`, `.offwidth`, `.chimney`, `.corner`, `.arete`, `.tufa`, `.ice_pillar`, `.ice_curtain`, `.mixed_dry_tool`), holds, ascent tags (`tag.pumpy` …), conditions.
 
-**route_attributes**: `route_id`, `attribute_key`, `value` (key, number or bool as text). Primary key on all three for multi-values.
+**route_attributes**: `id`, `route_id`, `attribute_key`, `value` (key, number or bool as text). One row per value, so multi-value attributes have several rows; unique on the three columns on the server.
 
 Common filters (discipline, angle, protection, rock type) are typed columns. Attribute tables hold the rest.
 
@@ -250,9 +261,9 @@ Common filters (discipline, angle, protection, rock type) are typed columns. Att
 
 **trips**: `id`, `owner_id`, `name`, `start_date`, `end_date`, `area_id` (main place), `description`, `visibility`.
 
-**trip_members**: `trip_id`, `user_id` (or null), `guest_name`, `status` (`pending`, `accepted`, `declined`, `guest`).
+**trip_members**: `id`, `owner_id`, `trip_id`, `user_id` (or null), `guest_name`, `status` (`pending`, `accepted`, `declined`, `guest`).
 
-**climb_groups**: links the copies of a shared session. `id`, `created_by`, `created_at`.
+**climb_groups**: links the copies of a shared session. `id`, `owner_id` (who shared it), `created_at`.
 
 **sessions**
 
@@ -276,9 +287,9 @@ Common filters (discipline, angle, protection, rock type) are typed columns. Att
 | conditions | text | `condition.dry`, `.perfect`, `.humid`, `.wet`, `.icy`, … |
 | created_at, updated_at, deleted_at | | |
 
-**weather_snapshots**: `session_id` (primary key), `source` (`open_meteo`), `temp_c`, `precip_mm`, `wind_ms`, `humidity_pct`, `cloud_pct`, `water_temp_c` (deep water solo), `raw` (jsonb), `fetched_at`.
+**weather_snapshots**: `id`, `owner_id`, `session_id` (one per session), `source` (`open_meteo`), `temp_c`, `precip_mm`, `wind_ms`, `humidity_pct`, `cloud_pct`, `water_temp_c` (deep water solo), `raw` (jsonb, the provider's answer without its coordinates), `fetched_at`.
 
-**session_members**: `id`, `session_id`, `user_id` (null for people without the app), `guest_name`, `status` (`pending`, `accepted`, `declined`, `guest`), `invited_by`.
+**session_members**: `id`, `owner_id` (the session's owner), `session_id`, `user_id` (null for people without the app), `guest_name`, `status` (`pending`, `accepted`, `declined`, `guest`), `invited_by`.
 
 **ascents**
 
@@ -300,12 +311,13 @@ Common filters (discipline, angle, protection, rock type) are typed columns. Att
 | official_grade_id | uuid → grades | Snapshot of the main official grade at the time |
 | difficulty_score | numeric | Cache for stats, from the snapshot |
 | quality_stars | integer | 0 to 3 |
-| beta_notes | text | Always private |
 | duration_s | integer | Optional time on route |
 | shoe_id | uuid → shoes | Overrides the session's shoes |
 | setting | text | Cache: `outdoor`, `indoor` |
 | discipline | text | Cache from the route |
 | created_at, updated_at, deleted_at | | |
+
+**ascent_beta**: beta notes on an ascent. `id`, `owner_id`, `ascent_id`, `beta_notes`. Always private: they live in their own owner-only table, so no sync rule or view for friends can reach them, even one that sends whole ascent rows.
 
 **ascent_pitches**: one row per pitch climbed, also for single-pitch routes.
 
@@ -321,9 +333,9 @@ Common filters (discipline, angle, protection, rock type) are typed columns. Att
 | falls, rests | integer | |
 | notes | text | |
 
-**ascent_attributes**: `ascent_id`, `attribute_key`, `value`. Holds tags and other ascent details.
+**ascent_attributes**: `id`, `owner_id`, `ascent_id`, `attribute_key`, `value`. Holds tags and other ascent details.
 
-**ascent_gear**: `ascent_id`, `gear_piece_id`, `count`, `borrowed_from` (uuid → profiles or null). The rack taken on that climb.
+**ascent_gear**: `id`, `owner_id`, `ascent_id`, `gear_piece_id`, `count`, `borrowed_from` (uuid → profiles or null). The rack taken on that climb.
 
 ## 5. Media
 
@@ -380,11 +392,11 @@ Categories: `cam`, `nut`, `hex`, `tricam`, `sling`, `alpine_draw`, `quickdraw`, 
 
 Pieces are grouped by model in the UI, so two #1 cams show as "×2" but keep their own resling dates.
 
-**gear_events**: `id`, `piece_id`, `kind` (`reslung`, `inspected`, `fall_held`, `lent`, `retired`), `date`, `notes`.
+**gear_events**: `id`, `owner_id`, `piece_id`, `kind` (`reslung`, `inspected`, `fall_held`, `lent`, `retired`), `date`, `notes`.
 
 **shoes**: `id`, `owner_id`, `brand`, `model`, `size_label`, `colour_hex`, `closure` (`velcro`, `lace`, `slipper`), `default_for` (json array: `gym`, `sport`, `boulder`, `trad`, `ice`), `bought_on`, `resole_after_days`, `retired_on`, `notes`.
 
-**shoe_resoles**: `id`, `shoe_id`, `date`, `notes`.
+**shoe_resoles**: `id`, `owner_id`, `shoe_id`, `date`, `notes`.
 
 ## 7. Projects and goals
 
@@ -428,12 +440,17 @@ Pieces are grouped by model in the UI, so two #1 cams show as "×2" but keep the
 ## Server rules
 
 - Row-level security on every table. Owners write their own rows. Reads follow `visibility`, friendships and blocks.
+- Hidden locations stay hidden. For an area with `location_hidden`, every view and sync query for other users returns null `latitude` and `longitude`. For a session with `location_hidden`, they get no `area_id`. Weather is saved without the request's coordinates (`raw` keeps only the weather fields). pgTAP tests check that a friend cannot read any of these.
 - Postgres functions for multi-row operations: accept a shared session, merge routes or areas, decide a request (accept, reject or merge), respond to a friend request. Only a moderator of the request's `moderating_area_id`, or an app admin, may decide it.
 - Merging moves everyone's ascents, media, topos, ticklist items and projects to the remaining row, keeps the old name as an alias and keeps the old row with `merged_into_id` set. A trigger on new ascents and media follows `merged_into_id` to the remaining row, for devices that were offline during the merge.
 - When a request is saved, a trigger notifies each moderator of its crag or gym (`mod.request`). When it is decided, the person who made it is notified (`mod.resolved`).
 - Triggers check style and tries rules on ascents, using the same test cases as `sva_core`.
 - Scheduled jobs: expire gym routes, recompute consensus grades and quality.
 - Account deletion: personal rows are deleted, including private routes, gym routes and open requests. Ascents on shared routes are kept without an owner and marked private, so consensus grades stay correct. Shared topo photos are kept, without the credit.
+
+## On the device
+
+The drift schema in `packages/sva_data/lib/src/database/` holds every table above except the server-only ones: `device_tokens`, `aliases`, `external_ids`, `area_moderators`, `suggested_edits`, `edit_votes`, `route_history` and the social tables in §9 (social rows reach the device with M13). Saved schema versions live in `packages/sva_data/drift_schemas/`, and a test migrates every saved version to the latest. To change a table, bump `schemaVersion`, add a migration step, run `dart run drift_dev make-migrations` in `packages/sva_data`, and commit the generated files.
 
 ## Sync scope
 
@@ -442,7 +459,7 @@ Pieces are grouped by model in the UI, so two #1 cams show as "×2" but keep the
 
 ## Indexes for stats
 
-- `ascents (owner_id, setting, discipline)`, `sessions (owner_id, local_date)`, and `ascents (owner_id, route_id)` for the tries rules.
+- `ascents (owner_id, setting, discipline)`, `sessions (owner_id, local_date)`, `ascents (owner_id, route_id)` for the tries rules, and `ascents (session_id)` to open a session.
 - `ascent_attributes (attribute_key, value)`, `route_attributes (attribute_key, value)`.
 - `routes (area_id)`, `areas (parent_id)`, `areas (country_code)`, PostGIS index on area location.
 - `media (session_id)`, `session_members (user_id, status)`.
