@@ -43,6 +43,16 @@ void main() {
     final title = 'Flow ${DateTime.now().millisecondsSinceEpoch}';
 
     Future<void> tap(Finder target) async {
+      if (target.evaluate().isEmpty) {
+        // Show what was on screen, to make a failure on CI readable.
+        final texts = find
+            .byType(Text)
+            .evaluate()
+            .map((e) => (e.widget as Text).data)
+            .whereType<String>()
+            .join(' | ');
+        fail('Not found: $target\nOn screen: $texts');
+      }
       await tester.ensureVisible(target);
       await tester.pumpAndSettle();
       await tester.tap(target);
