@@ -42,7 +42,34 @@ void main() {
     final l10n = AppLocalizations.of(tester.element(find.byType(AppShell)));
     final title = 'Flow ${DateTime.now().millisecondsSinceEpoch}';
 
-    Future<void> tap(Finder target) async {
+    // Only look inside the sheet: the feed behind it shows the example
+    // sessions, which mention the same routes.
+    Finder inSheet(Finder finder) =>
+        find.descendant(of: find.byType(LogSheet), matching: finder);
+
+    /// Scrolls the sheet until [target] is built and on screen. Its list
+    /// builds rows lazily, so rows out of view may not exist yet: look
+    /// above first, then below.
+    Future<void> reveal(Finder target) async {
+      for (final step in [-200.0, 200.0]) {
+        if (find.byType(LogSheet).evaluate().isEmpty ||
+            target.evaluate().isNotEmpty) {
+          break;
+        }
+        try {
+          await tester.scrollUntilVisible(
+            target,
+            step,
+            scrollable: inSheet(find.byType(Scrollable)).first,
+            maxScrolls: 30,
+          );
+          // scrollUntilVisible gives up with a StateError when the target
+          // is not in this direction; then try the other one.
+          // ignore: avoid_catching_errors
+        } on StateError {
+          continue;
+        }
+      }
       if (target.evaluate().isEmpty) {
         // Show what was on screen, to make a failure on CI readable.
         final texts = find
@@ -55,15 +82,15 @@ void main() {
       }
       await tester.ensureVisible(target);
       await tester.pumpAndSettle();
+    }
+
+    Future<void> tap(Finder target) async {
+      await reveal(target);
       await tester.tap(target);
       await tester.pumpAndSettle();
     }
 
     await tap(find.byKey(logButtonKey));
-    // Only look inside the sheet: the feed behind it shows the example
-    // sessions, which mention the same routes.
-    Finder inSheet(Finder finder) =>
-        find.descendant(of: find.byType(LogSheet), matching: finder);
     await tap(inSheet(find.text(l10n.logOutdoor)));
     // Attempts are always allowed, whatever the example history holds.
     for (var i = 0; i < 2; i++) {
@@ -79,7 +106,7 @@ void main() {
       if (i == 0) await tap(inSheet(find.text(l10n.logAddClimb)));
     }
     final titleField = inSheet(find.widgetWithText(TextField, l10n.logTitle));
-    await tester.ensureVisible(titleField);
+    await reveal(titleField);
     await tester.enterText(titleField, title);
     await tester.pumpAndSettle();
     await tap(inSheet(find.text(l10n.logSave(2))));
