@@ -1,0 +1,24 @@
+{
+  "about": "Search and sort keys for names (sva_core name_keys.dart). The server computes the same keys from M11-2. Each case: the name, its search key and its ascii key.",
+  "cases": [
+    {"name": "Fløyen", "search": "fløyen", "ascii": "floyen"},
+    {"name": "FLØYEN", "search": "fløyen", "ascii": "floyen"},
+    {"name": "Ærfuglen", "search": "ærfuglen", "ascii": "aerfuglen"},
+    {"name": "Åsane", "search": "åsane", "ascii": "asane"},
+    {"name": "Aaland", "search": "åland", "ascii": "aland"},
+    {"name": "Kraakmo", "search": "kråkmo", "ascii": "krakmo"},
+    {"name": "Bjørnø", "search": "bjørnø", "ascii": "bjorno"},
+    {"name": "Kullaberg Hjärtat", "search": "kullaberg hjærtat", "ascii": "kullaberg hjaertat"},
+    {"name": "Smörgåsbord", "search": "smørgåsbord", "ascii": "smorgasbord"},
+    {"name": "Café Crème", "search": "cafe creme", "ascii": "cafe creme"},
+    {"name": "Straße", "search": "strasse", "ascii": "strasse"},
+    {"name": "  Reisa – Nord-Norge!  ", "search": "reisa nord norge", "ascii": "reisa nord norge"},
+    {"name": "Svartisen 7b+", "search": "svartisen 7b", "ascii": "svartisen 7b"},
+    {"name": "Vill'mann", "search": "vill mann", "ascii": "vill mann"},
+    {"name": "Καλύμνος", "search": "καλύμνος", "ascii": "καλύμνος"},
+    {"name": "東京 ボルダー", "search": "東京 ボルダー", "ascii": "東京 ボルダー"},
+    {"name": " - ", "search": "", "ascii": ""},
+    {"name": "", "search": "", "ascii": ""}
+  ],
+  "order": ["Andøya", "Bø", "Zappa", "Ærfuglen", "Øya", "Aaland", "Åsane"]
+}

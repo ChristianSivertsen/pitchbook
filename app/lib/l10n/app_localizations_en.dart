@@ -78,4 +78,169 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notFoundAction => 'Go to the feed';
+
+  @override
+  String get routeSearchOpen => 'Find a route';
+
+  @override
+  String get routeSearchTitle => 'Find a route';
+
+  @override
+  String get routeSearchField => 'Route or crag';
+
+  @override
+  String routeSearchNoMatch(String term) {
+    return 'No routes match \"$term\".';
+  }
+
+  @override
+  String get routeSearchEmpty => 'Routes you add and climb show up here.';
+
+  @override
+  String get routeNotFound => 'This route is gone or private.';
+
+  @override
+  String get routeUngraded => 'Ungraded';
+
+  @override
+  String routeLength(int metres) {
+    return '$metres m';
+  }
+
+  @override
+  String routePitches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pitches',
+      one: '1 pitch',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String routeRopeLength(int metres) {
+    return '$metres m rope';
+  }
+
+  @override
+  String get routeDetails => 'Details';
+
+  @override
+  String get routeYourClimbs => 'Your climbs';
+
+  @override
+  String get routeNotClimbed => 'You haven\'t logged this route yet.';
+
+  @override
+  String routeLastClimbed(String date) {
+    return 'Last climbed $date';
+  }
+
+  @override
+  String discipline(String discipline) {
+    String _temp0 = intl.Intl.selectLogic(discipline, {
+      'sport': 'Sport',
+      'trad': 'Trad',
+      'boulder': 'Boulder',
+      'alpine': 'Alpine',
+      'ice': 'Ice',
+      'mixed': 'Mixed',
+      'aid': 'Aid',
+      'dws': 'Deep water solo',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String ascentStyle(String style) {
+    String _temp0 = intl.Intl.selectLogic(style, {
+      'onsight': 'Onsight',
+      'flash': 'Flash',
+      'redpoint': 'Redpoint',
+      'repeat': 'Repeat',
+      'attempt': 'Attempt',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String ascentTries(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tries',
+      one: '1 try',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String aspect(String direction) {
+    String _temp0 = intl.Intl.selectLogic(direction, {
+      'N': 'Faces north',
+      'NE': 'Faces northeast',
+      'E': 'Faces east',
+      'SE': 'Faces southeast',
+      'S': 'Faces south',
+      'SW': 'Faces southwest',
+      'W': 'Faces west',
+      'NW': 'Faces northwest',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String attributeValue(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'rock_granite': 'Granite',
+      'rock_gneiss': 'Gneiss',
+      'rock_limestone': 'Limestone',
+      'rock_sandstone': 'Sandstone',
+      'rock_basalt': 'Basalt',
+      'rock_conglomerate': 'Conglomerate',
+      'rock_quartzite': 'Quartzite',
+      'rock_schist': 'Schist',
+      'rock_dolerite': 'Dolerite',
+      'angle_slab': 'Slab',
+      'angle_vertical': 'Vertical',
+      'angle_overhang': 'Overhang',
+      'angle_roof': 'Roof',
+      'feature_face': 'Face',
+      'feature_finger_crack': 'Finger crack',
+      'feature_hand_crack': 'Hand crack',
+      'feature_offwidth': 'Offwidth',
+      'feature_chimney': 'Chimney',
+      'feature_corner': 'Corner',
+      'feature_arete': 'Arête',
+      'feature_tufa': 'Tufa',
+      'feature_ice_pillar': 'Ice pillar',
+      'feature_ice_curtain': 'Ice curtain',
+      'feature_mixed_dry_tool': 'Dry tooling',
+      'hold_crimp': 'Crimps',
+      'hold_pocket': 'Pockets',
+      'hold_pinch': 'Pinches',
+      'hold_sloper': 'Slopers',
+      'hold_jug': 'Jugs',
+      'hold_undercling': 'Underclings',
+      'hold_sidepull': 'Sidepulls',
+      'protection_bolted': 'Bolted',
+      'protection_trad': 'Trad gear',
+      'protection_mixed': 'Mixed protection',
+      'protection_runout': 'Runout',
+      'protection_none': 'No protection',
+      'protection_pads': 'Pads',
+      'protection_ice_screws': 'Ice screws',
+      'descent_lower_off': 'Lower off',
+      'descent_rappel': 'Rappel',
+      'descent_walk_off': 'Walk off',
+      'descent_downclimb': 'Downclimb',
+      'descent_swim': 'Swim',
+      'other': '',
+    });
+    return '$_temp0';
+  }
 }

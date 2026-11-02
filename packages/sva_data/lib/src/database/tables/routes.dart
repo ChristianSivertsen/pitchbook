@@ -3,7 +3,7 @@ import 'package:sva_data/src/database/tables/conventions.dart';
 
 /// Every climbable line, outdoors or in a gym (docs/schema.md §3).
 @TableIndex(name: 'routes_area', columns: {#areaId})
-class Routes extends Table with SyncedRow, SharedRow, Visible {
+class Routes extends Table with SyncedRow, SharedRow, Visible, NameKeys {
   TextColumn get areaId => text()();
 
   /// `outdoor` or `gym`.
@@ -76,6 +76,7 @@ class Grades extends Table with SyncedRow, SharedRow {
 }
 
 /// Any number of grades per route or pitch.
+@TableIndex(name: 'route_grades_route', columns: {#routeId})
 class RouteGrades extends Table with SyncedRow, SharedRow {
   TextColumn get routeId => text()();
   TextColumn get pitchId => text().nullable()();

@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:sva_data/src/database/sva_database.dart';
 import 'package:sva_data/src/ids.dart';
+import 'package:sva_data/src/repositories/place_repositories.dart' show LatLon;
 
 // EXAMPLE DATA FOR DEBUG BUILDS ONLY. A small slice of the prototype's
 // made-up history, so screens have something to show while they are built.
@@ -28,25 +29,37 @@ Future<void> seedExampleData(SvaDatabase db, {required String userId}) async {
       row(exampleId(name));
 
   await db.batch((b) {
-    void area(String name, String type, {String? parent, String? rock}) =>
-        b.insert(
-          db.areas,
-          AreasCompanion.insert(
-            id: exampleId(name),
-            createdAt: t,
-            updatedAt: t,
-            visibility: 'private',
-            createdBy: Value(userId),
-            parentId: Value(parent == null ? null : exampleId(parent)),
-            type: type,
-            name: name,
-            countryCode: 'NO',
-            rockType: Value(rock),
-          ),
-          mode: InsertMode.insertOrIgnore,
-        );
-    area('Kolsås', 'crag', rock: 'rock.basalt');
-    area('Flatanger', 'crag', rock: 'rock.granite');
+    void area(
+      String name,
+      String type, {
+      String? parent,
+      String? rock,
+      LatLon? at,
+    }) => b.insert(
+      db.areas,
+      AreasCompanion.insert(
+        id: exampleId(name),
+        createdAt: t,
+        updatedAt: t,
+        visibility: 'private',
+        createdBy: Value(userId),
+        parentId: Value(parent == null ? null : exampleId(parent)),
+        type: type,
+        name: name,
+        countryCode: 'NO',
+        rockType: Value(rock),
+        latitude: Value(at?.lat),
+        longitude: Value(at?.lon),
+      ),
+      mode: InsertMode.insertOrIgnore,
+    );
+    area('Kolsås', 'crag', rock: 'rock.basalt', at: (lat: 59.92, lon: 10.50));
+    area(
+      'Flatanger',
+      'crag',
+      rock: 'rock.granite',
+      at: (lat: 64.49, lon: 10.80),
+    );
     area('Hanshelleren', 'sector', parent: 'Flatanger');
     area('Home gym, Oslo', 'gym');
 
@@ -251,6 +264,7 @@ Future<void> seedExampleData(SvaDatabase db, {required String userId}) async {
       mode: InsertMode.insertOrIgnore,
     );
   });
+  await db.fillNameKeys();
 }
 
 /// Example routes: name → (place, discipline, angle). Ascents take their

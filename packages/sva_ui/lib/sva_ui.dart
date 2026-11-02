@@ -12,3 +12,4 @@ export 'src/theme/sva_colors.dart';
 export 'src/theme/sva_theme.dart';
 export 'src/theme/sva_tokens.dart';
 export 'src/theme/sva_typography.dart';
+export 'src/widgets/badges.dart';

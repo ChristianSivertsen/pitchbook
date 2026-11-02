@@ -12,7 +12,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('M0-8: app starts and every tab can be opened', (tester) async {
-    app.main();
+    await app.main();
     await tester.pumpAndSettle();
     final l10n = AppLocalizations.of(tester.element(find.byType(AppShell)));
     expect(find.text(l10n.feedEmptyTitle), findsOneWidget);

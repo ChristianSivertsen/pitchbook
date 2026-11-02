@@ -5,7 +5,7 @@ import 'package:sva_data/src/database/tables/conventions.dart';
 /// (docs/schema.md §2).
 @TableIndex(name: 'areas_parent', columns: {#parentId})
 @TableIndex(name: 'areas_country', columns: {#countryCode})
-class Areas extends Table with SyncedRow, SharedRow, Visible {
+class Areas extends Table with SyncedRow, SharedRow, Visible, NameKeys {
   TextColumn get parentId => text().nullable()();
 
   /// `country`, `region`, `area`, `crag`, `sector`, `wall`,

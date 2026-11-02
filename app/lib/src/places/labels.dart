@@ -1,0 +1,40 @@
+import 'package:intl/intl.dart';
+import 'package:sva/l10n/app_localizations.dart';
+import 'package:sva_core/sva_core.dart' show AttributeValues;
+
+/// Route details shown as tags, in this order. Discipline is shown on its
+/// own line, so it is not here.
+const _tagKeys = [
+  'rock_type',
+  'aspect',
+  'angle',
+  'feature',
+  'hold',
+  'protection',
+  'descent',
+  'rope_length_m',
+];
+
+/// The display text for each detail in [values] that the app has words
+/// for. Unknown keys are left out rather than shown raw.
+List<String> detailTags(AppLocalizations l10n, AttributeValues values) => [
+  for (final key in _tagKeys)
+    for (final value in values[key] ?? const <String>[])
+      if (_label(l10n, key, value) case final label? when label.isNotEmpty)
+        label,
+];
+
+String? _label(AppLocalizations l10n, String key, String value) =>
+    switch (key) {
+      'aspect' => l10n.aspect(value),
+      'rope_length_m' => switch (num.tryParse(value)) {
+        final metres? => l10n.routeRopeLength(metres.round()),
+        null => null,
+      },
+      _ => l10n.attributeValue(value.replaceAll('.', '_')),
+    };
+
+/// A `YYYY-MM-DD` day as `1 Nov 2026` in the app's language
+/// (docs/DESIGN.md, Writing).
+String formatDay(AppLocalizations l10n, String day) =>
+    DateFormat('d MMM y', l10n.localeName).format(DateTime.parse(day));

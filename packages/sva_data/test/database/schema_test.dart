@@ -64,6 +64,24 @@ const _shared = {
 void main() {
   group('a new database', newDatabaseTests);
 
+  test('M2-1: upgrading to version 2 fills in name search keys', () async {
+    final verifier = SchemaVerifier(GeneratedHelper());
+    final schema = await verifier.schemaAt(1);
+    schema.rawDatabase.execute(
+      'INSERT INTO areas (id, created_at, updated_at, created_by, '
+      'visibility, type, name, country_code, location_hidden) '
+      "VALUES ('a', '2026', '2026', 'me', 'private', 'crag', 'Fløyen', "
+      "'NO', 0)",
+    );
+    final db = SvaDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 2);
+    final row = await db.customSelect('SELECT * FROM areas').getSingle();
+    expect(row.read<String>('search_key'), 'fløyen');
+    expect(row.read<String>('ascii_key'), 'floyen');
+    expect(row.read<String>('updated_at'), '2026', reason: 'not an edit');
+    await db.close();
+  });
+
   test(
     'M1-1: migration from every earlier version to the latest works',
     () async {

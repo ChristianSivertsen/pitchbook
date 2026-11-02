@@ -33,7 +33,16 @@ class HistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return _TabScreen(
-      header: _ScreenTitle(l10n.historyTitle),
+      header: Row(
+        children: [
+          Expanded(child: _ScreenTitle(l10n.historyTitle)),
+          IconButton(
+            tooltip: l10n.routeSearchOpen,
+            onPressed: () => context.push(Routes.routeSearch),
+            icon: Icon(LucideIcons.search, color: context.svaColors.text),
+          ),
+        ],
+      ),
       empty: _EmptyState(
         icon: LucideIcons.chartLine,
         title: l10n.historyEmptyTitle,

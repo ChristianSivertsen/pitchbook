@@ -16,6 +16,7 @@ dependencies:
   go_router: ^18.1.2
   intl: ^0.20.3
   lucide_icons_flutter: ^3.1.25
+  path_provider: ^2.1.6
   sva_core:
     path: ../packages/sva_core
   sva_data:

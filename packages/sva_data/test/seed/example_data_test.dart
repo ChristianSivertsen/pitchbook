@@ -51,9 +51,8 @@ void main() {
         isEmpty,
       );
       expect(
-        (await RouteRepository(
-          db,
-        ).search('', userId: 'me')).map((r) => r.createdBy),
+        (await RouteRepository(db).find(userId: 'me'))
+            .map((h) => h.route.createdBy),
         everyElement('them'),
         reason: "another user's example rows stay",
       );

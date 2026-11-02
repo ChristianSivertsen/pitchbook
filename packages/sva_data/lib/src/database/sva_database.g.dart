@@ -820,6 +820,28 @@ class $AreasTable extends Areas with TableInfo<$AreasTable, Area> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _searchKeyMeta = const VerificationMeta(
+    'searchKey',
+  );
+  @override
+  late final GeneratedColumn<String> searchKey = GeneratedColumn<String>(
+    'search_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _asciiKeyMeta = const VerificationMeta(
+    'asciiKey',
+  );
+  @override
+  late final GeneratedColumn<String> asciiKey = GeneratedColumn<String>(
+    'ascii_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _parentIdMeta = const VerificationMeta(
     'parentId',
   );
@@ -969,6 +991,8 @@ class $AreasTable extends Areas with TableInfo<$AreasTable, Area> {
     deletedAt,
     createdBy,
     visibility,
+    searchKey,
+    asciiKey,
     parentId,
     type,
     name,
@@ -1035,6 +1059,18 @@ class $AreasTable extends Areas with TableInfo<$AreasTable, Area> {
       );
     } else if (isInserting) {
       context.missing(_visibilityMeta);
+    }
+    if (data.containsKey('search_key')) {
+      context.handle(
+        _searchKeyMeta,
+        searchKey.isAcceptableOrUnknown(data['search_key']!, _searchKeyMeta),
+      );
+    }
+    if (data.containsKey('ascii_key')) {
+      context.handle(
+        _asciiKeyMeta,
+        asciiKey.isAcceptableOrUnknown(data['ascii_key']!, _asciiKeyMeta),
+      );
     }
     if (data.containsKey('parent_id')) {
       context.handle(
@@ -1168,6 +1204,14 @@ class $AreasTable extends Areas with TableInfo<$AreasTable, Area> {
         DriftSqlType.string,
         data['${effectivePrefix}visibility'],
       )!,
+      searchKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}search_key'],
+      ),
+      asciiKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ascii_key'],
+      ),
       parentId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}parent_id'],
@@ -1241,6 +1285,8 @@ class Area extends DataClass implements Insertable<Area> {
   /// Null for rows seeded by Sva.
   final String? createdBy;
   final String visibility;
+  final String? searchKey;
+  final String? asciiKey;
   final String? parentId;
 
   /// `country`, `region`, `area`, `crag`, `sector`, `wall`,
@@ -1266,6 +1312,8 @@ class Area extends DataClass implements Insertable<Area> {
     this.deletedAt,
     this.createdBy,
     required this.visibility,
+    this.searchKey,
+    this.asciiKey,
     this.parentId,
     required this.type,
     required this.name,
@@ -1293,6 +1341,12 @@ class Area extends DataClass implements Insertable<Area> {
       map['created_by'] = Variable<String>(createdBy);
     }
     map['visibility'] = Variable<String>(visibility);
+    if (!nullToAbsent || searchKey != null) {
+      map['search_key'] = Variable<String>(searchKey);
+    }
+    if (!nullToAbsent || asciiKey != null) {
+      map['ascii_key'] = Variable<String>(asciiKey);
+    }
     if (!nullToAbsent || parentId != null) {
       map['parent_id'] = Variable<String>(parentId);
     }
@@ -1339,6 +1393,12 @@ class Area extends DataClass implements Insertable<Area> {
           ? const Value.absent()
           : Value(createdBy),
       visibility: Value(visibility),
+      searchKey: searchKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(searchKey),
+      asciiKey: asciiKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asciiKey),
       parentId: parentId == null && nullToAbsent
           ? const Value.absent()
           : Value(parentId),
@@ -1385,6 +1445,8 @@ class Area extends DataClass implements Insertable<Area> {
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       createdBy: serializer.fromJson<String?>(json['createdBy']),
       visibility: serializer.fromJson<String>(json['visibility']),
+      searchKey: serializer.fromJson<String?>(json['searchKey']),
+      asciiKey: serializer.fromJson<String?>(json['asciiKey']),
       parentId: serializer.fromJson<String?>(json['parentId']),
       type: serializer.fromJson<String>(json['type']),
       name: serializer.fromJson<String>(json['name']),
@@ -1410,6 +1472,8 @@ class Area extends DataClass implements Insertable<Area> {
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'createdBy': serializer.toJson<String?>(createdBy),
       'visibility': serializer.toJson<String>(visibility),
+      'searchKey': serializer.toJson<String?>(searchKey),
+      'asciiKey': serializer.toJson<String?>(asciiKey),
       'parentId': serializer.toJson<String?>(parentId),
       'type': serializer.toJson<String>(type),
       'name': serializer.toJson<String>(name),
@@ -1433,6 +1497,8 @@ class Area extends DataClass implements Insertable<Area> {
     Value<DateTime?> deletedAt = const Value.absent(),
     Value<String?> createdBy = const Value.absent(),
     String? visibility,
+    Value<String?> searchKey = const Value.absent(),
+    Value<String?> asciiKey = const Value.absent(),
     Value<String?> parentId = const Value.absent(),
     String? type,
     String? name,
@@ -1453,6 +1519,8 @@ class Area extends DataClass implements Insertable<Area> {
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     createdBy: createdBy.present ? createdBy.value : this.createdBy,
     visibility: visibility ?? this.visibility,
+    searchKey: searchKey.present ? searchKey.value : this.searchKey,
+    asciiKey: asciiKey.present ? asciiKey.value : this.asciiKey,
     parentId: parentId.present ? parentId.value : this.parentId,
     type: type ?? this.type,
     name: name ?? this.name,
@@ -1477,6 +1545,8 @@ class Area extends DataClass implements Insertable<Area> {
       visibility: data.visibility.present
           ? data.visibility.value
           : this.visibility,
+      searchKey: data.searchKey.present ? data.searchKey.value : this.searchKey,
+      asciiKey: data.asciiKey.present ? data.asciiKey.value : this.asciiKey,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
       type: data.type.present ? data.type.value : this.type,
       name: data.name.present ? data.name.value : this.name,
@@ -1512,6 +1582,8 @@ class Area extends DataClass implements Insertable<Area> {
           ..write('deletedAt: $deletedAt, ')
           ..write('createdBy: $createdBy, ')
           ..write('visibility: $visibility, ')
+          ..write('searchKey: $searchKey, ')
+          ..write('asciiKey: $asciiKey, ')
           ..write('parentId: $parentId, ')
           ..write('type: $type, ')
           ..write('name: $name, ')
@@ -1530,13 +1602,15 @@ class Area extends DataClass implements Insertable<Area> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     createdAt,
     updatedAt,
     deletedAt,
     createdBy,
     visibility,
+    searchKey,
+    asciiKey,
     parentId,
     type,
     name,
@@ -1550,7 +1624,7 @@ class Area extends DataClass implements Insertable<Area> {
     locationHidden,
     accessNotes,
     mergedIntoId,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1561,6 +1635,8 @@ class Area extends DataClass implements Insertable<Area> {
           other.deletedAt == this.deletedAt &&
           other.createdBy == this.createdBy &&
           other.visibility == this.visibility &&
+          other.searchKey == this.searchKey &&
+          other.asciiKey == this.asciiKey &&
           other.parentId == this.parentId &&
           other.type == this.type &&
           other.name == this.name &&
@@ -1583,6 +1659,8 @@ class AreasCompanion extends UpdateCompanion<Area> {
   final Value<DateTime?> deletedAt;
   final Value<String?> createdBy;
   final Value<String> visibility;
+  final Value<String?> searchKey;
+  final Value<String?> asciiKey;
   final Value<String?> parentId;
   final Value<String> type;
   final Value<String> name;
@@ -1604,6 +1682,8 @@ class AreasCompanion extends UpdateCompanion<Area> {
     this.deletedAt = const Value.absent(),
     this.createdBy = const Value.absent(),
     this.visibility = const Value.absent(),
+    this.searchKey = const Value.absent(),
+    this.asciiKey = const Value.absent(),
     this.parentId = const Value.absent(),
     this.type = const Value.absent(),
     this.name = const Value.absent(),
@@ -1626,6 +1706,8 @@ class AreasCompanion extends UpdateCompanion<Area> {
     this.deletedAt = const Value.absent(),
     this.createdBy = const Value.absent(),
     required String visibility,
+    this.searchKey = const Value.absent(),
+    this.asciiKey = const Value.absent(),
     this.parentId = const Value.absent(),
     required String type,
     required String name,
@@ -1654,6 +1736,8 @@ class AreasCompanion extends UpdateCompanion<Area> {
     Expression<DateTime>? deletedAt,
     Expression<String>? createdBy,
     Expression<String>? visibility,
+    Expression<String>? searchKey,
+    Expression<String>? asciiKey,
     Expression<String>? parentId,
     Expression<String>? type,
     Expression<String>? name,
@@ -1676,6 +1760,8 @@ class AreasCompanion extends UpdateCompanion<Area> {
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (createdBy != null) 'created_by': createdBy,
       if (visibility != null) 'visibility': visibility,
+      if (searchKey != null) 'search_key': searchKey,
+      if (asciiKey != null) 'ascii_key': asciiKey,
       if (parentId != null) 'parent_id': parentId,
       if (type != null) 'type': type,
       if (name != null) 'name': name,
@@ -1700,6 +1786,8 @@ class AreasCompanion extends UpdateCompanion<Area> {
     Value<DateTime?>? deletedAt,
     Value<String?>? createdBy,
     Value<String>? visibility,
+    Value<String?>? searchKey,
+    Value<String?>? asciiKey,
     Value<String?>? parentId,
     Value<String>? type,
     Value<String>? name,
@@ -1722,6 +1810,8 @@ class AreasCompanion extends UpdateCompanion<Area> {
       deletedAt: deletedAt ?? this.deletedAt,
       createdBy: createdBy ?? this.createdBy,
       visibility: visibility ?? this.visibility,
+      searchKey: searchKey ?? this.searchKey,
+      asciiKey: asciiKey ?? this.asciiKey,
       parentId: parentId ?? this.parentId,
       type: type ?? this.type,
       name: name ?? this.name,
@@ -1759,6 +1849,12 @@ class AreasCompanion extends UpdateCompanion<Area> {
     }
     if (visibility.present) {
       map['visibility'] = Variable<String>(visibility.value);
+    }
+    if (searchKey.present) {
+      map['search_key'] = Variable<String>(searchKey.value);
+    }
+    if (asciiKey.present) {
+      map['ascii_key'] = Variable<String>(asciiKey.value);
     }
     if (parentId.present) {
       map['parent_id'] = Variable<String>(parentId.value);
@@ -1814,6 +1910,8 @@ class AreasCompanion extends UpdateCompanion<Area> {
           ..write('deletedAt: $deletedAt, ')
           ..write('createdBy: $createdBy, ')
           ..write('visibility: $visibility, ')
+          ..write('searchKey: $searchKey, ')
+          ..write('asciiKey: $asciiKey, ')
           ..write('parentId: $parentId, ')
           ..write('type: $type, ')
           ..write('name: $name, ')
@@ -3918,6 +4016,28 @@ class $RoutesTable extends Routes with TableInfo<$RoutesTable, Route> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _searchKeyMeta = const VerificationMeta(
+    'searchKey',
+  );
+  @override
+  late final GeneratedColumn<String> searchKey = GeneratedColumn<String>(
+    'search_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _asciiKeyMeta = const VerificationMeta(
+    'asciiKey',
+  );
+  @override
+  late final GeneratedColumn<String> asciiKey = GeneratedColumn<String>(
+    'ascii_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _areaIdMeta = const VerificationMeta('areaId');
   @override
   late final GeneratedColumn<String> areaId = GeneratedColumn<String>(
@@ -4193,6 +4313,8 @@ class $RoutesTable extends Routes with TableInfo<$RoutesTable, Route> {
     deletedAt,
     createdBy,
     visibility,
+    searchKey,
+    asciiKey,
     areaId,
     kind,
     name,
@@ -4271,6 +4393,18 @@ class $RoutesTable extends Routes with TableInfo<$RoutesTable, Route> {
       );
     } else if (isInserting) {
       context.missing(_visibilityMeta);
+    }
+    if (data.containsKey('search_key')) {
+      context.handle(
+        _searchKeyMeta,
+        searchKey.isAcceptableOrUnknown(data['search_key']!, _searchKeyMeta),
+      );
+    }
+    if (data.containsKey('ascii_key')) {
+      context.handle(
+        _asciiKeyMeta,
+        asciiKey.isAcceptableOrUnknown(data['ascii_key']!, _asciiKeyMeta),
+      );
     }
     if (data.containsKey('area_id')) {
       context.handle(
@@ -4490,6 +4624,14 @@ class $RoutesTable extends Routes with TableInfo<$RoutesTable, Route> {
         DriftSqlType.string,
         data['${effectivePrefix}visibility'],
       )!,
+      searchKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}search_key'],
+      ),
+      asciiKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ascii_key'],
+      ),
       areaId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}area_id'],
@@ -4611,6 +4753,8 @@ class Route extends DataClass implements Insertable<Route> {
   /// Null for rows seeded by Sva.
   final String? createdBy;
   final String visibility;
+  final String? searchKey;
+  final String? asciiKey;
   final String areaId;
 
   /// `outdoor` or `gym`.
@@ -4651,6 +4795,8 @@ class Route extends DataClass implements Insertable<Route> {
     this.deletedAt,
     this.createdBy,
     required this.visibility,
+    this.searchKey,
+    this.asciiKey,
     required this.areaId,
     required this.kind,
     this.name,
@@ -4690,6 +4836,12 @@ class Route extends DataClass implements Insertable<Route> {
       map['created_by'] = Variable<String>(createdBy);
     }
     map['visibility'] = Variable<String>(visibility);
+    if (!nullToAbsent || searchKey != null) {
+      map['search_key'] = Variable<String>(searchKey);
+    }
+    if (!nullToAbsent || asciiKey != null) {
+      map['ascii_key'] = Variable<String>(asciiKey);
+    }
     map['area_id'] = Variable<String>(areaId);
     map['kind'] = Variable<String>(kind);
     if (!nullToAbsent || name != null) {
@@ -4770,6 +4922,12 @@ class Route extends DataClass implements Insertable<Route> {
           ? const Value.absent()
           : Value(createdBy),
       visibility: Value(visibility),
+      searchKey: searchKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(searchKey),
+      asciiKey: asciiKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asciiKey),
       areaId: Value(areaId),
       kind: Value(kind),
       name: name == null && nullToAbsent ? const Value.absent() : Value(name),
@@ -4848,6 +5006,8 @@ class Route extends DataClass implements Insertable<Route> {
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       createdBy: serializer.fromJson<String?>(json['createdBy']),
       visibility: serializer.fromJson<String>(json['visibility']),
+      searchKey: serializer.fromJson<String?>(json['searchKey']),
+      asciiKey: serializer.fromJson<String?>(json['asciiKey']),
       areaId: serializer.fromJson<String>(json['areaId']),
       kind: serializer.fromJson<String>(json['kind']),
       name: serializer.fromJson<String?>(json['name']),
@@ -4885,6 +5045,8 @@ class Route extends DataClass implements Insertable<Route> {
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'createdBy': serializer.toJson<String?>(createdBy),
       'visibility': serializer.toJson<String>(visibility),
+      'searchKey': serializer.toJson<String?>(searchKey),
+      'asciiKey': serializer.toJson<String?>(asciiKey),
       'areaId': serializer.toJson<String>(areaId),
       'kind': serializer.toJson<String>(kind),
       'name': serializer.toJson<String?>(name),
@@ -4920,6 +5082,8 @@ class Route extends DataClass implements Insertable<Route> {
     Value<DateTime?> deletedAt = const Value.absent(),
     Value<String?> createdBy = const Value.absent(),
     String? visibility,
+    Value<String?> searchKey = const Value.absent(),
+    Value<String?> asciiKey = const Value.absent(),
     String? areaId,
     String? kind,
     Value<String?> name = const Value.absent(),
@@ -4952,6 +5116,8 @@ class Route extends DataClass implements Insertable<Route> {
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     createdBy: createdBy.present ? createdBy.value : this.createdBy,
     visibility: visibility ?? this.visibility,
+    searchKey: searchKey.present ? searchKey.value : this.searchKey,
+    asciiKey: asciiKey.present ? asciiKey.value : this.asciiKey,
     areaId: areaId ?? this.areaId,
     kind: kind ?? this.kind,
     name: name.present ? name.value : this.name,
@@ -4996,6 +5162,8 @@ class Route extends DataClass implements Insertable<Route> {
       visibility: data.visibility.present
           ? data.visibility.value
           : this.visibility,
+      searchKey: data.searchKey.present ? data.searchKey.value : this.searchKey,
+      asciiKey: data.asciiKey.present ? data.asciiKey.value : this.asciiKey,
       areaId: data.areaId.present ? data.areaId.value : this.areaId,
       kind: data.kind.present ? data.kind.value : this.kind,
       name: data.name.present ? data.name.value : this.name,
@@ -5061,6 +5229,8 @@ class Route extends DataClass implements Insertable<Route> {
           ..write('deletedAt: $deletedAt, ')
           ..write('createdBy: $createdBy, ')
           ..write('visibility: $visibility, ')
+          ..write('searchKey: $searchKey, ')
+          ..write('asciiKey: $asciiKey, ')
           ..write('areaId: $areaId, ')
           ..write('kind: $kind, ')
           ..write('name: $name, ')
@@ -5098,6 +5268,8 @@ class Route extends DataClass implements Insertable<Route> {
     deletedAt,
     createdBy,
     visibility,
+    searchKey,
+    asciiKey,
     areaId,
     kind,
     name,
@@ -5134,6 +5306,8 @@ class Route extends DataClass implements Insertable<Route> {
           other.deletedAt == this.deletedAt &&
           other.createdBy == this.createdBy &&
           other.visibility == this.visibility &&
+          other.searchKey == this.searchKey &&
+          other.asciiKey == this.asciiKey &&
           other.areaId == this.areaId &&
           other.kind == this.kind &&
           other.name == this.name &&
@@ -5168,6 +5342,8 @@ class RoutesCompanion extends UpdateCompanion<Route> {
   final Value<DateTime?> deletedAt;
   final Value<String?> createdBy;
   final Value<String> visibility;
+  final Value<String?> searchKey;
+  final Value<String?> asciiKey;
   final Value<String> areaId;
   final Value<String> kind;
   final Value<String?> name;
@@ -5201,6 +5377,8 @@ class RoutesCompanion extends UpdateCompanion<Route> {
     this.deletedAt = const Value.absent(),
     this.createdBy = const Value.absent(),
     this.visibility = const Value.absent(),
+    this.searchKey = const Value.absent(),
+    this.asciiKey = const Value.absent(),
     this.areaId = const Value.absent(),
     this.kind = const Value.absent(),
     this.name = const Value.absent(),
@@ -5235,6 +5413,8 @@ class RoutesCompanion extends UpdateCompanion<Route> {
     this.deletedAt = const Value.absent(),
     this.createdBy = const Value.absent(),
     required String visibility,
+    this.searchKey = const Value.absent(),
+    this.asciiKey = const Value.absent(),
     required String areaId,
     required String kind,
     this.name = const Value.absent(),
@@ -5276,6 +5456,8 @@ class RoutesCompanion extends UpdateCompanion<Route> {
     Expression<DateTime>? deletedAt,
     Expression<String>? createdBy,
     Expression<String>? visibility,
+    Expression<String>? searchKey,
+    Expression<String>? asciiKey,
     Expression<String>? areaId,
     Expression<String>? kind,
     Expression<String>? name,
@@ -5310,6 +5492,8 @@ class RoutesCompanion extends UpdateCompanion<Route> {
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (createdBy != null) 'created_by': createdBy,
       if (visibility != null) 'visibility': visibility,
+      if (searchKey != null) 'search_key': searchKey,
+      if (asciiKey != null) 'ascii_key': asciiKey,
       if (areaId != null) 'area_id': areaId,
       if (kind != null) 'kind': kind,
       if (name != null) 'name': name,
@@ -5346,6 +5530,8 @@ class RoutesCompanion extends UpdateCompanion<Route> {
     Value<DateTime?>? deletedAt,
     Value<String?>? createdBy,
     Value<String>? visibility,
+    Value<String?>? searchKey,
+    Value<String?>? asciiKey,
     Value<String>? areaId,
     Value<String>? kind,
     Value<String?>? name,
@@ -5380,6 +5566,8 @@ class RoutesCompanion extends UpdateCompanion<Route> {
       deletedAt: deletedAt ?? this.deletedAt,
       createdBy: createdBy ?? this.createdBy,
       visibility: visibility ?? this.visibility,
+      searchKey: searchKey ?? this.searchKey,
+      asciiKey: asciiKey ?? this.asciiKey,
       areaId: areaId ?? this.areaId,
       kind: kind ?? this.kind,
       name: name ?? this.name,
@@ -5429,6 +5617,12 @@ class RoutesCompanion extends UpdateCompanion<Route> {
     }
     if (visibility.present) {
       map['visibility'] = Variable<String>(visibility.value);
+    }
+    if (searchKey.present) {
+      map['search_key'] = Variable<String>(searchKey.value);
+    }
+    if (asciiKey.present) {
+      map['ascii_key'] = Variable<String>(asciiKey.value);
     }
     if (areaId.present) {
       map['area_id'] = Variable<String>(areaId.value);
@@ -5520,6 +5714,8 @@ class RoutesCompanion extends UpdateCompanion<Route> {
           ..write('deletedAt: $deletedAt, ')
           ..write('createdBy: $createdBy, ')
           ..write('visibility: $visibility, ')
+          ..write('searchKey: $searchKey, ')
+          ..write('asciiKey: $asciiKey, ')
           ..write('areaId: $areaId, ')
           ..write('kind: $kind, ')
           ..write('name: $name, ')
@@ -26622,6 +26818,10 @@ abstract class _$SvaDatabase extends GeneratedDatabase {
     'routes_area',
     'CREATE INDEX routes_area ON routes (area_id)',
   );
+  late final Index routeGradesRoute = Index(
+    'route_grades_route',
+    'CREATE INDEX route_grades_route ON route_grades (route_id)',
+  );
   late final Index routeAttributesKeyValue = Index(
     'route_attributes_key_value',
     'CREATE INDEX route_attributes_key_value ON route_attributes (attribute_key, value)',
@@ -26697,6 +26897,7 @@ abstract class _$SvaDatabase extends GeneratedDatabase {
     areasParent,
     areasCountry,
     routesArea,
+    routeGradesRoute,
     routeAttributesKeyValue,
     sessionsOwnerDate,
     sessionMembersUserStatus,
@@ -27066,6 +27267,8 @@ typedef $$AreasTableCreateCompanionBuilder = AreasCompanion Function({
   Value<DateTime?> deletedAt,
   Value<String?> createdBy,
   required String visibility,
+  Value<String?> searchKey,
+  Value<String?> asciiKey,
   Value<String?> parentId,
   required String type,
   required String name,
@@ -27088,6 +27291,8 @@ typedef $$AreasTableUpdateCompanionBuilder = AreasCompanion Function({
   Value<DateTime?> deletedAt,
   Value<String?> createdBy,
   Value<String> visibility,
+  Value<String?> searchKey,
+  Value<String?> asciiKey,
   Value<String?> parentId,
   Value<String> type,
   Value<String> name,
@@ -27139,6 +27344,16 @@ class $$AreasTableFilterComposer extends Composer<_$SvaDatabase, $AreasTable> {
 
   ColumnFilters<String> get visibility => $composableBuilder(
     column: $table.visibility,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get searchKey => $composableBuilder(
+    column: $table.searchKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get asciiKey => $composableBuilder(
+    column: $table.asciiKey,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -27247,6 +27462,16 @@ class $$AreasTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get searchKey => $composableBuilder(
+    column: $table.searchKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get asciiKey => $composableBuilder(
+    column: $table.asciiKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get parentId => $composableBuilder(
     column: $table.parentId,
     builder: (column) => ColumnOrderings(column),
@@ -27342,6 +27567,12 @@ class $$AreasTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get searchKey =>
+      $composableBuilder(column: $table.searchKey, builder: (column) => column);
+
+  GeneratedColumn<String> get asciiKey =>
+      $composableBuilder(column: $table.asciiKey, builder: (column) => column);
+
   GeneratedColumn<String> get parentId =>
       $composableBuilder(column: $table.parentId, builder: (column) => column);
 
@@ -27426,6 +27657,8 @@ class $$AreasTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String?> createdBy = const Value.absent(),
                 Value<String> visibility = const Value.absent(),
+                Value<String?> searchKey = const Value.absent(),
+                Value<String?> asciiKey = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
                 Value<String> type = const Value.absent(),
                 Value<String> name = const Value.absent(),
@@ -27447,6 +27680,8 @@ class $$AreasTableTableManager
                 deletedAt: deletedAt,
                 createdBy: createdBy,
                 visibility: visibility,
+                searchKey: searchKey,
+                asciiKey: asciiKey,
                 parentId: parentId,
                 type: type,
                 name: name,
@@ -27470,6 +27705,8 @@ class $$AreasTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String?> createdBy = const Value.absent(),
                 required String visibility,
+                Value<String?> searchKey = const Value.absent(),
+                Value<String?> asciiKey = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
                 required String type,
                 required String name,
@@ -27491,6 +27728,8 @@ class $$AreasTableTableManager
                 deletedAt: deletedAt,
                 createdBy: createdBy,
                 visibility: visibility,
+                searchKey: searchKey,
+                asciiKey: asciiKey,
                 parentId: parentId,
                 type: type,
                 name: name,
@@ -28523,6 +28762,8 @@ typedef $$RoutesTableCreateCompanionBuilder = RoutesCompanion Function({
   Value<DateTime?> deletedAt,
   Value<String?> createdBy,
   required String visibility,
+  Value<String?> searchKey,
+  Value<String?> asciiKey,
   required String areaId,
   required String kind,
   Value<String?> name,
@@ -28557,6 +28798,8 @@ typedef $$RoutesTableUpdateCompanionBuilder = RoutesCompanion Function({
   Value<DateTime?> deletedAt,
   Value<String?> createdBy,
   Value<String> visibility,
+  Value<String?> searchKey,
+  Value<String?> asciiKey,
   Value<String> areaId,
   Value<String> kind,
   Value<String?> name,
@@ -28621,6 +28864,16 @@ class $$RoutesTableFilterComposer
 
   ColumnFilters<String> get visibility => $composableBuilder(
     column: $table.visibility,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get searchKey => $composableBuilder(
+    column: $table.searchKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get asciiKey => $composableBuilder(
+    column: $table.asciiKey,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -28789,6 +29042,16 @@ class $$RoutesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get searchKey => $composableBuilder(
+    column: $table.searchKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get asciiKey => $composableBuilder(
+    column: $table.asciiKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get areaId => $composableBuilder(
     column: $table.areaId,
     builder: (column) => ColumnOrderings(column),
@@ -28944,6 +29207,12 @@ class $$RoutesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get searchKey =>
+      $composableBuilder(column: $table.searchKey, builder: (column) => column);
+
+  GeneratedColumn<String> get asciiKey =>
+      $composableBuilder(column: $table.asciiKey, builder: (column) => column);
+
   GeneratedColumn<String> get areaId =>
       $composableBuilder(column: $table.areaId, builder: (column) => column);
 
@@ -29082,6 +29351,8 @@ class $$RoutesTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String?> createdBy = const Value.absent(),
                 Value<String> visibility = const Value.absent(),
+                Value<String?> searchKey = const Value.absent(),
+                Value<String?> asciiKey = const Value.absent(),
                 Value<String> areaId = const Value.absent(),
                 Value<String> kind = const Value.absent(),
                 Value<String?> name = const Value.absent(),
@@ -29115,6 +29386,8 @@ class $$RoutesTableTableManager
                 deletedAt: deletedAt,
                 createdBy: createdBy,
                 visibility: visibility,
+                searchKey: searchKey,
+                asciiKey: asciiKey,
                 areaId: areaId,
                 kind: kind,
                 name: name,
@@ -29150,6 +29423,8 @@ class $$RoutesTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String?> createdBy = const Value.absent(),
                 required String visibility,
+                Value<String?> searchKey = const Value.absent(),
+                Value<String?> asciiKey = const Value.absent(),
                 required String areaId,
                 required String kind,
                 Value<String?> name = const Value.absent(),
@@ -29183,6 +29458,8 @@ class $$RoutesTableTableManager
                 deletedAt: deletedAt,
                 createdBy: createdBy,
                 visibility: visibility,
+                searchKey: searchKey,
+                asciiKey: asciiKey,
                 areaId: areaId,
                 kind: kind,
                 name: name,

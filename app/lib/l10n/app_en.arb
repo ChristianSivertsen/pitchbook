@@ -24,5 +24,104 @@
   "close": "Close",
   "notFoundTitle": "This page doesn't exist",
   "notFoundBody": "The link may be old or mistyped.",
-  "notFoundAction": "Go to the feed"
+  "notFoundAction": "Go to the feed",
+  "routeSearchOpen": "Find a route",
+  "@routeSearchOpen": {
+    "description": "Tooltip of the search button on the History tab."
+  },
+  "routeSearchTitle": "Find a route",
+  "routeSearchField": "Route or crag",
+  "@routeSearchField": {
+    "description": "Label of the search field."
+  },
+  "routeSearchNoMatch": "No routes match \"{term}\".",
+  "@routeSearchNoMatch": {
+    "placeholders": {
+      "term": {
+        "type": "String"
+      }
+    }
+  },
+  "routeSearchEmpty": "Routes you add and climb show up here.",
+  "routeNotFound": "This route is gone or private.",
+  "routeUngraded": "Ungraded",
+  "routeLength": "{metres} m",
+  "@routeLength": {
+    "placeholders": {
+      "metres": {
+        "type": "int"
+      }
+    }
+  },
+  "routePitches": "{count, plural, =1{1 pitch} other{{count} pitches}}",
+  "@routePitches": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "routeRopeLength": "{metres} m rope",
+  "@routeRopeLength": {
+    "placeholders": {
+      "metres": {
+        "type": "int"
+      }
+    }
+  },
+  "routeDetails": "Details",
+  "routeYourClimbs": "Your climbs",
+  "routeNotClimbed": "You haven't logged this route yet.",
+  "routeLastClimbed": "Last climbed {date}",
+  "@routeLastClimbed": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "discipline": "{discipline, select, sport{Sport} trad{Trad} boulder{Boulder} alpine{Alpine} ice{Ice} mixed{Mixed} aid{Aid} dws{Deep water solo} other{}}",
+  "@discipline": {
+    "description": "A route's discipline, by its stable key.",
+    "placeholders": {
+      "discipline": {
+        "type": "String"
+      }
+    }
+  },
+  "ascentStyle": "{style, select, onsight{Onsight} flash{Flash} redpoint{Redpoint} repeat{Repeat} attempt{Attempt} other{}}",
+  "@ascentStyle": {
+    "description": "A climb's style, by its stable key.",
+    "placeholders": {
+      "style": {
+        "type": "String"
+      }
+    }
+  },
+  "ascentTries": "{count, plural, =1{1 try} other{{count} tries}}",
+  "@ascentTries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aspect": "{direction, select, N{Faces north} NE{Faces northeast} E{Faces east} SE{Faces southeast} S{Faces south} SW{Faces southwest} W{Faces west} NW{Faces northwest} other{}}",
+  "@aspect": {
+    "description": "Which way a crag faces, by compass key.",
+    "placeholders": {
+      "direction": {
+        "type": "String"
+      }
+    }
+  },
+  "attributeValue": "{value, select, rock_granite{Granite} rock_gneiss{Gneiss} rock_limestone{Limestone} rock_sandstone{Sandstone} rock_basalt{Basalt} rock_conglomerate{Conglomerate} rock_quartzite{Quartzite} rock_schist{Schist} rock_dolerite{Dolerite} angle_slab{Slab} angle_vertical{Vertical} angle_overhang{Overhang} angle_roof{Roof} feature_face{Face} feature_finger_crack{Finger crack} feature_hand_crack{Hand crack} feature_offwidth{Offwidth} feature_chimney{Chimney} feature_corner{Corner} feature_arete{Arête} feature_tufa{Tufa} feature_ice_pillar{Ice pillar} feature_ice_curtain{Ice curtain} feature_mixed_dry_tool{Dry tooling} hold_crimp{Crimps} hold_pocket{Pockets} hold_pinch{Pinches} hold_sloper{Slopers} hold_jug{Jugs} hold_undercling{Underclings} hold_sidepull{Sidepulls} protection_bolted{Bolted} protection_trad{Trad gear} protection_mixed{Mixed protection} protection_runout{Runout} protection_none{No protection} protection_pads{Pads} protection_ice_screws{Ice screws} descent_lower_off{Lower off} descent_rappel{Rappel} descent_walk_off{Walk off} descent_downclimb{Downclimb} descent_swim{Swim} other{}}",
+  "@attributeValue": {
+    "description": "A route detail by its stable key, with the dot replaced by an underscore (hold.crimp is hold_crimp). Empty for unknown keys.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }

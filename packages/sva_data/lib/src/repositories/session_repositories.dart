@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:sva_core/sva_core.dart';
 import 'package:sva_data/src/database/sva_database.dart';
 import 'package:sva_data/src/ids.dart';
+import 'package:sva_data/src/repositories/place_repositories.dart' show LatLon;
 import 'package:sva_data/src/repositories/repository.dart';
 
 /// A child table of a session or ascent and the column that points at its
@@ -85,6 +86,39 @@ class SessionRepository extends Repository<$SessionsTable, Session> {
         (s) => OrderingTerm.desc(s.createdAt),
       ]);
     return query.watch();
+  }
+
+  /// Where [userId] climbed outdoors most recently: the place of their
+  /// latest outdoor session with a known location (the session's place, or
+  /// else its first climb's), looked up to three levels up. `null` when
+  /// there is none. Search uses it for "nearby" until the app reads the
+  /// phone's location.
+  Future<LatLon?> lastOutdoorLocation({required String userId}) async {
+    final row = await db
+        .customSelect(
+          'WITH places AS ( '
+          'SELECT s.local_date, s.created_at, COALESCE(s.area_id, ( '
+          'SELECT r.area_id FROM ascents x JOIN routes r ON r.id = x.route_id '
+          'WHERE x.session_id = s.id AND x.deleted_at IS NULL '
+          'ORDER BY x.ordinal LIMIT 1)) AS area_id '
+          'FROM sessions s '
+          'WHERE s.owner_id = ?1 AND s.deleted_at IS NULL '
+          "AND s.setting = 'outdoor') "
+          'SELECT COALESCE(a1.latitude, a2.latitude, a3.latitude) AS lat, '
+          'COALESCE(a1.longitude, a2.longitude, a3.longitude) AS lon '
+          'FROM places p '
+          'JOIN areas a1 ON a1.id = p.area_id '
+          'LEFT JOIN areas a2 ON a2.id = a1.parent_id '
+          'LEFT JOIN areas a3 ON a3.id = a2.parent_id '
+          'WHERE COALESCE(a1.latitude, a2.latitude, a3.latitude) IS NOT NULL '
+          'AND COALESCE(a1.longitude, a2.longitude, a3.longitude) IS NOT NULL '
+          'ORDER BY p.local_date DESC, p.created_at DESC LIMIT 1',
+          variables: [Variable.withString(userId)],
+          readsFrom: {db.sessions, db.ascents, db.routes, db.areas},
+        )
+        .getSingleOrNull();
+    if (row == null) return null;
+    return (lat: row.read<double>('lat'), lon: row.read<double>('lon'));
   }
 
   /// Changes who can see a session, and the copies of its visibility on
@@ -230,6 +264,41 @@ class AscentRepository extends Repository<$AscentsTable, Ascent> {
       ..where((a) => a.sessionId.equals(sessionId))
       ..orderBy([(a) => OrderingTerm(expression: a.ordinal)]);
     return query.watch();
+  }
+
+  /// [userId]'s climbs on a route with each session's day, newest first,
+  /// updating as climbs are logged or removed.
+  Stream<List<({String date, Ascent ascent})>> watchOnRoute(
+    String routeId, {
+    required String userId,
+  }) {
+    final query =
+        db.select(db.ascents).join([
+            innerJoin(
+              db.sessions,
+              db.sessions.id.equalsExp(db.ascents.sessionId),
+            ),
+          ])
+          ..where(
+            db.ascents.routeId.equals(routeId) &
+                db.ascents.ownerId.equals(userId) &
+                db.ascents.deletedAt.isNull() &
+                db.sessions.deletedAt.isNull(),
+          )
+          ..orderBy([
+            OrderingTerm.desc(db.sessions.localDate),
+            OrderingTerm.desc(db.sessions.createdAt),
+            OrderingTerm.desc(db.ascents.ordinal),
+          ]);
+    return query.watch().map(
+      (rows) => [
+        for (final row in rows)
+          (
+            date: row.readTable(db.sessions).localDate,
+            ascent: row.readTable(db.ascents),
+          ),
+      ],
+    );
   }
 
   /// [userId]'s live ascents of a route, oldest first, in the form the
