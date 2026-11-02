@@ -114,8 +114,11 @@ void main() {
         ),
         clock: clock,
       );
-      expect(await filler.fillMissing(userId: 'me'), 0, reason: 'wrong day');
+      // No weather for that day: stored as empty, never asked again.
+      expect(await filler.fillMissing(userId: 'me'), 1);
+      expect(await filler.fillMissing(userId: 'me'), 0);
       expect(asked.single.host, 'archive-api.open-meteo.com');
+      expect((await db.select(db.weatherSnapshots).get()).single.tempC, isNull);
 
       final odd = OpenMeteo.parseDay(
         jsonEncode({
@@ -134,4 +137,34 @@ void main() {
       expect(OpenMeteo.parseDay('not json', '2025-07-12'), isNull);
     },
   );
+
+  test('M2-5: a busy service or hidden place is not asked', () async {
+    final session = await logAt('2026-11-01');
+    var calls = 0;
+    final filler = WeatherFiller(
+      db,
+      OpenMeteo(
+        client: MockClient((request) async {
+          calls++;
+          return http.Response('busy', 429);
+        }),
+        clock: clock,
+      ),
+      clock: clock,
+    );
+    expect(await filler.fillMissing(userId: 'me'), 0);
+    expect(
+      await db.select(db.weatherSnapshots).get(),
+      isEmpty,
+      reason: 'retry',
+    );
+
+    await db.customStatement(
+      'UPDATE sessions SET location_hidden = 1 WHERE id = ?',
+      [session],
+    );
+    calls = 0;
+    expect(await filler.fillMissing(userId: 'me'), 0);
+    expect(calls, 0, reason: "a hidden session's place stays on the device");
+  });
 }

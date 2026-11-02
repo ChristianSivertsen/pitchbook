@@ -47,7 +47,8 @@ String weatherLine(AppLocalizations l10n, WeatherSnapshot weather) {
     ..maximumFractionDigits = 1;
   return [
     if (weather.tempC case final t?) l10n.weatherTemp(number.format(t.round())),
-    if (weather.precipMm case final mm? when mm > 0)
+    // Less than a tenth of a millimetre would read as 0 mm.
+    if (weather.precipMm case final mm? when mm >= 0.05)
       l10n.weatherRain(number.format(mm)),
     if (weather.windMs case final ms?)
       l10n.weatherWind(number.format(ms.round())),

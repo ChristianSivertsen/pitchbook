@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sva/l10n/app_localizations.dart';
 import 'package:sva/src/app.dart';
 import 'package:sva/src/data/providers.dart';
 import 'package:sva/src/shell/app_shell.dart';
 import 'package:sva_core/sva_core.dart';
 import 'package:sva_data/sva_data.dart';
 
-/// Records what the sheet saves. Saving and the rules themselves are
-/// tested in sva_data and sva_core.
 /// Counts weather look-ups instead of calling Open-Meteo.
 class _FakeWeather extends WeatherFiller {
   new(SvaDatabase db) : super(db, OpenMeteo());
@@ -22,6 +21,8 @@ class _FakeWeather extends WeatherFiller {
   }
 }
 
+/// Records what the sheet saves. Saving and the rules themselves are
+/// tested in sva_data and sva_core.
 class _FakeLogger extends SessionLogger {
   new(super.db);
 
@@ -123,7 +124,6 @@ void main() {
     expect(climb.tries, 1);
     expect(climb.ascentType, 'lead');
     expect(find.text('Session saved'), findsOneWidget);
-    expect(weather.runs, 1, reason: 'weather is looked up after saving');
   });
 
   testWidgets('M2-3: the sheet opens on the last indoor or outdoor choice', (
@@ -272,7 +272,11 @@ void main() {
     await tester.pumpAndSettle();
     // The route is at Kolsås, in the north, and the date is today.
     final season = seasonOf(DateTime.now(), latitude: 59.92).name;
-    final name = season[0].toUpperCase() + season.substring(1);
-    expect(find.textContaining(' · $name'), findsOneWidget);
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    expect(find.textContaining(' · ${l10n.season(season)}'), findsOneWidget);
+
+    await tester.tap(find.text('Save session'));
+    await tester.pumpAndSettle();
+    expect(weather.runs, 1, reason: 'weather is looked up after saving');
   });
 }

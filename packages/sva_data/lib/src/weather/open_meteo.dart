@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -14,6 +15,19 @@ typedef WeatherDay = ({
   /// The daily part of the answer, kept as it came.
   String raw,
 });
+
+/// Thrown when Open-Meteo is busy or failing (429 or 5xx): try later.
+class WeatherUnavailable implements Exception {
+  new(this.statusCode);
+
+  final int statusCode;
+
+  @override
+  String toString() => 'WeatherUnavailable: $statusCode';
+}
+
+/// How long to wait for an answer before trying again later.
+const _timeout = Duration(seconds: 15);
 
 /// Days back that the forecast API still covers; older days come from
 /// the historical archive, which lags a few days behind.
@@ -35,8 +49,10 @@ class OpenMeteo {
   final DateTime Function() _clock;
 
   /// The weather on [localDate] (`YYYY-MM-DD`) at [at], or `null` when
-  /// Open-Meteo has none. Throws [http.ClientException] (or a socket error)
-  /// when there is no connection, so the caller can try again later.
+  /// Open-Meteo has none for that day and asking again will not help.
+  /// Throws when it is worth trying again later: [http.ClientException]
+  /// or a socket error without a connection, a [TimeoutException], or
+  /// [WeatherUnavailable] when the service is busy or failing.
   Future<WeatherDay?> day(LatLon at, String localDate) async {
     final day = DateTime.parse(localDate);
     final today = _clock();
@@ -56,8 +72,10 @@ class OpenMeteo {
         'timezone': 'auto',
       },
     );
-    final response = await _client.get(uri);
-    if (response.statusCode != 200) return null;
+    final response = await _client.get(uri).timeout(_timeout);
+    final status = response.statusCode;
+    if (status == 429 || status >= 500) throw WeatherUnavailable(status);
+    if (status != 200) return null;
     return parseDay(response.body, localDate);
   }
 

@@ -31,13 +31,17 @@ class WeatherFiller {
       final WeatherDay? day;
       try {
         day = await _weather.day(session.at, session.localDate);
+      } on FormatException {
+        // A date that cannot be read: skip it, not the sessions after it.
+        continue;
       } on Exception {
-        // No connection (or a timeout): the rest can wait too.
+        // No connection, a timeout, or a busy service: the rest can wait.
         break;
       }
-      if (day == null) continue;
       final now = _clock();
-      final temp = switch ((day.tempMaxC, day.tempMinC)) {
+      // No weather for that day: store an empty snapshot so the session
+      // is not asked about again on every run.
+      final temp = switch ((day?.tempMaxC, day?.tempMinC)) {
         (final max?, final min?) => (max + min) / 2,
         (final max?, null) => max,
         (null, final min?) => min,
@@ -55,9 +59,9 @@ class WeatherFiller {
               sessionId: session.id,
               source: 'open_meteo',
               tempC: Value(temp),
-              precipMm: Value(day.precipMm),
-              windMs: Value(day.windMs),
-              raw: Value(day.raw),
+              precipMm: Value(day?.precipMm),
+              windMs: Value(day?.windMs),
+              raw: Value(day?.raw),
               fetchedAt: now,
             ),
           );
@@ -68,10 +72,16 @@ class WeatherFiller {
 
   /// [userId]'s live outdoor sessions, up to today, that have no weather
   /// yet but a place to look it up for: the session's place, or else its
-  /// first climb's, up to three levels up. Newest first.
+  /// first climb's, up to three levels up. Newest first. Hidden places
+  /// (a secret spot, a hidden session) are left out, so their location
+  /// never leaves the device.
   Future<List<({String id, String localDate, String visibility, LatLon at})>>
   _waiting(String userId) async {
-    final today = _clock().toIso8601String().substring(0, 10);
+    // Tomorrow in UTC covers "today" in every time zone ahead of UTC.
+    final today = _clock()
+        .add(const Duration(days: 1))
+        .toIso8601String()
+        .substring(0, 10);
     final rows = await db
         .customSelect(
           'WITH places AS ( '
@@ -82,6 +92,7 @@ class WeatherFiller {
           'FROM sessions s '
           'WHERE s.owner_id = ?1 AND s.deleted_at IS NULL '
           "AND s.setting = 'outdoor' AND s.local_date <= ?2 "
+          'AND s.location_hidden = 0 '
           'AND NOT EXISTS (SELECT 1 FROM weather_snapshots w '
           'WHERE w.session_id = s.id AND w.deleted_at IS NULL)) '
           'SELECT p.id, p.local_date, p.visibility, '
@@ -91,7 +102,10 @@ class WeatherFiller {
           'JOIN areas a1 ON a1.id = p.area_id '
           'LEFT JOIN areas a2 ON a2.id = a1.parent_id '
           'LEFT JOIN areas a3 ON a3.id = a2.parent_id '
-          'WHERE COALESCE(a1.latitude, a2.latitude, a3.latitude) IS NOT NULL '
+          'WHERE a1.location_hidden = 0 '
+          'AND COALESCE(a2.location_hidden, 0) = 0 '
+          'AND COALESCE(a3.location_hidden, 0) = 0 '
+          'AND COALESCE(a1.latitude, a2.latitude, a3.latitude) IS NOT NULL '
           'AND COALESCE(a1.longitude, a2.longitude, a3.longitude) IS NOT NULL '
           'ORDER BY p.local_date DESC',
           variables: [Variable.withString(userId), Variable.withString(today)],
