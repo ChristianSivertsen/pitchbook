@@ -191,6 +191,16 @@ class SessionRepository extends Repository<$SessionsTable, Session> {
   }
 }
 
+/// One of the user's climbs on a route, for the route page: the session's
+/// day, the climb, and the labels of its official grade as it was when
+/// logged and of the user's personal grade.
+typedef RouteClimb = ({
+  String date,
+  Ascent ascent,
+  String? officialGrade,
+  String? personalGrade,
+});
+
 /// Climbs logged in a session.
 class AscentRepository extends Repository<$AscentsTable, Ascent> {
   new(super.db, {super.clock});
@@ -277,17 +287,28 @@ class AscentRepository extends Repository<$AscentsTable, Ascent> {
     return query.watch();
   }
 
-  /// [userId]'s climbs on a route with each session's day, newest first,
-  /// updating as climbs are logged or removed.
-  Stream<List<({String date, Ascent ascent})>> watchOnRoute(
+  /// [userId]'s climbs on a route with each session's day and the labels
+  /// of the official grade (as it was when logged) and the personal grade,
+  /// newest first, updating as climbs are logged or removed.
+  Stream<List<RouteClimb>> watchOnRoute(
     String routeId, {
     required String userId,
   }) {
+    final official = db.alias(db.grades, 'official');
+    final personal = db.alias(db.grades, 'personal');
     final query =
         db.select(db.ascents).join([
             innerJoin(
               db.sessions,
               db.sessions.id.equalsExp(db.ascents.sessionId),
+            ),
+            leftOuterJoin(
+              official,
+              official.id.equalsExp(db.ascents.officialGradeId),
+            ),
+            leftOuterJoin(
+              personal,
+              personal.id.equalsExp(db.ascents.personalGradeId),
             ),
           ])
           ..where(
@@ -307,6 +328,8 @@ class AscentRepository extends Repository<$AscentsTable, Ascent> {
           (
             date: row.readTable(db.sessions).localDate,
             ascent: row.readTable(db.ascents),
+            officialGrade: row.readTableOrNull(official)?.label,
+            personalGrade: row.readTableOrNull(personal)?.label,
           ),
       ],
     );

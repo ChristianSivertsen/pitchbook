@@ -183,6 +183,7 @@ class SessionLogger {
         if (climb.personalGradeId case final grade?) {
           await _checkGrade(grade, climb.routeId);
         }
+        final official = await _officialGrade(climb.routeId);
         final ascentId = await _ascents.create(
           AscentsCompanion(
             sessionId: Value(sessionId),
@@ -193,6 +194,10 @@ class SessionLogger {
             tries: Value(climb.tries),
             feel: Value(climb.feel),
             personalGradeId: Value(climb.personalGradeId),
+            // The route's grade may change later (consensus, moderators);
+            // the climb keeps the grade it was logged at.
+            officialGradeId: Value(official?.id),
+            difficultyScore: Value(official?.score),
             qualityStars: Value(climb.qualityStars),
           ),
           userId: userId,
@@ -256,6 +261,26 @@ class SessionLogger {
       if (issues.isNotEmpty) throw ClimbRejected(i, issues);
       log.add((style: climb.style, tries: climb.tries));
     }
+  }
+
+  /// The route's official grade now, with its difficulty score.
+  Future<({String id, double? score})?> _officialGrade(String routeId) async {
+    final row = await db
+        .customSelect(
+          'SELECT g.id, g.score FROM route_grades rg '
+          'JOIN grades g ON g.id = rg.grade_id AND g.deleted_at IS NULL '
+          'WHERE rg.route_id = ? AND rg.pitch_id IS NULL '
+          "AND rg.source = 'official' AND rg.deleted_at IS NULL "
+          'ORDER BY g.sort LIMIT 1',
+          variables: [Variable.withString(routeId)],
+          readsFrom: {db.routeGrades, db.grades},
+        )
+        .getSingleOrNull();
+    if (row == null) return null;
+    return (
+      id: row.read<String>('id'),
+      score: row.readNullable<double>('score'),
+    );
   }
 
   /// A personal grade must be a grade of the route's kind (route or
