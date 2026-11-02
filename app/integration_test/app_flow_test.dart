@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:sva/l10n/app_localizations.dart';
 import 'package:sva/main.dart' as app;
+import 'package:sva/src/places/route_search_screen.dart';
 import 'package:sva/src/shell/app_shell.dart';
+import 'package:sva/src/shell/log_sheet.dart';
 import 'package:sva/src/shell/tab_screens.dart';
 
 /// Flows: journeys across screens on a real device or emulator. See
@@ -48,19 +50,29 @@ void main() {
     }
 
     await tap(find.byKey(logButtonKey));
-    final outdoor = find.text(l10n.logOutdoor);
-    await tap(outdoor);
+    // Only look inside the sheet: the feed behind it shows the example
+    // sessions, which mention the same routes.
+    Finder inSheet(Finder finder) =>
+        find.descendant(of: find.byType(LogSheet), matching: finder);
+    await tap(inSheet(find.text(l10n.logOutdoor)));
     // Attempts are always allowed, whatever the example history holds.
     for (var i = 0; i < 2; i++) {
-      await tap(find.text('Hjemmebane').first);
-      await tap(find.text(l10n.ascentStyle('attempt')));
-      if (i == 0) await tap(find.text(l10n.logAddClimb));
+      await tap(
+        inSheet(
+          find.descendant(
+            of: find.byType(RouteHitTile),
+            matching: find.text('Hjemmebane'),
+          ),
+        ).first,
+      );
+      await tap(inSheet(find.text(l10n.ascentStyle('attempt'))));
+      if (i == 0) await tap(inSheet(find.text(l10n.logAddClimb)));
     }
-    final titleField = find.widgetWithText(TextField, l10n.logTitle);
+    final titleField = inSheet(find.widgetWithText(TextField, l10n.logTitle));
     await tester.ensureVisible(titleField);
     await tester.enterText(titleField, title);
     await tester.pumpAndSettle();
-    await tap(find.text(l10n.logSave(2)));
+    await tap(inSheet(find.text(l10n.logSave(2))));
 
     expect(find.byType(FeedScreen), findsOneWidget);
     expect(find.text(title), findsOneWidget);
