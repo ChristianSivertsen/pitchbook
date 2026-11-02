@@ -58,6 +58,7 @@ class _SessionRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final climbs = ref.watch(sessionAscentsProvider(session.id)).value;
+    final weather = ref.watch(sessionWeatherProvider(session.id)).value;
     final day = formatDay(l10n, session.localDate);
     return Padding(
       padding: const EdgeInsets.only(bottom: SvaSpace.sm),
@@ -78,6 +79,13 @@ class _SessionRow extends ConsumerWidget {
                   color: context.svaColors.textMuted,
                 ),
               ),
+              if (weather != null && weatherLine(l10n, weather) != '')
+                Text(
+                  weatherLine(l10n, weather),
+                  style: context.svaText.caption.copyWith(
+                    color: context.svaColors.textMuted,
+                  ),
+                ),
             ],
           ),
         ),

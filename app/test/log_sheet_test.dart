@@ -9,6 +9,19 @@ import 'package:sva_data/sva_data.dart';
 
 /// Records what the sheet saves. Saving and the rules themselves are
 /// tested in sva_data and sva_core.
+/// Counts weather look-ups instead of calling Open-Meteo.
+class _FakeWeather extends WeatherFiller {
+  new(SvaDatabase db) : super(db, OpenMeteo());
+
+  int runs = 0;
+
+  @override
+  Future<int> fillMissing({required String userId}) async {
+    runs++;
+    return 0;
+  }
+}
+
 class _FakeLogger extends SessionLogger {
   new(super.db);
 
@@ -41,10 +54,12 @@ RouteHit _hit(String id, String name, {String discipline = 'sport'}) => (
   crag: 'Kolsås',
   lastClimbed: null,
   distanceKm: null,
+  location: (lat: 59.92, lon: 10.5),
 );
 
 void main() {
   late _FakeLogger logger;
+  late _FakeWeather weather;
 
   /// Opens the app with faked data. [log] is what each route's history
   /// holds; [lastSetting] is the last session's setting.
@@ -58,9 +73,11 @@ void main() {
     addTearDown(tester.view.reset);
     final db = SvaDatabase.inMemory();
     logger = _FakeLogger(db);
+    weather = _FakeWeather(db);
     final container = ProviderContainer(
       overrides: [
         sessionLoggerProvider.overrideWithValue(logger),
+        weatherFillerProvider.overrideWithValue(weather),
         lastSettingProvider.overrideWith((ref) async => lastSetting),
         routeSearchProvider.overrideWith(
           (ref, term) => Stream.value([
@@ -106,6 +123,7 @@ void main() {
     expect(climb.tries, 1);
     expect(climb.ascentType, 'lead');
     expect(find.text('Session saved'), findsOneWidget);
+    expect(weather.runs, 1, reason: 'weather is looked up after saving');
   });
 
   testWidgets('M2-3: the sheet opens on the last indoor or outdoor choice', (
@@ -241,5 +259,20 @@ void main() {
     expect(find.text('Hjemmebane · Flash'), findsNothing);
     expect(find.text('Hjemmebane · Repeat'), findsNothing);
     expect(find.textContaining('were removed too'), findsOneWidget);
+  });
+
+  testWidgets("M2-5: the sheet names the season from the date and the crag's "
+      'hemisphere', (tester) async {
+    await start(tester);
+    await tester.tap(find.byKey(logButtonKey));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Hjemmebane'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Onsight'));
+    await tester.pumpAndSettle();
+    // The route is at Kolsås, in the north, and the date is today.
+    final season = seasonOf(DateTime.now(), latitude: 59.92).name;
+    final name = season[0].toUpperCase() + season.substring(1);
+    expect(find.textContaining(' · $name'), findsOneWidget);
   });
 }

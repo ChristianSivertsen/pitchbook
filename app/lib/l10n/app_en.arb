@@ -307,5 +307,38 @@
     }
   },
   "cragFormMap": "Map. Tap to place the crag.",
-  "cragFormLocationHintMap": "Tap the map, or type decimal degrees such as 59.92 and 10.50. Leave both empty if you are not sure."
+  "cragFormLocationHintMap": "Tap the map, or type decimal degrees such as 59.92 and 10.50. Leave both empty if you are not sure.",
+  "season": "{season, select, spring{Spring} summer{Summer} autumn{Autumn} winter{Winter} other{}}",
+  "@season": {
+    "description": "A season by name (spring, summer, autumn, winter).",
+    "placeholders": {
+      "season": {
+        "type": "String"
+      }
+    }
+  },
+  "weatherTemp": "{temp} °C",
+  "@weatherTemp": {
+    "placeholders": {
+      "temp": {
+        "type": "String"
+      }
+    }
+  },
+  "weatherRain": "{mm} mm rain",
+  "@weatherRain": {
+    "placeholders": {
+      "mm": {
+        "type": "String"
+      }
+    }
+  },
+  "weatherWind": "{speed} m/s wind",
+  "@weatherWind": {
+    "placeholders": {
+      "speed": {
+        "type": "String"
+      }
+    }
+  }
 }
