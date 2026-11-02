@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sva/l10n/app_localizations.dart';
 import 'package:sva/src/data/providers.dart';
 import 'package:sva/src/places/form_parts.dart';
+import 'package:sva/src/places/location_picker.dart';
 import 'package:sva_data/sva_data.dart';
 import 'package:sva_ui/sva_ui.dart';
 
@@ -117,8 +118,18 @@ class _CragFormScreenState extends ConsumerState<CragFormScreen> {
               onChanged: (v) => setState(() => _rock = v.firstOrNull),
             ),
             formGap,
+            LocationPicker(
+              value: _location,
+              onChanged: (at) => setState(() {
+                _lat.text = at.lat.toStringAsFixed(5);
+                _lon.text = at.lon.toStringAsFixed(5);
+              }),
+            ),
+            const SizedBox(height: SvaSpace.xs),
             Text(
-              l10n.cragFormLocationHint,
+              ref.watch(mapTilesProvider) == null
+                  ? l10n.cragFormLocationHint
+                  : l10n.cragFormLocationHintMap,
               style: context.svaText.caption.copyWith(
                 color: context.svaColors.textMuted,
               ),
@@ -137,6 +148,8 @@ class _CragFormScreenState extends ConsumerState<CragFormScreen> {
                       decimal: true,
                       signed: true,
                     ),
+                    // Moves the pin on the map as you type.
+                    onChanged: (_) => setState(() {}),
                     validator: (_) => _checkLocation(l10n),
                   ),
                 ),
@@ -151,6 +164,8 @@ class _CragFormScreenState extends ConsumerState<CragFormScreen> {
                       decimal: true,
                       signed: true,
                     ),
+                    // Moves the pin on the map as you type.
+                    onChanged: (_) => setState(() {}),
                     validator: (_) => _checkLocation(l10n),
                   ),
                 ),

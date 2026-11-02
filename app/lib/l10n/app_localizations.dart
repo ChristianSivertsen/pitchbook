@@ -775,6 +775,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Later climbs on that route no longer fit the rules, so they were removed too.'**
   String get logLaterClimbsRemoved;
+
+  /// No description provided for @cragFormMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Map. Tap to place the crag.'**
+  String get cragFormMap;
+
+  /// No description provided for @cragFormLocationHintMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the map, or type decimal degrees such as 59.92 and 10.50. Leave both empty if you are not sure.'**
+  String get cragFormLocationHintMap;
 }
 
 class _AppLocalizationsDelegate

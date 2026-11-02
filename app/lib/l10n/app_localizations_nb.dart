@@ -545,4 +545,11 @@ class AppLocalizationsNb extends AppLocalizations {
   @override
   String get logLaterClimbsRemoved =>
       'Senere klatringer på ruten passet ikke lenger med reglene, så de ble også fjernet.';
+
+  @override
+  String get cragFormMap => 'Kart. Trykk for å plassere feltet.';
+
+  @override
+  String get cragFormLocationHintMap =>
+      'Trykk på kartet, eller skriv desimalgrader, for eksempel 59,92 og 10,50. La begge stå tomme hvis du er usikker.';
 }

@@ -112,5 +112,7 @@
   "logSave": "{count, plural, =1{Lagre økten} other{Lagre økten ({count} klatringer)}}",
   "logSaved": "Økten er lagret",
   "logClimbRejected": "Klatring {number} passer ikke lenger med reglene for stil og forsøk. Sjekk den og prøv igjen.",
-  "logLaterClimbsRemoved": "Senere klatringer på ruten passet ikke lenger med reglene, så de ble også fjernet."
+  "logLaterClimbsRemoved": "Senere klatringer på ruten passet ikke lenger med reglene, så de ble også fjernet.",
+  "cragFormMap": "Kart. Trykk for å plassere feltet.",
+  "cragFormLocationHintMap": "Trykk på kartet, eller skriv desimalgrader, for eksempel 59,92 og 10,50. La begge stå tomme hvis du er usikker."
 }
