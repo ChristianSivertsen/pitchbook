@@ -278,6 +278,8 @@ class RouteRepository extends Repository<$RoutesTable, Route>
       '(SELECT g.label FROM route_grades rg '
       'JOIN grades g ON g.id = rg.grade_id AND g.deleted_at IS NULL '
       'WHERE rg.route_id = r.id AND rg.pitch_id IS NULL '
+      // The climbing grade, not a danger or commitment grade.
+      "AND rg.grade_type IN ('free_route', 'boulder') "
       "AND rg.source = 'official' AND rg.deleted_at IS NULL "
       'ORDER BY g.sort LIMIT 1) AS grade_label '
       'FROM routes r '

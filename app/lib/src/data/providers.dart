@@ -176,12 +176,12 @@ final FutureProviderFamily<AttributeValues, String> routeDetailsProvider =
     );
 
 /// The user's climbs on one route, newest first, live.
-final StreamProviderFamily<List<({String date, Ascent ascent})>, String>
-routeClimbsProvider = StreamProvider.autoDispose.family(
-  (ref, routeId) => ref
-      .watch(ascentRepositoryProvider)
-      .watchOnRoute(routeId, userId: ref.watch(currentUserIdProvider)),
-);
+final StreamProviderFamily<List<RouteClimb>, String> routeClimbsProvider =
+    StreamProvider.autoDispose.family(
+      (ref, routeId) => ref
+          .watch(ascentRepositoryProvider)
+          .watchOnRoute(routeId, userId: ref.watch(currentUserIdProvider)),
+    );
 
 /// Adds crags and routes from the forms.
 final Provider<RouteEditor> routeEditorProvider = Provider(

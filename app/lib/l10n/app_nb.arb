@@ -112,5 +112,8 @@
   "logSave": "{count, plural, =1{Lagre økten} other{Lagre økten ({count} klatringer)}}",
   "logSaved": "Økten er lagret",
   "logClimbRejected": "Klatring {number} passer ikke lenger med reglene for stil og forsøk. Sjekk den og prøv igjen.",
-  "logLaterClimbsRemoved": "Senere klatringer på ruten passet ikke lenger med reglene, så de ble også fjernet."
+  "logLaterClimbsRemoved": "Senere klatringer på ruten passet ikke lenger med reglene, så de ble også fjernet.",
+  "routeYourGrade": "Din grad: {grade}",
+  "routeYourFeel": "Opplevd som: {feel}",
+  "routeLoggedAt": "gradert {grade} da"
 }
