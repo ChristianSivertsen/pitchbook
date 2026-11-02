@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:sva/l10n/app_localizations.dart';
+import 'package:sva/src/data/providers.dart';
+import 'package:sva/src/logging/climb_editor.dart';
+import 'package:sva/src/places/form_parts.dart';
+import 'package:sva/src/places/labels.dart';
 import 'package:sva/src/routes.dart';
+import 'package:sva_core/sva_core.dart' show RouteHistory;
+import 'package:sva_data/sva_data.dart';
 import 'package:sva_ui/sva_ui.dart';
 
 /// The log sheet as a page, so `/log` works as a deep link and the system
@@ -46,73 +54,478 @@ void closeLogSheet(BuildContext context) {
   }
 }
 
-/// The log sheet. Logging itself arrives in M2-3.
-class LogSheet extends StatelessWidget {
+/// The log sheet: pick outdoor or indoor, add climbs, then save the
+/// session. Opens on the setting of the session logged last.
+class LogSheet extends ConsumerStatefulWidget {
   const new({super.key});
+
+  @override
+  ConsumerState<LogSheet> createState() => _LogSheetState();
+}
+
+class _LogSheetState extends ConsumerState<LogSheet> {
+  /// The user's own choice; until then, the last session's setting.
+  String? _setting;
+  final _climbs = <PendingClimb>[];
+  PendingClimb? _current;
+
+  /// A new key gives a fresh, empty climb editor after "Add climb".
+  var _editorKey = UniqueKey();
+  DateTime _date = DateUtils.dateOnly(DateTime.now());
+  final _title = TextEditingController();
+  final _description = TextEditingController();
+  final _partners = TextEditingController();
+  String? _conditions;
+  var _saving = false;
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _description.dispose();
+    _partners.dispose();
+    super.dispose();
+  }
+
+  List<PendingClimb> get _toSave => [..._climbs, ?_current];
+
+  /// Removes climb [index] and any later climb on the same route that the
+  /// rules no longer allow without it (a repeat whose send is gone, say).
+  Future<void> _remove(int index) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final routeId = _climbs[index].hit.route.id;
+    final logged = await ref.read(routeLogProvider(routeId).future);
+    if (!mounted) return;
+    final remaining = [..._climbs]..removeAt(index);
+    final history = [...logged];
+    final kept = <PendingClimb>[];
+    for (final climb in remaining) {
+      final draft = climb.draft;
+      if (draft.routeId == routeId) {
+        final ascent = (style: draft.style, tries: draft.tries);
+        final boulder = climb.hit.route.discipline == 'boulder';
+        if (RouteHistory.from(
+          history,
+          boulder: boulder,
+        ).check(ascent).isNotEmpty) {
+          continue;
+        }
+        history.add(ascent);
+      }
+      kept.add(climb);
+    }
+    setState(() {
+      final dropped = remaining.length - kept.length;
+      _climbs
+        ..clear()
+        ..addAll(kept);
+      // The open climb may depend on the removed one too: start it again.
+      _current = null;
+      _editorKey = UniqueKey();
+      if (dropped > 0) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.logLaterClimbsRemoved)),
+        );
+      }
+    });
+  }
+
+  void _addAnother() => setState(() {
+    _climbs.add(_current!);
+    _current = null;
+    _editorKey = UniqueKey();
+  });
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: DateTime(1950),
+      lastDate: DateUtils.dateOnly(DateTime.now()),
+    );
+    if (picked != null) setState(() => _date = picked);
+  }
+
+  Future<void> _save() async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _saving = true);
+    try {
+      await ref
+          .read(sessionLoggerProvider)
+          .logOutdoor(
+            SessionDraft(
+              localDate: DateFormat('yyyy-MM-dd').format(_date),
+              tz: deviceTimeZone(DateTime.now().timeZoneOffset),
+              // Private until the settings screen offers a default (M2-8).
+              visibility: 'private',
+              climbs: [for (final c in _toSave) c.draft],
+              title: _title.text,
+              description: _description.text,
+              conditions: _conditions,
+              partners: _partners.text.split(','),
+            ),
+            userId: ref.read(currentUserIdProvider),
+          );
+      if (!mounted) return;
+      closeLogSheet(context);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.logSaved)));
+    } on ClimbRejected catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.logClimbRejected(e.index + 1))),
+      );
+      if (mounted) setState(() => _saving = false);
+    } on Object {
+      // A database failure or a value the logger refused.
+      messenger.showSnackBar(SnackBar(content: Text(l10n.formSaveFailed)));
+      if (mounted) setState(() => _saving = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = context.svaColors;
     final text = context.svaText;
+    final setting =
+        _setting ?? ref.watch(lastSettingProvider).value ?? 'outdoor';
+    final outdoor = setting == 'outdoor';
+    final count = _toSave.length;
+
+    // Lift the sheet above the keyboard so the fields and Save stay
+    // reachable.
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
     return SafeArea(
       bottom: false,
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Material(
-          color: colors.surface,
-          elevation: 8,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: SvaRadius.sheet),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: SafeArea(
-            top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    SvaSpace.xs,
-                    SvaSpace.xs,
-                    SvaSpace.screen,
-                    0,
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        tooltip: l10n.close,
-                        onPressed: () => closeLogSheet(context),
-                        icon: Icon(LucideIcons.x, color: colors.text),
-                      ),
-                      Expanded(
-                        child: Semantics(
-                          header: true,
-                          child: Text(
-                            l10n.logSheetTitle,
-                            style: text.title,
-                            textAlign: TextAlign.center,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: keyboard),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: (MediaQuery.sizeOf(context).height - keyboard) * 0.92,
+            ),
+            child: Material(
+              color: colors.surface,
+              elevation: 8,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: SvaRadius.sheet),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      SvaSpace.xs,
+                      SvaSpace.xs,
+                      SvaSpace.screen,
+                      0,
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          tooltip: l10n.close,
+                          onPressed: () => closeLogSheet(context),
+                          icon: Icon(LucideIcons.x, color: colors.text),
+                        ),
+                        Expanded(
+                          child: Semantics(
+                            header: true,
+                            child: Text(
+                              l10n.logSheetTitle,
+                              style: text.title,
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
+                        const SizedBox(width: SvaSpace.minTouchTarget),
+                      ],
+                    ),
+                  ),
+                  Flexible(
+                    child: ListView(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.all(SvaSpace.screen),
+                      children: [
+                        _SettingPicker(
+                          setting: setting,
+                          onChanged: (s) => setState(() => _setting = s),
+                        ),
+                        formGap,
+                        if (!outdoor)
+                          Text(
+                            l10n.logIndoorSoon,
+                            style: text.body.copyWith(color: colors.textMuted),
+                          )
+                        else ...[
+                          for (final (i, climb) in _climbs.indexed)
+                            _PendingRow(
+                              number: i + 1,
+                              climb: climb,
+                              onRemove: () => _remove(i),
+                            ),
+                          if (_climbs.isNotEmpty) formGap,
+                          ClimbEditor(
+                            key: _editorKey,
+                            earlierInSession: List.unmodifiable(_climbs),
+                            onChanged: (c) => setState(() => _current = c),
+                          ),
+                          if (_current != null) ...[
+                            formGap,
+                            OutlinedButton(
+                              onPressed: _addAnother,
+                              child: Text(l10n.logAddClimb),
+                            ),
+                          ],
+                          formGap,
+                          _SessionFields(
+                            date: _date,
+                            onPickDate: _pickDate,
+                            title: _title,
+                            description: _description,
+                            partners: _partners,
+                            conditions: _conditions,
+                            onConditions: (c) =>
+                                setState(() => _conditions = c),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (outdoor)
+                    SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: const EdgeInsets.all(SvaSpace.screen),
+                        child: FilledButton(
+                          onPressed: count == 0 || _saving ? null : _save,
+                          child: Text(l10n.logSave(count == 0 ? 1 : count)),
+                        ),
                       ),
-                      const SizedBox(width: SvaSpace.minTouchTarget),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(SvaSpace.xxl),
-                  child: Text(
-                    l10n.logSheetBody,
-                    style: text.body.copyWith(color: colors.textMuted),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
+                    ),
+                ],
+              ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// An IANA time zone for the device's current offset. Dart has no IANA
+/// name for the device zone without a native plugin, so whole-hour offsets
+/// become `Etc/GMT±n` (whose sign is inverted by convention) and others
+/// fall back to `Etc/UTC`. Enough to place a day; DST rules are not needed.
+String deviceTimeZone(Duration offset) {
+  if (offset.inMinutes % 60 != 0) return 'Etc/UTC';
+  final hours = offset.inHours;
+  if (hours == 0) return 'Etc/UTC';
+  return 'Etc/GMT${hours > 0 ? '-' : '+'}${hours.abs()}';
+}
+
+class _SettingPicker extends StatelessWidget {
+  const new({required this.setting, required this.onChanged});
+
+  final String setting;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    Widget option(String value, IconData icon, String label, String hint) {
+      final on = setting == value;
+      final colors = context.svaColors;
+      return Expanded(
+        child: Semantics(
+          inMutuallyExclusiveGroup: true,
+          selected: on,
+          button: true,
+          label: label,
+          onTap: () => onChanged(value),
+          excludeSemantics: true,
+          child: InkWell(
+            onTap: () => onChanged(value),
+            borderRadius: const BorderRadius.all(SvaRadius.card),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: on ? colors.text : colors.surfaceSunk,
+                borderRadius: const BorderRadius.all(SvaRadius.card),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(SvaSpace.sm),
+                child: Row(
+                  children: [
+                    Icon(icon, color: on ? colors.background : colors.text),
+                    const SizedBox(width: SvaSpace.xs),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            label,
+                            style: context.svaText.label.copyWith(
+                              color: on ? colors.background : colors.text,
+                            ),
+                          ),
+                          Text(
+                            hint,
+                            style: context.svaText.caption.copyWith(
+                              color: on ? colors.background : colors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Semantics(
+      label: l10n.logWhere,
+      container: true,
+      child: Row(
+        children: [
+          option(
+            'outdoor',
+            LucideIcons.mountain,
+            l10n.logOutdoor,
+            l10n.logOutdoorHint,
+          ),
+          const SizedBox(width: SvaSpace.sm),
+          option(
+            'indoor',
+            LucideIcons.building2,
+            l10n.logIndoor,
+            l10n.logIndoorHint,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PendingRow extends StatelessWidget {
+  const new({
+    required this.number,
+    required this.climb,
+    required this.onRemove,
+  });
+
+  final int number;
+  final PendingClimb climb;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final name = climb.hit.route.name ?? '';
+    return Row(
+      children: [
+        Text('$number', style: context.svaText.caption),
+        const SizedBox(width: SvaSpace.sm),
+        Expanded(
+          child: Text(
+            '$name · ${l10n.ascentStyle(climb.draft.style.name)}',
+            style: context.svaText.body,
+          ),
+        ),
+        if (climb.hit.grade case final grade?) SvaGradeBadge(grade),
+        IconButton(
+          tooltip: l10n.logRemoveClimb(name),
+          onPressed: onRemove,
+          icon: const Icon(LucideIcons.x),
+        ),
+      ],
+    );
+  }
+}
+
+class _SessionFields extends StatelessWidget {
+  const new({
+    required this.date,
+    required this.onPickDate,
+    required this.title,
+    required this.description,
+    required this.partners,
+    required this.conditions,
+    required this.onConditions,
+  });
+
+  final DateTime date;
+  final VoidCallback onPickDate;
+  final TextEditingController title;
+  final TextEditingController description;
+  final TextEditingController partners;
+  final String? conditions;
+  final ValueChanged<String?> onConditions;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(l10n.logSession, style: context.svaText.headline),
+        ),
+        const SizedBox(height: SvaSpace.xs),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: onPickDate,
+            icon: const Icon(LucideIcons.calendar),
+            label: Text(
+              '${l10n.logDate}: '
+              '${formatDay(l10n, DateFormat('yyyy-MM-dd').format(date))}',
+            ),
+          ),
+        ),
+        formGap,
+        TextField(
+          controller: title,
+          decoration: InputDecoration(labelText: l10n.logTitle),
+          maxLength: maxTitleLength,
+        ),
+        formGap,
+        TextField(
+          controller: description,
+          decoration: InputDecoration(labelText: l10n.logDescription),
+          maxLength: maxDescriptionLength,
+          minLines: 2,
+          maxLines: 5,
+        ),
+        formGap,
+        ChipGroup(
+          label: l10n.logConditions,
+          options: [
+            for (final value
+                in attributeSeed
+                    .firstWhere((d) => d.key == 'conditions')
+                    .valueKeys)
+              (value, l10n.attributeValue(value.replaceAll('.', '_'))),
+          ],
+          selected: {?conditions},
+          onChanged: (v) => onConditions(v.firstOrNull),
+        ),
+        formGap,
+        TextField(
+          controller: partners,
+          decoration: InputDecoration(
+            labelText: l10n.logPartners,
+            hintText: l10n.logPartnersHint,
+          ),
+          textCapitalization: TextCapitalization.words,
+        ),
+      ],
     );
   }
 }

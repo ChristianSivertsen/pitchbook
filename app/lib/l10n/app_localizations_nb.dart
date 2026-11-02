@@ -65,9 +65,6 @@ class AppLocalizationsNb extends AppLocalizations {
   String get logSheetTitle => 'Logg en økt';
 
   @override
-  String get logSheetBody => 'Snart kan du logge klatring her.';
-
-  @override
   String get close => 'Lukk';
 
   @override
@@ -240,6 +237,30 @@ class AppLocalizationsNb extends AppLocalizations {
       'descent_walk_off': 'Gå ned',
       'descent_downclimb': 'Klatre ned',
       'descent_swim': 'Svømme',
+      'feel_very_soft': 'Veldig soft',
+      'feel_soft': 'Soft',
+      'feel_fair': 'Riktig',
+      'feel_hard': 'Hard',
+      'feel_very_hard': 'Veldig hard',
+      'tag_pumpy': 'Pumpete',
+      'tag_techy': 'Teknisk',
+      'tag_powerful': 'Kraftkrevende',
+      'tag_scary': 'Skummel',
+      'tag_sustained': 'Vedvarende',
+      'tag_reachy': 'Krever rekkevidde',
+      'tag_polished': 'Blankslitt',
+      'tag_great_rock': 'Flott fjell',
+      'tag_heady': 'Psykisk',
+      'tag_balancy': 'Balansepreget',
+      'condition_perfect': 'Perfekt',
+      'condition_dry': 'Tørt',
+      'condition_humid': 'Fuktig',
+      'condition_damp': 'Rått',
+      'condition_wet': 'Vått',
+      'condition_icy': 'Islagt',
+      'condition_windy': 'Vind',
+      'condition_cold': 'Kaldt',
+      'condition_hot': 'Varmt',
       'other': '',
     });
     return '$_temp0';
@@ -363,4 +384,165 @@ class AppLocalizationsNb extends AppLocalizations {
   String formLengthInvalid(int max) {
     return 'Skriv en lengde i meter, opptil $max.';
   }
+
+  @override
+  String get logWhere => 'Hvor klatret du?';
+
+  @override
+  String get logOutdoor => 'Ute';
+
+  @override
+  String get logOutdoorHint => 'Felt og fjell';
+
+  @override
+  String get logIndoor => 'Klatresenter';
+
+  @override
+  String get logIndoorHint => 'Vegger og brett';
+
+  @override
+  String get logIndoorSoon =>
+      'Klatring inne kan logges når klatresentrene kommer. Foreløpig kan du logge klatring ute.';
+
+  @override
+  String get logRoute => 'Rute eller problem';
+
+  @override
+  String get logChangeRoute => 'Bytt rute';
+
+  @override
+  String get logStyle => 'Stil';
+
+  @override
+  String get logTries => 'Forsøk';
+
+  @override
+  String get logTriesFewer => 'Færre forsøk';
+
+  @override
+  String get logTriesMore => 'Flere forsøk';
+
+  @override
+  String get logHintSent =>
+      'Du har klatret ruten før, så den logges som repetisjon eller forsøk.';
+
+  @override
+  String logHintTried(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Du har $count tidligere forsøk på ruten, så onsight og flash er ikke mulig.',
+      one: 'Du har 1 tidligere forsøk på ruten, så onsight og flash er ikke mulig.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get logHintBoulder => 'Buldreproblemer flashes, de onsightes ikke.';
+
+  @override
+  String get logRope => 'Tau';
+
+  @override
+  String ascentType(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'lead': 'Leding',
+      'follow': 'Andremann',
+      'toprope': 'Topptau',
+      'solo': 'Solo',
+      'boulder': 'Buldring',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get logFeel => 'Hvordan graden føltes';
+
+  @override
+  String get logPersonalGrade => 'Din grad';
+
+  @override
+  String get logPersonalGradeNone => 'Samme som ruten';
+
+  @override
+  String get logTags => 'Beskriv den';
+
+  @override
+  String get logQuality => 'Kvalitet';
+
+  @override
+  String logQualityLevel(String level) {
+    String _temp0 = intl.Intl.selectLogic(level, {
+      'q1': 'Bra',
+      'q2': 'Svært bra',
+      'q3': 'Klassiker',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get logAddClimb => 'Legg til og logg en til';
+
+  @override
+  String logClimbCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count klatringer',
+      one: '1 klatring',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String logRemoveClimb(String route) {
+    return 'Fjern $route';
+  }
+
+  @override
+  String get logSession => 'Økt';
+
+  @override
+  String get logDate => 'Dato';
+
+  @override
+  String get logTitle => 'Tittel';
+
+  @override
+  String get logDescription => 'Beskrivelse';
+
+  @override
+  String get logConditions => 'Forhold';
+
+  @override
+  String get logPartners => 'Klatrepartnere';
+
+  @override
+  String get logPartnersHint => 'Navn, skilt med komma';
+
+  @override
+  String logSave(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Lagre økten ($count klatringer)',
+      one: 'Lagre økten',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get logSaved => 'Økten er lagret';
+
+  @override
+  String logClimbRejected(int number) {
+    return 'Klatring $number passer ikke lenger med reglene for stil og forsøk. Sjekk den og prøv igjen.';
+  }
+
+  @override
+  String get logLaterClimbsRemoved =>
+      'Senere klatringer på ruten passet ikke lenger med reglene, så de ble også fjernet.';
 }

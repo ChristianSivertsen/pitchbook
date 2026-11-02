@@ -10,6 +10,7 @@ class ChipGroup extends StatelessWidget {
     required this.selected,
     required this.onChanged,
     this.multi = false,
+    this.disabled = const {},
     super.key,
   });
 
@@ -20,6 +21,10 @@ class ChipGroup extends StatelessWidget {
   final Set<String> selected;
   final ValueChanged<Set<String>> onChanged;
   final bool multi;
+
+  /// Values shown but not pickable, struck through (DESIGN.md, Chip). Say
+  /// why next to the group.
+  final Set<String> disabled;
 
   @override
   Widget build(BuildContext context) {
@@ -45,14 +50,23 @@ class ChipGroup extends StatelessWidget {
             children: [
               for (final (value, text) in options)
                 FilterChip(
-                  label: Text(text),
+                  label: Text(
+                    text,
+                    style: disabled.contains(value)
+                        ? const TextStyle(
+                            decoration: TextDecoration.lineThrough,
+                          )
+                        : null,
+                  ),
                   selected: selected.contains(value),
-                  onSelected: (on) => onChanged(switch ((multi, on)) {
-                    (true, true) => {...selected, value},
-                    (true, false) => {...selected}..remove(value),
-                    (false, true) => {value},
-                    (false, false) => const {},
-                  }),
+                  onSelected: disabled.contains(value)
+                      ? null
+                      : (on) => onChanged(switch ((multi, on)) {
+                          (true, true) => {...selected, value},
+                          (true, false) => {...selected}..remove(value),
+                          (false, true) => {value},
+                          (false, false) => const {},
+                        }),
                 ),
             ],
           ),

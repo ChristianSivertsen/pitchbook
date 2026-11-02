@@ -38,9 +38,12 @@ class RouteSearchScreen extends StatelessWidget {
 /// A search field with live results. The log sheet reuses it to pick the
 /// route for a climb (M2-3).
 class RouteSearch extends ConsumerStatefulWidget {
-  const new({required this.onPick, super.key});
+  const new({required this.onPick, this.autofocus = true, super.key});
 
   final ValueChanged<RouteHit> onPick;
+
+  /// Whether the field takes focus (and opens the keyboard) at once.
+  final bool autofocus;
 
   @override
   ConsumerState<RouteSearch> createState() => _RouteSearchState();
@@ -74,7 +77,7 @@ class _RouteSearchState extends ConsumerState<RouteSearch> {
           padding: const EdgeInsets.all(SvaSpace.screen),
           child: TextField(
             controller: _field,
-            autofocus: true,
+            autofocus: widget.autofocus,
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
               labelText: l10n.routeSearchField,
@@ -116,10 +119,12 @@ class _RouteSearchState extends ConsumerState<RouteSearch> {
 
 /// One route in a list: name and grade, then crag, discipline and pitches.
 class RouteHitTile extends StatelessWidget {
-  const new({required this.hit, required this.onTap, super.key});
+  const new({required this.hit, this.onTap, super.key});
 
   final RouteHit hit;
-  final VoidCallback onTap;
+
+  /// `null` for a tile that only shows the route.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
