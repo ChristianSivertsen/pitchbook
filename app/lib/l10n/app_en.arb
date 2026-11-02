@@ -296,5 +296,14 @@
         "type": "String"
       }
     }
+  },
+  "routeLoggedAt": "graded {grade} then",
+  "@routeLoggedAt": {
+    "description": "On a climb in a route's history, when the route has been regraded since.",
+    "placeholders": {
+      "grade": {
+        "type": "String"
+      }
+    }
   }
 }

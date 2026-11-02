@@ -107,13 +107,14 @@ class _RouteDetail extends ConsumerWidget {
           )
         else
           for (final climb in climbs ?? const <RouteClimb>[])
-            _ClimbRow(climb: climb),
+            _ClimbRow(climb: climb, currentGrade: hit.grade),
       ],
     );
   }
 
-  /// Your own grade for the route, from your latest climb that has one,
-  /// or else how your latest climb felt. Shown next to the official grade.
+  /// Your own grade for the route, from the newest climb that has one, or
+  /// else how the newest climb with a feel felt. Shown under the official
+  /// grade.
   static String? _yourTake(AppLocalizations l10n, List<RouteClimb>? climbs) {
     for (final climb in climbs ?? const <RouteClimb>[]) {
       if (climb.personalGrade case final grade?) {
@@ -122,9 +123,9 @@ class _RouteDetail extends ConsumerWidget {
     }
     for (final climb in climbs ?? const <RouteClimb>[]) {
       if (climb.ascent.feel case final feel?) {
-        return l10n.routeYourFeel(
-          l10n.attributeValue(feel.replaceAll('.', '_')),
-        );
+        final label = l10n.attributeValue(feel.replaceAll('.', '_'));
+        // An unknown key has no words yet: say nothing rather than half.
+        if (label.isNotEmpty) return l10n.routeYourFeel(label);
       }
     }
     return null;
@@ -132,9 +133,12 @@ class _RouteDetail extends ConsumerWidget {
 }
 
 class _ClimbRow extends StatelessWidget {
-  const new({required this.climb});
+  const new({required this.climb, required this.currentGrade});
 
   final RouteClimb climb;
+
+  /// The route's grade now, to point out climbs logged before a regrade.
+  final String? currentGrade;
 
   @override
   Widget build(BuildContext context) {
@@ -156,6 +160,12 @@ class _ClimbRow extends StatelessWidget {
             l10n.ascentTries(ascent.tries),
             style: text.caption.copyWith(color: context.svaColors.textMuted),
           ),
+          if (climb.officialGrade case final then?
+              when currentGrade != null && then != currentGrade)
+            Text(
+              l10n.routeLoggedAt(then),
+              style: text.caption.copyWith(color: context.svaColors.textMuted),
+            ),
           if (climb.personalGrade case final grade?)
             Text(
               l10n.routeYourGrade(grade),

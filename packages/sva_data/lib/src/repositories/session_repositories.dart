@@ -294,6 +294,8 @@ class AscentRepository extends Repository<$AscentsTable, Ascent> {
     String routeId, {
     required String userId,
   }) {
+    // Deleted grades still show their label: these are what the climb was
+    // logged with.
     final official = db.alias(db.grades, 'official');
     final personal = db.alias(db.grades, 'personal');
     final query =

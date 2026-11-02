@@ -553,6 +553,11 @@ class AppLocalizationsNb extends AppLocalizations {
 
   @override
   String routeYourFeel(String feel) {
-    return 'Føltes: $feel';
+    return 'Opplevd som: $feel';
+  }
+
+  @override
+  String routeLoggedAt(String grade) {
+    return 'gradert $grade da';
   }
 }

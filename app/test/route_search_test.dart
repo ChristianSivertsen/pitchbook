@@ -86,7 +86,7 @@ void main() {
                     (
                       date: '2026-05-01',
                       ascent: _ascent('attempt', 2),
-                      officialGrade: '7-',
+                      officialGrade: '6+',
                       personalGrade: null,
                     ),
                   ]
@@ -167,6 +167,8 @@ void main() {
     expect(find.text('7-'), findsOneWidget, reason: 'the official grade');
     // Under the grade, and on the climb that set it.
     expect(find.text('Your grade: 7'), findsNWidgets(2));
+    // The older climb was logged before the route went from 6+ to 7-.
+    expect(find.text('graded 6+ then'), findsOneWidget);
 
     container.read(routerProvider).go(Routes.route('r3'));
     await tester.pumpAndSettle();

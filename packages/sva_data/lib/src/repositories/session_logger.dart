@@ -263,13 +263,16 @@ class SessionLogger {
     }
   }
 
-  /// The route's official grade now, with its difficulty score.
+  /// The route's official climbing grade now, with its difficulty score.
+  /// `null` for an ungraded route, or one graded only per pitch.
   Future<({String id, double? score})?> _officialGrade(String routeId) async {
     final row = await db
         .customSelect(
           'SELECT g.id, g.score FROM route_grades rg '
           'JOIN grades g ON g.id = rg.grade_id AND g.deleted_at IS NULL '
           'WHERE rg.route_id = ? AND rg.pitch_id IS NULL '
+          // The climbing grade, not a danger or commitment grade.
+          "AND rg.grade_type IN ('free_route', 'boulder') "
           "AND rg.source = 'official' AND rg.deleted_at IS NULL "
           'ORDER BY g.sort LIMIT 1',
           variables: [Variable.withString(routeId)],
