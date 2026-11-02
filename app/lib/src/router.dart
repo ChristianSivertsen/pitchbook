@@ -2,7 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sva/src/places/crag_form_screen.dart';
 import 'package:sva/src/places/route_detail_screen.dart';
+import 'package:sva/src/places/route_form_screen.dart';
 import 'package:sva/src/places/route_search_screen.dart';
 import 'package:sva/src/routes.dart';
 import 'package:sva/src/shell/app_shell.dart';
@@ -56,6 +58,16 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: Routes.routeSearchSegment,
                     builder: (context, state) => const RouteSearchScreen(),
+                    routes: [
+                      GoRoute(
+                        path: Routes.newSegment,
+                        builder: (context, state) => const RouteFormScreen(),
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: Routes.cragsNewSegment,
+                    builder: (context, state) => const CragFormScreen(),
                   ),
                   GoRoute(
                     path: Routes.routeSegment,

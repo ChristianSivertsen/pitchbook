@@ -60,3 +60,6 @@ key.properties
 
 # Worktrees made by Claude Code agents
 .claude/worktrees/
+
+# Mapbox token for local runs (--dart-define-from-file); never commit it.
+app/mapbox.json

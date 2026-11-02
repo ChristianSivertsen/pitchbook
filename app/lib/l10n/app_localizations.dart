@@ -343,6 +343,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{value, select, rock_granite{Granite} rock_gneiss{Gneiss} rock_limestone{Limestone} rock_sandstone{Sandstone} rock_basalt{Basalt} rock_conglomerate{Conglomerate} rock_quartzite{Quartzite} rock_schist{Schist} rock_dolerite{Dolerite} angle_slab{Slab} angle_vertical{Vertical} angle_overhang{Overhang} angle_roof{Roof} feature_face{Face} feature_finger_crack{Finger crack} feature_hand_crack{Hand crack} feature_offwidth{Offwidth} feature_chimney{Chimney} feature_corner{Corner} feature_arete{Arête} feature_tufa{Tufa} feature_ice_pillar{Ice pillar} feature_ice_curtain{Ice curtain} feature_mixed_dry_tool{Dry tooling} hold_crimp{Crimps} hold_pocket{Pockets} hold_pinch{Pinches} hold_sloper{Slopers} hold_jug{Jugs} hold_undercling{Underclings} hold_sidepull{Sidepulls} protection_bolted{Bolted} protection_trad{Trad gear} protection_mixed{Mixed protection} protection_runout{Runout} protection_none{No protection} protection_pads{Pads} protection_ice_screws{Ice screws} descent_lower_off{Lower off} descent_rappel{Rappel} descent_walk_off{Walk off} descent_downclimb{Downclimb} descent_swim{Swim} other{}}'**
   String attributeValue(String value);
+
+  /// No description provided for @routeAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a route'**
+  String get routeAdd;
+
+  /// No description provided for @routeFormTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New route'**
+  String get routeFormTitle;
+
+  /// No description provided for @formName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get formName;
+
+  /// No description provided for @routeFormNameMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the route a name.'**
+  String get routeFormNameMissing;
+
+  /// No description provided for @routeFormCrag.
+  ///
+  /// In en, this message translates to:
+  /// **'Crag'**
+  String get routeFormCrag;
+
+  /// No description provided for @routeFormCragMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the crag the route is in.'**
+  String get routeFormCragMissing;
+
+  /// No description provided for @routeFormRockFromCrag.
+  ///
+  /// In en, this message translates to:
+  /// **'Rock type comes from the crag: {rock}.'**
+  String routeFormRockFromCrag(String rock);
+
+  /// No description provided for @routeFormDiscipline.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline'**
+  String get routeFormDiscipline;
+
+  /// No description provided for @routeFormGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade ({system})'**
+  String routeFormGrade(String system);
+
+  /// No description provided for @routeFormNoGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'No grade yet'**
+  String get routeFormNoGrade;
+
+  /// No description provided for @routeFormLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Length in metres'**
+  String get routeFormLength;
+
+  /// No description provided for @routeFormPitches.
+  ///
+  /// In en, this message translates to:
+  /// **'Pitches'**
+  String get routeFormPitches;
+
+  /// No description provided for @routeFormPitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Pitch {number}'**
+  String routeFormPitch(int number);
+
+  /// No description provided for @formNumberInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number from 1 to {max}.'**
+  String formNumberInvalid(int max);
+
+  /// No description provided for @routeFormAngle.
+  ///
+  /// In en, this message translates to:
+  /// **'Angle'**
+  String get routeFormAngle;
+
+  /// No description provided for @routeFormFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Features'**
+  String get routeFormFeatures;
+
+  /// No description provided for @routeFormHolds.
+  ///
+  /// In en, this message translates to:
+  /// **'Holds'**
+  String get routeFormHolds;
+
+  /// No description provided for @routeFormProtection.
+  ///
+  /// In en, this message translates to:
+  /// **'Protection'**
+  String get routeFormProtection;
+
+  /// No description provided for @routeFormDescent.
+  ///
+  /// In en, this message translates to:
+  /// **'Descent'**
+  String get routeFormDescent;
+
+  /// No description provided for @routeFormRope.
+  ///
+  /// In en, this message translates to:
+  /// **'Rope needed'**
+  String get routeFormRope;
+
+  /// No description provided for @routeFormFirstAscent.
+  ///
+  /// In en, this message translates to:
+  /// **'First ascent'**
+  String get routeFormFirstAscent;
+
+  /// No description provided for @routeFormFirstAscentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Names and year'**
+  String get routeFormFirstAscentHint;
+
+  /// No description provided for @routeFormSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save route'**
+  String get routeFormSave;
+
+  /// No description provided for @formSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save. Check the fields and try again.'**
+  String get formSaveFailed;
+
+  /// No description provided for @cragAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'New crag'**
+  String get cragAdd;
+
+  /// No description provided for @cragFormTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New crag'**
+  String get cragFormTitle;
+
+  /// No description provided for @cragFormNameMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the crag a name.'**
+  String get cragFormNameMissing;
+
+  /// No description provided for @cragFormCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Country code'**
+  String get cragFormCountry;
+
+  /// No description provided for @cragFormCountryInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use two letters, such as NO.'**
+  String get cragFormCountryInvalid;
+
+  /// No description provided for @cragFormRock.
+  ///
+  /// In en, this message translates to:
+  /// **'Rock type'**
+  String get cragFormRock;
+
+  /// No description provided for @cragFormLatitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Latitude'**
+  String get cragFormLatitude;
+
+  /// No description provided for @cragFormLongitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Longitude'**
+  String get cragFormLongitude;
+
+  /// No description provided for @cragFormLocationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Decimal degrees, such as 59.92 and 10.50. Leave both empty if you are not sure.'**
+  String get cragFormLocationHint;
+
+  /// No description provided for @cragFormLocationInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter both, as decimal degrees.'**
+  String get cragFormLocationInvalid;
+
+  /// No description provided for @cragFormSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save crag'**
+  String get cragFormSave;
 }
 
 class _AppLocalizationsDelegate

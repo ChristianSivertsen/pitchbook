@@ -17,6 +17,12 @@ abstract final class Routes {
   static const routeSearch = '$history/$routeSearchSegment';
   static const routeSearchSegment = 'routes';
 
+  /// The form for a new route, and for a new crag from inside it.
+  static const routeNew = '$routeSearch/$newSegment';
+  static const cragNew = '$history/crags/$newSegment';
+  static const newSegment = 'new';
+  static const cragsNewSegment = 'crags/$newSegment';
+
   /// One route. Share links open it, so the id is checked by the screen.
   static String route(String routeId) =>
       '$history/route/${Uri.encodeComponent(routeId)}';

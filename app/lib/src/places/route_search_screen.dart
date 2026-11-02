@@ -21,6 +21,16 @@ class RouteSearchScreen extends StatelessWidget {
       body: RouteSearch(
         onPick: (hit) => context.push(Routes.route(hit.route.id)),
       ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(SvaSpace.screen),
+          child: OutlinedButton.icon(
+            onPressed: () => context.push(Routes.routeNew),
+            icon: const Icon(LucideIcons.plus),
+            label: Text(l10n.routeAdd),
+          ),
+        ),
+      ),
     );
   }
 }

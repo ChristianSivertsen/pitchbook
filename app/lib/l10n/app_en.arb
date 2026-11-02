@@ -123,5 +123,68 @@
         "type": "String"
       }
     }
-  }
+  },
+  "routeAdd": "Add a route",
+  "routeFormTitle": "New route",
+  "formName": "Name",
+  "routeFormNameMissing": "Give the route a name.",
+  "routeFormCrag": "Crag",
+  "routeFormCragMissing": "Pick the crag the route is in.",
+  "routeFormRockFromCrag": "Rock type comes from the crag: {rock}.",
+  "@routeFormRockFromCrag": {
+    "placeholders": {
+      "rock": {
+        "type": "String"
+      }
+    }
+  },
+  "routeFormDiscipline": "Discipline",
+  "routeFormGrade": "Grade ({system})",
+  "@routeFormGrade": {
+    "placeholders": {
+      "system": {
+        "type": "String"
+      }
+    }
+  },
+  "routeFormNoGrade": "No grade yet",
+  "routeFormLength": "Length in metres",
+  "routeFormPitches": "Pitches",
+  "routeFormPitch": "Pitch {number}",
+  "@routeFormPitch": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "formNumberInvalid": "Enter a number from 1 to {max}.",
+  "@formNumberInvalid": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "routeFormAngle": "Angle",
+  "routeFormFeatures": "Features",
+  "routeFormHolds": "Holds",
+  "routeFormProtection": "Protection",
+  "routeFormDescent": "Descent",
+  "routeFormRope": "Rope needed",
+  "routeFormFirstAscent": "First ascent",
+  "routeFormFirstAscentHint": "Names and year",
+  "routeFormSave": "Save route",
+  "formSaveFailed": "Couldn't save. Check the fields and try again.",
+  "cragAdd": "New crag",
+  "cragFormTitle": "New crag",
+  "cragFormNameMissing": "Give the crag a name.",
+  "cragFormCountry": "Country code",
+  "cragFormCountryInvalid": "Use two letters, such as NO.",
+  "cragFormRock": "Rock type",
+  "cragFormLatitude": "Latitude",
+  "cragFormLongitude": "Longitude",
+  "cragFormLocationHint": "Decimal degrees, such as 59.92 and 10.50. Leave both empty if you are not sure.",
+  "cragFormLocationInvalid": "Enter both, as decimal degrees.",
+  "cragFormSave": "Save crag"
 }
