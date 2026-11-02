@@ -76,6 +76,47 @@ abstract final class SvaTheme {
           ),
         ),
       ),
+      // Chips: sunk fill, selected chips filled with `text` (DESIGN.md).
+      chipTheme: ChipThemeData(
+        color: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? colors.text
+              : colors.surfaceSunk,
+        ),
+        labelStyle: type.label.copyWith(
+          color: WidgetStateColor.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? colors.background
+                : states.contains(WidgetState.disabled)
+                ? colors.textMuted
+                : colors.text,
+          ),
+        ),
+        side: BorderSide.none,
+        showCheckmark: false,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(SvaRadius.small),
+        ),
+      ),
+      // Inputs and wells sit in `surfaceSunk` (DESIGN.md, depth).
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: colors.surfaceSunk,
+        labelStyle: type.label.copyWith(color: colors.textMuted),
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(SvaRadius.small),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: const BorderRadius.all(SvaRadius.small),
+          borderSide: BorderSide(color: colors.granite, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: const BorderRadius.all(SvaRadius.small),
+          borderSide: BorderSide(color: colors.danger),
+        ),
+        errorStyle: type.caption.copyWith(color: colors.danger),
+      ),
       extensions: [colors, type],
     );
   }
