@@ -65,9 +65,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logSheetTitle => 'Log a session';
 
   @override
-  String get logSheetBody => 'Logging climbs is coming soon.';
-
-  @override
   String get close => 'Close';
 
   @override
@@ -239,6 +236,30 @@ class AppLocalizationsEn extends AppLocalizations {
       'descent_walk_off': 'Walk off',
       'descent_downclimb': 'Downclimb',
       'descent_swim': 'Swim',
+      'feel_very_soft': 'Very soft',
+      'feel_soft': 'Soft',
+      'feel_fair': 'Fair',
+      'feel_hard': 'Hard',
+      'feel_very_hard': 'Very hard',
+      'tag_pumpy': 'Pumpy',
+      'tag_techy': 'Technical',
+      'tag_powerful': 'Powerful',
+      'tag_scary': 'Scary',
+      'tag_sustained': 'Sustained',
+      'tag_reachy': 'Reachy',
+      'tag_polished': 'Polished',
+      'tag_great_rock': 'Great rock',
+      'tag_heady': 'Heady',
+      'tag_balancy': 'Balancy',
+      'condition_perfect': 'Perfect',
+      'condition_dry': 'Dry',
+      'condition_humid': 'Humid',
+      'condition_damp': 'Damp',
+      'condition_wet': 'Wet',
+      'condition_icy': 'Icy',
+      'condition_windy': 'Windy',
+      'condition_cold': 'Cold',
+      'condition_hot': 'Hot',
       'other': '',
     });
     return '$_temp0';
@@ -363,4 +384,156 @@ class AppLocalizationsEn extends AppLocalizations {
   String formLengthInvalid(int max) {
     return 'Enter a length in metres, up to $max.';
   }
+
+  @override
+  String get logWhere => 'Where did you climb?';
+
+  @override
+  String get logOutdoor => 'Outdoor';
+
+  @override
+  String get logOutdoorHint => 'Crags and mountains';
+
+  @override
+  String get logIndoor => 'Indoor gym';
+
+  @override
+  String get logIndoorHint => 'Walls and boards';
+
+  @override
+  String get logIndoorSoon =>
+      'Gym climbs can be logged once gyms arrive. For now, log your outdoor climbs.';
+
+  @override
+  String get logRoute => 'Route or problem';
+
+  @override
+  String get logChangeRoute => 'Change route';
+
+  @override
+  String get logStyle => 'Style';
+
+  @override
+  String get logTries => 'Tries';
+
+  @override
+  String get logTriesFewer => 'Fewer tries';
+
+  @override
+  String get logTriesMore => 'More tries';
+
+  @override
+  String get logHintSent =>
+      'You have sent this route, so it logs as a repeat or an attempt.';
+
+  @override
+  String logHintTried(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'You have $count earlier tries on this route, so onsight and flash are not possible.',
+      one: 'You have 1 earlier try on this route, so onsight and flash are not possible.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get logHintBoulder => 'Boulders are flashed, not onsighted.';
+
+  @override
+  String get logRope => 'Rope';
+
+  @override
+  String ascentType(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'lead': 'Lead',
+      'follow': 'Follow',
+      'toprope': 'Top rope',
+      'solo': 'Solo',
+      'boulder': 'Boulder',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get logFeel => 'How it felt for the grade';
+
+  @override
+  String get logPersonalGrade => 'Your grade';
+
+  @override
+  String get logPersonalGradeNone => 'Same as the route';
+
+  @override
+  String get logTags => 'Describe it';
+
+  @override
+  String get logQuality => 'Quality';
+
+  @override
+  String logQualityLevel(String level) {
+    String _temp0 = intl.Intl.selectLogic(level, {
+      'q1': 'Good',
+      'q2': 'Great',
+      'q3': 'Classic',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get logAddClimb => 'Add climb and log another';
+
+  @override
+  String logClimbCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count climbs',
+      one: '1 climb',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String logRemoveClimb(String route) {
+    return 'Remove $route';
+  }
+
+  @override
+  String get logSession => 'Session';
+
+  @override
+  String get logDate => 'Date';
+
+  @override
+  String get logTitle => 'Title';
+
+  @override
+  String get logDescription => 'Description';
+
+  @override
+  String get logConditions => 'Conditions';
+
+  @override
+  String get logPartners => 'Partners';
+
+  @override
+  String get logPartnersHint => 'Names, separated by commas';
+
+  @override
+  String logSave(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Save session ($count climbs)',
+      one: 'Save session',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get logSaved => 'Session saved';
 }

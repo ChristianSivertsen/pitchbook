@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
-import 'package:sva_core/sva_core.dart' show AttributeValues, GradeSystem;
+import 'package:sva_core/sva_core.dart'
+    show AttributeValues, GradeSystem, LoggedAscent;
 import 'package:sva_data/sva_data.dart';
 
 /// The local database. `main` opens it on the device; tests override it
@@ -200,3 +201,25 @@ final StreamProvider<List<Area>> routePlacesProvider =
 final FutureProvider<List<GradeSystem>> gradeSystemsProvider = FutureProvider(
   (ref) => GradeRepository(ref.watch(databaseProvider)).systems(),
 );
+
+/// Saves logged sessions with their climbs.
+final Provider<SessionLogger> sessionLoggerProvider = Provider(
+  (ref) => SessionLogger(ref.watch(databaseProvider)),
+);
+
+/// The setting of the session the user logged last, so the log sheet opens
+/// on the same choice.
+final FutureProvider<String?> lastSettingProvider = FutureProvider.autoDispose(
+  (ref) => ref
+      .watch(sessionRepositoryProvider)
+      .lastSetting(userId: ref.watch(currentUserIdProvider)),
+);
+
+/// What the user has logged on one route, oldest first, for the style and
+/// tries rules.
+final FutureProviderFamily<List<LoggedAscent>, String> routeLogProvider =
+    FutureProvider.autoDispose.family(
+      (ref, routeId) => ref
+          .watch(ascentRepositoryProvider)
+          .routeLog(routeId, userId: ref.watch(currentUserIdProvider)),
+    );

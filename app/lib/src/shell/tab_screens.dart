@@ -1,17 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:sva/l10n/app_localizations.dart';
+import 'package:sva/src/data/providers.dart';
+import 'package:sva/src/places/labels.dart';
 import 'package:sva/src/routes.dart';
+import 'package:sva_data/sva_data.dart';
 import 'package:sva_ui/sva_ui.dart';
 
-/// Feed tab. Session cards arrive in M2-7.
-class FeedScreen extends StatelessWidget {
+/// Feed tab: your sessions, newest first. The full session cards arrive
+/// in M2-7; until then each session is a simple row.
+class FeedScreen extends ConsumerWidget {
   const new({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final sessions = ref.watch(mySessionsProvider).value ?? const [];
+    if (sessions.isNotEmpty) {
+      return SafeArea(
+        bottom: false,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            SvaSpace.screen,
+            SvaSpace.lg,
+            SvaSpace.screen,
+            SvaSpace.xl,
+          ),
+          children: [
+            const Align(alignment: Alignment.centerLeft, child: _Wordmark()),
+            const SizedBox(height: SvaSpace.md),
+            for (final session in sessions) _SessionRow(session: session),
+          ],
+        ),
+      );
+    }
     return _TabScreen(
       header: const Align(alignment: Alignment.centerLeft, child: _Wordmark()),
       empty: _EmptyState(
@@ -20,6 +44,43 @@ class FeedScreen extends StatelessWidget {
         body: l10n.feedEmptyBody,
         actionLabel: l10n.logButton,
         onAction: () => context.push(Routes.log),
+      ),
+    );
+  }
+}
+
+class _SessionRow extends ConsumerWidget {
+  const new({required this.session});
+
+  final Session session;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final climbs = ref.watch(sessionAscentsProvider(session.id)).value;
+    final day = formatDay(l10n, session.localDate);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: SvaSpace.sm),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(SvaSpace.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(session.title ?? day, style: context.svaText.headline),
+              const SizedBox(height: SvaSpace.xxs),
+              Text(
+                [
+                  if (session.title != null) day,
+                  if (climbs != null) l10n.logClimbCount(climbs.length),
+                ].join(' · '),
+                style: context.svaText.caption.copyWith(
+                  color: context.svaColors.textMuted,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

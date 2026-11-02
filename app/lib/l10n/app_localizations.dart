@@ -200,12 +200,6 @@ abstract class AppLocalizations {
   /// **'Log a session'**
   String get logSheetTitle;
 
-  /// No description provided for @logSheetBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Logging climbs is coming soon.'**
-  String get logSheetBody;
-
   /// No description provided for @close.
   ///
   /// In en, this message translates to:
@@ -341,7 +335,7 @@ abstract class AppLocalizations {
   /// A route detail by its stable key, with the dot replaced by an underscore (hold.crimp is hold_crimp). Empty for unknown keys.
   ///
   /// In en, this message translates to:
-  /// **'{value, select, rock_granite{Granite} rock_gneiss{Gneiss} rock_limestone{Limestone} rock_sandstone{Sandstone} rock_basalt{Basalt} rock_conglomerate{Conglomerate} rock_quartzite{Quartzite} rock_schist{Schist} rock_dolerite{Dolerite} angle_slab{Slab} angle_vertical{Vertical} angle_overhang{Overhang} angle_roof{Roof} feature_face{Face} feature_finger_crack{Finger crack} feature_hand_crack{Hand crack} feature_offwidth{Offwidth} feature_chimney{Chimney} feature_corner{Corner} feature_arete{Arête} feature_tufa{Tufa} feature_ice_pillar{Ice pillar} feature_ice_curtain{Ice curtain} feature_mixed_dry_tool{Dry tooling} hold_crimp{Crimps} hold_pocket{Pockets} hold_pinch{Pinches} hold_sloper{Slopers} hold_jug{Jugs} hold_undercling{Underclings} hold_sidepull{Sidepulls} protection_bolted{Bolted} protection_trad{Trad gear} protection_mixed{Mixed protection} protection_runout{Runout} protection_none{No protection} protection_pads{Pads} protection_ice_screws{Ice screws} descent_lower_off{Lower off} descent_rappel{Rappel} descent_walk_off{Walk off} descent_downclimb{Downclimb} descent_swim{Swim} other{}}'**
+  /// **'{value, select, rock_granite{Granite} rock_gneiss{Gneiss} rock_limestone{Limestone} rock_sandstone{Sandstone} rock_basalt{Basalt} rock_conglomerate{Conglomerate} rock_quartzite{Quartzite} rock_schist{Schist} rock_dolerite{Dolerite} angle_slab{Slab} angle_vertical{Vertical} angle_overhang{Overhang} angle_roof{Roof} feature_face{Face} feature_finger_crack{Finger crack} feature_hand_crack{Hand crack} feature_offwidth{Offwidth} feature_chimney{Chimney} feature_corner{Corner} feature_arete{Arête} feature_tufa{Tufa} feature_ice_pillar{Ice pillar} feature_ice_curtain{Ice curtain} feature_mixed_dry_tool{Dry tooling} hold_crimp{Crimps} hold_pocket{Pockets} hold_pinch{Pinches} hold_sloper{Slopers} hold_jug{Jugs} hold_undercling{Underclings} hold_sidepull{Sidepulls} protection_bolted{Bolted} protection_trad{Trad gear} protection_mixed{Mixed protection} protection_runout{Runout} protection_none{No protection} protection_pads{Pads} protection_ice_screws{Ice screws} descent_lower_off{Lower off} descent_rappel{Rappel} descent_walk_off{Walk off} descent_downclimb{Downclimb} descent_swim{Swim} feel_very_soft{Very soft} feel_soft{Soft} feel_fair{Fair} feel_hard{Hard} feel_very_hard{Very hard} tag_pumpy{Pumpy} tag_techy{Technical} tag_powerful{Powerful} tag_scary{Scary} tag_sustained{Sustained} tag_reachy{Reachy} tag_polished{Polished} tag_great_rock{Great rock} tag_heady{Heady} tag_balancy{Balancy} condition_perfect{Perfect} condition_dry{Dry} condition_humid{Humid} condition_damp{Damp} condition_wet{Wet} condition_icy{Icy} condition_windy{Windy} condition_cold{Cold} condition_hot{Hot} other{}}'**
   String attributeValue(String value);
 
   /// No description provided for @routeAdd.
@@ -559,6 +553,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a length in metres, up to {max}.'**
   String formLengthInvalid(int max);
+
+  /// No description provided for @logWhere.
+  ///
+  /// In en, this message translates to:
+  /// **'Where did you climb?'**
+  String get logWhere;
+
+  /// No description provided for @logOutdoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Outdoor'**
+  String get logOutdoor;
+
+  /// No description provided for @logOutdoorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Crags and mountains'**
+  String get logOutdoorHint;
+
+  /// No description provided for @logIndoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Indoor gym'**
+  String get logIndoor;
+
+  /// No description provided for @logIndoorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Walls and boards'**
+  String get logIndoorHint;
+
+  /// No description provided for @logIndoorSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Gym climbs can be logged once gyms arrive. For now, log your outdoor climbs.'**
+  String get logIndoorSoon;
+
+  /// No description provided for @logRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Route or problem'**
+  String get logRoute;
+
+  /// No description provided for @logChangeRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Change route'**
+  String get logChangeRoute;
+
+  /// No description provided for @logStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Style'**
+  String get logStyle;
+
+  /// No description provided for @logTries.
+  ///
+  /// In en, this message translates to:
+  /// **'Tries'**
+  String get logTries;
+
+  /// No description provided for @logTriesFewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer tries'**
+  String get logTriesFewer;
+
+  /// No description provided for @logTriesMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More tries'**
+  String get logTriesMore;
+
+  /// No description provided for @logHintSent.
+  ///
+  /// In en, this message translates to:
+  /// **'You have sent this route, so it logs as a repeat or an attempt.'**
+  String get logHintSent;
+
+  /// No description provided for @logHintTried.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{You have 1 earlier try on this route, so onsight and flash are not possible.} other{You have {count} earlier tries on this route, so onsight and flash are not possible.}}'**
+  String logHintTried(int count);
+
+  /// No description provided for @logHintBoulder.
+  ///
+  /// In en, this message translates to:
+  /// **'Boulders are flashed, not onsighted.'**
+  String get logHintBoulder;
+
+  /// No description provided for @logRope.
+  ///
+  /// In en, this message translates to:
+  /// **'Rope'**
+  String get logRope;
+
+  /// How a climb was climbed, by its stable key.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, lead{Lead} follow{Follow} toprope{Top rope} solo{Solo} boulder{Boulder} other{}}'**
+  String ascentType(String type);
+
+  /// No description provided for @logFeel.
+  ///
+  /// In en, this message translates to:
+  /// **'How it felt for the grade'**
+  String get logFeel;
+
+  /// No description provided for @logPersonalGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Your grade'**
+  String get logPersonalGrade;
+
+  /// No description provided for @logPersonalGradeNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Same as the route'**
+  String get logPersonalGradeNone;
+
+  /// No description provided for @logTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe it'**
+  String get logTags;
+
+  /// No description provided for @logQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality'**
+  String get logQuality;
+
+  /// No description provided for @logQualityLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'{level, select, q1{Good} q2{Great} q3{Classic} other{}}'**
+  String logQualityLevel(String level);
+
+  /// No description provided for @logAddClimb.
+  ///
+  /// In en, this message translates to:
+  /// **'Add climb and log another'**
+  String get logAddClimb;
+
+  /// No description provided for @logClimbCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 climb} other{{count} climbs}}'**
+  String logClimbCount(int count);
+
+  /// No description provided for @logRemoveClimb.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {route}'**
+  String logRemoveClimb(String route);
+
+  /// No description provided for @logSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Session'**
+  String get logSession;
+
+  /// No description provided for @logDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get logDate;
+
+  /// No description provided for @logTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get logTitle;
+
+  /// No description provided for @logDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get logDescription;
+
+  /// No description provided for @logConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Conditions'**
+  String get logConditions;
+
+  /// No description provided for @logPartners.
+  ///
+  /// In en, this message translates to:
+  /// **'Partners'**
+  String get logPartners;
+
+  /// No description provided for @logPartnersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Names, separated by commas'**
+  String get logPartnersHint;
+
+  /// No description provided for @logSave.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Save session} other{Save session ({count} climbs)}}'**
+  String logSave(int count);
+
+  /// No description provided for @logSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Session saved'**
+  String get logSaved;
 }
 
 class _AppLocalizationsDelegate

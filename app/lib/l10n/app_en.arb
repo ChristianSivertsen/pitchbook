@@ -20,7 +20,6 @@
   "trainingEmptyTitle": "Track strength and mobility",
   "trainingEmptyBody": "Finger strength, pulling, core and mobility tests arrive here, with your progress over time.",
   "logSheetTitle": "Log a session",
-  "logSheetBody": "Logging climbs is coming soon.",
   "close": "Close",
   "notFoundTitle": "This page doesn't exist",
   "notFoundBody": "The link may be old or mistyped.",
@@ -115,7 +114,7 @@
       }
     }
   },
-  "attributeValue": "{value, select, rock_granite{Granite} rock_gneiss{Gneiss} rock_limestone{Limestone} rock_sandstone{Sandstone} rock_basalt{Basalt} rock_conglomerate{Conglomerate} rock_quartzite{Quartzite} rock_schist{Schist} rock_dolerite{Dolerite} angle_slab{Slab} angle_vertical{Vertical} angle_overhang{Overhang} angle_roof{Roof} feature_face{Face} feature_finger_crack{Finger crack} feature_hand_crack{Hand crack} feature_offwidth{Offwidth} feature_chimney{Chimney} feature_corner{Corner} feature_arete{Arête} feature_tufa{Tufa} feature_ice_pillar{Ice pillar} feature_ice_curtain{Ice curtain} feature_mixed_dry_tool{Dry tooling} hold_crimp{Crimps} hold_pocket{Pockets} hold_pinch{Pinches} hold_sloper{Slopers} hold_jug{Jugs} hold_undercling{Underclings} hold_sidepull{Sidepulls} protection_bolted{Bolted} protection_trad{Trad gear} protection_mixed{Mixed protection} protection_runout{Runout} protection_none{No protection} protection_pads{Pads} protection_ice_screws{Ice screws} descent_lower_off{Lower off} descent_rappel{Rappel} descent_walk_off{Walk off} descent_downclimb{Downclimb} descent_swim{Swim} other{}}",
+  "attributeValue": "{value, select, rock_granite{Granite} rock_gneiss{Gneiss} rock_limestone{Limestone} rock_sandstone{Sandstone} rock_basalt{Basalt} rock_conglomerate{Conglomerate} rock_quartzite{Quartzite} rock_schist{Schist} rock_dolerite{Dolerite} angle_slab{Slab} angle_vertical{Vertical} angle_overhang{Overhang} angle_roof{Roof} feature_face{Face} feature_finger_crack{Finger crack} feature_hand_crack{Hand crack} feature_offwidth{Offwidth} feature_chimney{Chimney} feature_corner{Corner} feature_arete{Arête} feature_tufa{Tufa} feature_ice_pillar{Ice pillar} feature_ice_curtain{Ice curtain} feature_mixed_dry_tool{Dry tooling} hold_crimp{Crimps} hold_pocket{Pockets} hold_pinch{Pinches} hold_sloper{Slopers} hold_jug{Jugs} hold_undercling{Underclings} hold_sidepull{Sidepulls} protection_bolted{Bolted} protection_trad{Trad gear} protection_mixed{Mixed protection} protection_runout{Runout} protection_none{No protection} protection_pads{Pads} protection_ice_screws{Ice screws} descent_lower_off{Lower off} descent_rappel{Rappel} descent_walk_off{Walk off} descent_downclimb{Downclimb} descent_swim{Swim} feel_very_soft{Very soft} feel_soft{Soft} feel_fair{Fair} feel_hard{Hard} feel_very_hard{Very hard} tag_pumpy{Pumpy} tag_techy{Technical} tag_powerful{Powerful} tag_scary{Scary} tag_sustained{Sustained} tag_reachy{Reachy} tag_polished{Polished} tag_great_rock{Great rock} tag_heady{Heady} tag_balancy{Balancy} condition_perfect{Perfect} condition_dry{Dry} condition_humid{Humid} condition_damp{Damp} condition_wet{Wet} condition_icy{Icy} condition_windy{Windy} condition_cold{Cold} condition_hot{Hot} other{}}",
   "@attributeValue": {
     "description": "A route detail by its stable key, with the dot replaced by an underscore (hold.crimp is hold_crimp). Empty for unknown keys.",
     "placeholders": {
@@ -194,5 +193,83 @@
         "type": "int"
       }
     }
-  }
+  },
+  "logWhere": "Where did you climb?",
+  "logOutdoor": "Outdoor",
+  "logOutdoorHint": "Crags and mountains",
+  "logIndoor": "Indoor gym",
+  "logIndoorHint": "Walls and boards",
+  "logIndoorSoon": "Gym climbs can be logged once gyms arrive. For now, log your outdoor climbs.",
+  "logRoute": "Route or problem",
+  "logChangeRoute": "Change route",
+  "logStyle": "Style",
+  "logTries": "Tries",
+  "logTriesFewer": "Fewer tries",
+  "logTriesMore": "More tries",
+  "logHintSent": "You have sent this route, so it logs as a repeat or an attempt.",
+  "logHintTried": "{count, plural, =1{You have 1 earlier try on this route, so onsight and flash are not possible.} other{You have {count} earlier tries on this route, so onsight and flash are not possible.}}",
+  "@logHintTried": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "logHintBoulder": "Boulders are flashed, not onsighted.",
+  "logRope": "Rope",
+  "ascentType": "{type, select, lead{Lead} follow{Follow} toprope{Top rope} solo{Solo} boulder{Boulder} other{}}",
+  "@ascentType": {
+    "description": "How a climb was climbed, by its stable key.",
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "logFeel": "How it felt for the grade",
+  "logPersonalGrade": "Your grade",
+  "logPersonalGradeNone": "Same as the route",
+  "logTags": "Describe it",
+  "logQuality": "Quality",
+  "logQualityLevel": "{level, select, q1{Good} q2{Great} q3{Classic} other{}}",
+  "@logQualityLevel": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "logAddClimb": "Add climb and log another",
+  "logClimbCount": "{count, plural, =1{1 climb} other{{count} climbs}}",
+  "@logClimbCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "logRemoveClimb": "Remove {route}",
+  "@logRemoveClimb": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "logSession": "Session",
+  "logDate": "Date",
+  "logTitle": "Title",
+  "logDescription": "Description",
+  "logConditions": "Conditions",
+  "logPartners": "Partners",
+  "logPartnersHint": "Names, separated by commas",
+  "logSave": "{count, plural, =1{Save session} other{Save session ({count} climbs)}}",
+  "@logSave": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "logSaved": "Session saved"
 }
