@@ -103,6 +103,14 @@ class AreaRepository extends Repository<$AreasTable, Area>
     return query.watch().map(_byName);
   }
 
+  /// Places of the given [types] that [userId] can see, such as every crag
+  /// and sector for the route form, in Norwegian name order, live.
+  Stream<List<Area>> watchOfTypes(Set<String> types, {required String userId}) {
+    final query = live()
+      ..where((a) => a.type.isIn(types) & _visibleTo(a, userId));
+    return query.watch().map(_byName);
+  }
+
   /// Places whose name contains [term], up to [limit], in Norwegian name
   /// order. Æ, ø and å match as Norwegians expect (sva_core `searchKey`).
   Future<List<Area>> search(

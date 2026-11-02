@@ -232,7 +232,7 @@ void main() {
               createdAt: DateTime.utc(2026),
               updatedAt: DateTime.utc(2026),
               routeId: id,
-              gradeType: 'route',
+              gradeType: 'free_route',
               gradeId: seedId('grade:nor:7-'),
               source: 'official',
             ),
