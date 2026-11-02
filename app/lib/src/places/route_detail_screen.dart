@@ -85,6 +85,10 @@ class _RouteDetail extends ConsumerWidget {
               Text(crag, style: text.body.copyWith(color: colors.textMuted)),
           ],
         ),
+        if (_yourTake(l10n, climbs) case final take?) ...[
+          const SizedBox(height: SvaSpace.xs),
+          Text(take, style: text.label),
+        ],
         const SizedBox(height: SvaSpace.xs),
         Text(facts, style: text.body),
         if (tags.isNotEmpty) ...[
@@ -102,24 +106,46 @@ class _RouteDetail extends ConsumerWidget {
             style: text.body.copyWith(color: colors.textMuted),
           )
         else
-          for (final climb
-              in climbs ?? const <({String date, Ascent ascent})>[])
-            _ClimbRow(date: climb.date, ascent: climb.ascent),
+          for (final climb in climbs ?? const <RouteClimb>[])
+            _ClimbRow(climb: climb, currentGrade: hit.grade),
       ],
     );
+  }
+
+  /// Your own grade for the route, from the newest climb that has one, or
+  /// else how the newest climb with a feel felt. Shown under the official
+  /// grade.
+  static String? _yourTake(AppLocalizations l10n, List<RouteClimb>? climbs) {
+    for (final climb in climbs ?? const <RouteClimb>[]) {
+      if (climb.personalGrade case final grade?) {
+        return l10n.routeYourGrade(grade);
+      }
+    }
+    for (final climb in climbs ?? const <RouteClimb>[]) {
+      if (climb.ascent.feel case final feel?) {
+        final label = l10n.attributeValue(feel.replaceAll('.', '_'));
+        // An unknown key has no words yet: say nothing rather than half.
+        if (label.isNotEmpty) return l10n.routeYourFeel(label);
+      }
+    }
+    return null;
   }
 }
 
 class _ClimbRow extends StatelessWidget {
-  const new({required this.date, required this.ascent});
+  const new({required this.climb, required this.currentGrade});
 
-  final String date;
-  final Ascent ascent;
+  final RouteClimb climb;
+
+  /// The route's grade now, to point out climbs logged before a regrade.
+  final String? currentGrade;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final text = context.svaText;
+    final ascent = climb.ascent;
+    final date = climb.date;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: SvaSpace.xs),
       // Wraps instead of squeezing the date when text is large.
@@ -134,6 +160,17 @@ class _ClimbRow extends StatelessWidget {
             l10n.ascentTries(ascent.tries),
             style: text.caption.copyWith(color: context.svaColors.textMuted),
           ),
+          if (climb.officialGrade case final then?
+              when currentGrade != null && then != currentGrade)
+            Text(
+              l10n.routeLoggedAt(then),
+              style: text.caption.copyWith(color: context.svaColors.textMuted),
+            ),
+          if (climb.personalGrade case final grade?)
+            Text(
+              l10n.routeYourGrade(grade),
+              style: text.caption.copyWith(color: context.svaColors.textMuted),
+            ),
         ],
       ),
     );

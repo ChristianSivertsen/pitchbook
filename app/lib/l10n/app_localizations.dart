@@ -776,6 +776,24 @@ abstract class AppLocalizations {
   /// **'Later climbs on that route no longer fit the rules, so they were removed too.'**
   String get logLaterClimbsRemoved;
 
+  /// No description provided for @routeYourGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Your grade: {grade}'**
+  String routeYourGrade(String grade);
+
+  /// No description provided for @routeYourFeel.
+  ///
+  /// In en, this message translates to:
+  /// **'How it felt: {feel}'**
+  String routeYourFeel(String feel);
+
+  /// On a climb in a route's history, when the route has been regraded since.
+  ///
+  /// In en, this message translates to:
+  /// **'graded {grade} then'**
+  String routeLoggedAt(String grade);
+
   /// No description provided for @cragFormMap.
   ///
   /// In en, this message translates to:

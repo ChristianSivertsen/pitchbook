@@ -547,6 +547,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Later climbs on that route no longer fit the rules, so they were removed too.';
 
   @override
+  String routeYourGrade(String grade) {
+    return 'Your grade: $grade';
+  }
+
+  @override
+  String routeYourFeel(String feel) {
+    return 'How it felt: $feel';
+  }
+
+  @override
+  String routeLoggedAt(String grade) {
+    return 'graded $grade then';
+  }
+
+  @override
   String get cragFormMap => 'Map. Tap to place the crag.';
 
   @override
