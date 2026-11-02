@@ -142,6 +142,9 @@ void main() {
       'Store Smatt',
     ], reason: 'typed without å, both match');
     expect(await names(term: 'åsm'), ['Aasmund'], reason: 'aa is å');
+    expect(await names(term: ' - '), isEmpty, reason: 'punctuation only');
+    await route(crag, 'Καλύμνος');
+    expect(await names(term: 'ΚΑΛΎ'), ['Καλύμνος'], reason: 'other scripts');
 
     final id = await route(crag, 'Gammelt navn');
     await routes.update(
@@ -243,7 +246,12 @@ void main() {
       expect(hit?.lastClimbed, '2026-10-30');
       expect(await routes.hit(id, userId: 'someone else'), isNull);
 
-      final details = await AttributeRepository(db).resolvedForRoute(id);
+      final details = await AttributeRepository(db)
+          .resolvedForRoute(id, userId: 'me');
+      expect(
+        await AttributeRepository(db).resolvedForRoute(id, userId: 'them'),
+        isEmpty,
+      );
       expect(details['rock_type'], ['rock.basalt'], reason: 'from the crag');
       expect(details['discipline'], ['sport']);
 

@@ -128,11 +128,20 @@ final StreamProvider<List<Goal>> activeGoalsProvider = StreamProvider(
 );
 
 /// Where route search measures "nearby" from: the user's latest outdoor
-/// climbing place, until the app reads the phone's location.
-final FutureProvider<LatLon?> searchOriginProvider = FutureProvider(
-  (ref) => ref
-      .watch(sessionRepositoryProvider)
-      .lastOutdoorLocation(userId: ref.watch(currentUserIdProvider)),
+/// climbing place, until the app reads the phone's location. Follows new
+/// sessions. Without one, or if the lookup fails, search simply skips
+/// "nearby".
+final FutureProvider<LatLon?> searchOriginProvider = FutureProvider.autoDispose(
+  (ref) async {
+    ref.watch(mySessionsProvider);
+    try {
+      return await ref
+          .watch(sessionRepositoryProvider)
+          .lastOutdoorLocation(userId: ref.watch(currentUserIdProvider));
+    } on Object {
+      return null;
+    }
+  },
 );
 
 /// Outdoor routes matching a search term, best first, live.
@@ -160,8 +169,9 @@ final FutureProviderFamily<RouteHit?, String> routeHitProvider = FutureProvider
 /// A route's details, with what it inherits from its crag.
 final FutureProviderFamily<AttributeValues, String> routeDetailsProvider =
     FutureProvider.autoDispose.family(
-      (ref, routeId) =>
-          ref.watch(attributeRepositoryProvider).resolvedForRoute(routeId),
+      (ref, routeId) => ref
+          .watch(attributeRepositoryProvider)
+          .resolvedForRoute(routeId, userId: ref.watch(currentUserIdProvider)),
     );
 
 /// The user's climbs on one route, newest first, live.

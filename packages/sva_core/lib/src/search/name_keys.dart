@@ -22,9 +22,15 @@ const _fold = {
   'ß': 'ss', 'þ': 'th', 'œ': 'oe',
 };
 
-/// Whether every code unit of [chars] is a letter or digit Sva keeps.
+/// Letters and digits of other scripts (Greek, Cyrillic, Japanese and so
+/// on), kept as they are so names in them can be found too.
+final _otherLetterOrDigit = RegExp(r'^[\p{L}\p{N}]+$', unicode: true);
+
+/// Whether [chars] is made of letters or digits Sva keeps.
 bool _isLetterOrDigit(String chars) =>
-    chars.isNotEmpty && chars.codeUnits.every(_keeps);
+    chars.isNotEmpty &&
+    (chars.codeUnits.every(_keeps) ||
+        (chars.codeUnitAt(0) > 0x7f && _otherLetterOrDigit.hasMatch(chars)));
 
 bool _keeps(int c) =>
     (c >= 0x61 && c <= 0x7a) || // a-z
@@ -35,8 +41,9 @@ bool _keeps(int c) =>
 
 /// The key a name is searched by: lower case, with æ, ø and å kept as their
 /// own letters. "Aa" counts as "å" (the old spelling, as in "Aaland"), "ä"
-/// and "ö" count as "æ" and "ø", other accents are dropped, and anything
-/// that is not a letter or digit becomes a single space.
+/// and "ö" count as "æ" and "ø", other accents are dropped, letters of
+/// other scripts are kept, and anything that is not a letter or digit
+/// becomes a single space.
 String searchKey(String name) {
   final out = StringBuffer();
   var space = false;

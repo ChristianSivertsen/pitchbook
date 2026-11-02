@@ -122,11 +122,14 @@ class _ClimbRow extends StatelessWidget {
     final text = context.svaText;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: SvaSpace.xs),
-      child: Row(
+      // Wraps instead of squeezing the date when text is large.
+      child: Wrap(
+        spacing: SvaSpace.xs,
+        runSpacing: SvaSpace.xxs,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          Expanded(child: Text(formatDay(l10n, date), style: text.body)),
+          Text(formatDay(l10n, date), style: text.body),
           _StyleTag(ascent.style),
-          const SizedBox(width: SvaSpace.xs),
           Text(
             l10n.ascentTries(ascent.tries),
             style: text.caption.copyWith(color: context.svaColors.textMuted),

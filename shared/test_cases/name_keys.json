@@ -15,6 +15,9 @@
     {"name": "  Reisa – Nord-Norge!  ", "search": "reisa nord norge", "ascii": "reisa nord norge"},
     {"name": "Svartisen 7b+", "search": "svartisen 7b", "ascii": "svartisen 7b"},
     {"name": "Vill'mann", "search": "vill mann", "ascii": "vill mann"},
+    {"name": "Καλύμνος", "search": "καλύμνος", "ascii": "καλύμνος"},
+    {"name": "東京 ボルダー", "search": "東京 ボルダー", "ascii": "東京 ボルダー"},
+    {"name": " - ", "search": "", "ascii": ""},
     {"name": "", "search": "", "ascii": ""}
   ],
   "order": ["Andøya", "Bø", "Zappa", "Ærfuglen", "Øya", "Aaland", "Åsane"]

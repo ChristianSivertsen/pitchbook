@@ -54,8 +54,9 @@ class _RouteSearchState extends ConsumerState<RouteSearch> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = context.svaColors;
-    final hits = ref.watch(routeSearchProvider(_term)).value ?? _shown;
-    _shown = hits;
+    final current = ref.watch(routeSearchProvider(_term)).value;
+    if (current != null) _shown = current;
+    final hits = _shown;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -75,6 +76,8 @@ class _RouteSearchState extends ConsumerState<RouteSearch> {
         Expanded(
           child: switch (hits) {
             null => const SizedBox.shrink(),
+            // "No match" only once this term's search has finished.
+            [] when current == null => const SizedBox.shrink(),
             [] => Padding(
               padding: const EdgeInsets.all(SvaSpace.xxl),
               child: Text(

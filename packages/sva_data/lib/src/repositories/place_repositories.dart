@@ -198,10 +198,11 @@ class RouteRepository extends Repository<$RoutesTable, Route>
   ///
   /// With a [term], only routes whose name, or the name of one of the
   /// three places above them, contains it; æ, ø and å match as Norwegians
-  /// expect (sva_core `searchKey`). The order is: routes [userId] climbed,
-  /// most recent first; then nearest to [near]; then routes with a word
-  /// in their own name starting with the term, then whose name contains
-  /// it, then whose place matches; then by name.
+  /// expect (sva_core `searchKey`). Routes with a word in their own name
+  /// starting with the term come first, then routes whose name contains
+  /// it, then routes whose place matches. Within each group, and for an
+  /// empty term: routes [userId] climbed, most recent first; then nearest
+  /// to [near]; then by name.
   ///
   /// Ranking happens in Dart over every match, which stays fast for the
   /// few thousand routes a device holds. Move it into SQL if devices start
@@ -211,12 +212,15 @@ class RouteRepository extends Repository<$RoutesTable, Route>
     String term = '',
     LatLon? near,
     int limit = 30,
-  }) async => _rank(
-    await _select(userId: userId, term: term).get(),
-    term: term,
-    near: near,
-    limit: limit,
-  );
+  }) async {
+    if (_matchesNothing(term)) return const [];
+    return _rank(
+      await _select(userId: userId, term: term).get(),
+      term: term,
+      near: near,
+      limit: limit,
+    );
+  }
 
   /// [find], updating whenever a route, place, climb or grade changes, so
   /// a route added or logged shows up straight away.
@@ -225,10 +229,16 @@ class RouteRepository extends Repository<$RoutesTable, Route>
     String term = '',
     LatLon? near,
     int limit = 30,
-  }) => _select(
-    userId: userId,
-    term: term,
-  ).watch().map((rows) => _rank(rows, term: term, near: near, limit: limit));
+  }) => _matchesNothing(term)
+      ? Stream.value(const [])
+      : _select(userId: userId, term: term).watch().map(
+          (rows) => _rank(rows, term: term, near: near, limit: limit),
+        );
+
+  /// A term of only punctuation, such as "-", has an empty key; it should
+  /// find nothing rather than every route.
+  static bool _matchesNothing(String term) =>
+      term.trim().isNotEmpty && searchKey(term).isEmpty;
 
   /// One route as [find] shows it, or `null` when it is gone, a gym route
   /// or private to someone else.
@@ -263,7 +273,7 @@ class RouteRepository extends Repository<$RoutesTable, Route>
       "AND rg.source = 'official' AND rg.deleted_at IS NULL "
       'ORDER BY g.sort LIMIT 1) AS grade_label '
       'FROM routes r '
-      'LEFT JOIN areas a1 ON a1.id = r.area_id AND a1.deleted_at IS NULL '
+      'LEFT JOIN areas a1 ON a1.id = r.area_id AND ${_visibleArea('a1')} '
       'LEFT JOIN areas a2 ON a2.id = a1.parent_id '
       'AND a2.deleted_at IS NULL '
       'LEFT JOIN areas a3 ON a3.id = a2.parent_id '
@@ -330,6 +340,13 @@ class RouteRepository extends Repository<$RoutesTable, Route>
     return [for (final r in ranked.take(limit)) r.hit];
   }
 
+  // Places above a route count only when the user can see them, so a
+  // public route under someone's private crag does not show its name or
+  // location.
+  static String _visibleArea(String t) =>
+      "$t.deleted_at IS NULL AND ($t.visibility = 'public' "
+      'OR $t.created_by = ?1)';
+
   /// SQL that is true when the term matches the name keys of any of
   /// [aliases]. `?2` and `?3` are the search and ascii patterns.
   static String _matchAny(List<String> aliases) => [
@@ -362,6 +379,10 @@ class RouteRepository extends Repository<$RoutesTable, Route>
     ({RouteHit hit, String sortKey, int tier}) a,
     ({RouteHit hit, String sortKey, int tier}) b,
   ) {
+    // A typed name wins: an exact route-name match beats a route you
+    // climbed that only matched on its crag. Without a term all tiers are 0.
+    final tier = a.tier.compareTo(b.tier);
+    if (tier != 0) return tier;
     // Climbed before not climbed, the latest first.
     final climbed = _compareNullsLast(
       a.hit.lastClimbed,
@@ -371,8 +392,6 @@ class RouteRepository extends Repository<$RoutesTable, Route>
     if (climbed != 0) return climbed;
     final distance = _compareNullsLast(a.hit.distanceKm, b.hit.distanceKm);
     if (distance != 0) return distance;
-    final tier = a.tier.compareTo(b.tier);
-    if (tier != 0) return tier;
     return a.sortKey.compareTo(b.sortKey);
   }
 

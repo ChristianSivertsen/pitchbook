@@ -272,11 +272,21 @@ class AttributeRepository {
 
   /// What applies to a route: its own values, then every area above it,
   /// nearest first (see [resolveAttributes]). Rock type comes from the
-  /// crag this way.
-  Future<AttributeValues> resolvedForRoute(String routeId) async {
-    final route = await (_db.select(
-      _db.routes,
-    )..where((r) => r.id.equals(routeId))).getSingle();
+  /// crag this way. Empty when the route is gone or private to someone
+  /// other than [userId].
+  Future<AttributeValues> resolvedForRoute(
+    String routeId, {
+    required String userId,
+  }) async {
+    final route =
+        await (_db.select(_db.routes)..where(
+              (r) =>
+                  r.id.equals(routeId) &
+                  r.deletedAt.isNull() &
+                  (r.visibility.equals('public') | r.createdBy.equals(userId)),
+            ))
+            .getSingleOrNull();
+    if (route == null) return const {};
     return resolveAttributes([
       ...await _areaLayers(route.areaId),
       await valuesAt(AttributeLevel.route, route.id),
