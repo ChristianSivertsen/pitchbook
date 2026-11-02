@@ -66,10 +66,29 @@ void main() {
         ),
         routeClimbsProvider.overrideWith(
           (ref, id) => Stream.value(
-            id == 'r1'
+            id == 'r3'
                 ? [
-                    (date: '2026-10-30', ascent: _ascent('redpoint', 3)),
-                    (date: '2026-05-01', ascent: _ascent('attempt', 2)),
+                    (
+                      date: '2026-10-01',
+                      ascent: _ascent('attempt', 1, feel: 'feel.hard'),
+                      officialGrade: null,
+                      personalGrade: null,
+                    ),
+                  ]
+                : id == 'r1'
+                ? [
+                    (
+                      date: '2026-10-30',
+                      ascent: _ascent('redpoint', 3),
+                      officialGrade: '7-',
+                      personalGrade: '7',
+                    ),
+                    (
+                      date: '2026-05-01',
+                      ascent: _ascent('attempt', 2),
+                      officialGrade: '7-',
+                      personalGrade: null,
+                    ),
                   ]
                 : const [],
           ),
@@ -134,14 +153,28 @@ void main() {
     container.read(routerProvider).go(Routes.route('r2'));
     await tester.pumpAndSettle();
     expect(find.text("You haven't logged this route yet."), findsOneWidget);
+    expect(find.textContaining('Your grade'), findsNothing);
 
     container.read(routerProvider).go(Routes.route('gone'));
     await tester.pumpAndSettle();
     expect(find.text('This route is gone or private.'), findsOneWidget);
   });
+
+  testWidgets('M2-4: route detail shows your grade next to the official one', (
+    tester,
+  ) async {
+    await open(tester, Routes.route('r1'));
+    expect(find.text('7-'), findsOneWidget, reason: 'the official grade');
+    // Under the grade, and on the climb that set it.
+    expect(find.text('Your grade: 7'), findsNWidgets(2));
+
+    container.read(routerProvider).go(Routes.route('r3'));
+    await tester.pumpAndSettle();
+    expect(find.text('How it felt: Hard'), findsOneWidget);
+  });
 }
 
-Ascent _ascent(String style, int tries) => Ascent(
+Ascent _ascent(String style, int tries, {String? feel}) => Ascent(
   id: 'a-$style',
   createdAt: DateTime.utc(2026),
   updatedAt: DateTime.utc(2026),
@@ -155,4 +188,5 @@ Ascent _ascent(String style, int tries) => Ascent(
   ascentType: 'lead',
   style: style,
   tries: tries,
+  feel: feel,
 );

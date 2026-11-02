@@ -280,5 +280,21 @@
       }
     }
   },
-  "logLaterClimbsRemoved": "Later climbs on that route no longer fit the rules, so they were removed too."
+  "logLaterClimbsRemoved": "Later climbs on that route no longer fit the rules, so they were removed too.",
+  "routeYourGrade": "Your grade: {grade}",
+  "@routeYourGrade": {
+    "placeholders": {
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "routeYourFeel": "How it felt: {feel}",
+  "@routeYourFeel": {
+    "placeholders": {
+      "feel": {
+        "type": "String"
+      }
+    }
+  }
 }

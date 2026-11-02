@@ -545,4 +545,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get logLaterClimbsRemoved =>
       'Later climbs on that route no longer fit the rules, so they were removed too.';
+
+  @override
+  String routeYourGrade(String grade) {
+    return 'Your grade: $grade';
+  }
+
+  @override
+  String routeYourFeel(String feel) {
+    return 'How it felt: $feel';
+  }
 }

@@ -85,6 +85,10 @@ class _RouteDetail extends ConsumerWidget {
               Text(crag, style: text.body.copyWith(color: colors.textMuted)),
           ],
         ),
+        if (_yourTake(l10n, climbs) case final take?) ...[
+          const SizedBox(height: SvaSpace.xs),
+          Text(take, style: text.label),
+        ],
         const SizedBox(height: SvaSpace.xs),
         Text(facts, style: text.body),
         if (tags.isNotEmpty) ...[
@@ -102,24 +106,42 @@ class _RouteDetail extends ConsumerWidget {
             style: text.body.copyWith(color: colors.textMuted),
           )
         else
-          for (final climb
-              in climbs ?? const <({String date, Ascent ascent})>[])
-            _ClimbRow(date: climb.date, ascent: climb.ascent),
+          for (final climb in climbs ?? const <RouteClimb>[])
+            _ClimbRow(climb: climb),
       ],
     );
+  }
+
+  /// Your own grade for the route, from your latest climb that has one,
+  /// or else how your latest climb felt. Shown next to the official grade.
+  static String? _yourTake(AppLocalizations l10n, List<RouteClimb>? climbs) {
+    for (final climb in climbs ?? const <RouteClimb>[]) {
+      if (climb.personalGrade case final grade?) {
+        return l10n.routeYourGrade(grade);
+      }
+    }
+    for (final climb in climbs ?? const <RouteClimb>[]) {
+      if (climb.ascent.feel case final feel?) {
+        return l10n.routeYourFeel(
+          l10n.attributeValue(feel.replaceAll('.', '_')),
+        );
+      }
+    }
+    return null;
   }
 }
 
 class _ClimbRow extends StatelessWidget {
-  const new({required this.date, required this.ascent});
+  const new({required this.climb});
 
-  final String date;
-  final Ascent ascent;
+  final RouteClimb climb;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final text = context.svaText;
+    final ascent = climb.ascent;
+    final date = climb.date;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: SvaSpace.xs),
       // Wraps instead of squeezing the date when text is large.
@@ -134,6 +156,11 @@ class _ClimbRow extends StatelessWidget {
             l10n.ascentTries(ascent.tries),
             style: text.caption.copyWith(color: context.svaColors.textMuted),
           ),
+          if (climb.personalGrade case final grade?)
+            Text(
+              l10n.routeYourGrade(grade),
+              style: text.caption.copyWith(color: context.svaColors.textMuted),
+            ),
         ],
       ),
     );
