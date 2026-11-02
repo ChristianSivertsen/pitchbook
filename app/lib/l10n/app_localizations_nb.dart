@@ -247,7 +247,7 @@ class AppLocalizationsNb extends AppLocalizations {
       'tag_powerful': 'Kraftkrevende',
       'tag_scary': 'Skummel',
       'tag_sustained': 'Vedvarende',
-      'tag_reachy': 'Langt rekk',
+      'tag_reachy': 'Krever rekkevidde',
       'tag_polished': 'Blankslitt',
       'tag_great_rock': 'Flott fjell',
       'tag_heady': 'Psykisk',
@@ -439,7 +439,7 @@ class AppLocalizationsNb extends AppLocalizations {
   }
 
   @override
-  String get logHintBoulder => 'Buldre flashes, de onsightes ikke.';
+  String get logHintBoulder => 'Buldreproblemer flashes, de onsightes ikke.';
 
   @override
   String get logRope => 'Tau';
@@ -447,7 +447,7 @@ class AppLocalizationsNb extends AppLocalizations {
   @override
   String ascentType(String type) {
     String _temp0 = intl.Intl.selectLogic(type, {
-      'lead': 'Led',
+      'lead': 'Leding',
       'follow': 'Andremann',
       'toprope': 'Topptau',
       'solo': 'Solo',
@@ -536,4 +536,13 @@ class AppLocalizationsNb extends AppLocalizations {
 
   @override
   String get logSaved => 'Økten er lagret';
+
+  @override
+  String logClimbRejected(int number) {
+    return 'Klatring $number passer ikke lenger med reglene for stil og forsøk. Sjekk den og prøv igjen.';
+  }
+
+  @override
+  String get logLaterClimbsRemoved =>
+      'Senere klatringer på ruten passet ikke lenger med reglene, så de ble også fjernet.';
 }

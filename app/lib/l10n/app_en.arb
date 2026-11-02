@@ -271,5 +271,14 @@
       }
     }
   },
-  "logSaved": "Session saved"
+  "logSaved": "Session saved",
+  "logClimbRejected": "Climb {number} no longer fits the style and tries rules. Check it and try again.",
+  "@logClimbRejected": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "logLaterClimbsRemoved": "Later climbs on that route no longer fit the rules, so they were removed too."
 }

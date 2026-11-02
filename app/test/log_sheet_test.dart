@@ -220,4 +220,26 @@ void main() {
     ]);
     expect(saved.climbs.last.ascentType, 'boulder');
   });
+
+  testWidgets('M2-3: removing a climb rechecks the later ones', (tester) async {
+    await start(tester);
+    await tester.tap(find.byKey(logButtonKey));
+    await tester.pumpAndSettle();
+    for (final style in ['Flash', 'Repeat']) {
+      await tester.tap(find.text('Hjemmebane').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(style));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add climb and log another'));
+      await tester.pumpAndSettle();
+    }
+    expect(find.text('Hjemmebane · Repeat'), findsOneWidget);
+
+    // Without the flash, the repeat has no send to repeat.
+    await tester.tap(find.byTooltip('Remove Hjemmebane').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Hjemmebane · Flash'), findsNothing);
+    expect(find.text('Hjemmebane · Repeat'), findsNothing);
+    expect(find.textContaining('were removed too'), findsOneWidget);
+  });
 }

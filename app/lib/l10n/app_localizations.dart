@@ -763,6 +763,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Session saved'**
   String get logSaved;
+
+  /// No description provided for @logClimbRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Climb {number} no longer fits the style and tries rules. Check it and try again.'**
+  String logClimbRejected(int number);
+
+  /// No description provided for @logLaterClimbsRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Later climbs on that route no longer fit the rules, so they were removed too.'**
+  String get logLaterClimbsRemoved;
 }
 
 class _AppLocalizationsDelegate

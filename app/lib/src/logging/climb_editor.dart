@@ -56,9 +56,12 @@ class _ClimbEditorState extends ConsumerState<ClimbEditor> {
 
   bool get _boulder => _hit?.route.discipline == 'boulder';
 
-  RouteHistory _history() {
+  /// The rules' view of the route, or `null` while its log is loading:
+  /// styles are only offered once the earlier tries are known.
+  RouteHistory? _history() {
     final hit = _hit!;
-    final logged = ref.watch(routeLogProvider(hit.route.id)).value ?? const [];
+    final logged = ref.watch(routeLogProvider(hit.route.id)).value;
+    if (logged == null) return null;
     return RouteHistory.from([
       ...logged,
       for (final climb in widget.earlierInSession)
@@ -113,7 +116,12 @@ class _ClimbEditorState extends ConsumerState<ClimbEditor> {
               onPick: (picked) => _update(() {
                 _hit = picked;
                 _style = null;
+                _tries = 1;
+                _rope = 'lead';
+                _feel = null;
                 _grade = null;
+                _tags = {};
+                _quality = null;
               }),
             ),
           ),
@@ -122,6 +130,7 @@ class _ClimbEditorState extends ConsumerState<ClimbEditor> {
     }
 
     final history = _history();
+    if (history == null) return RouteHitTile(hit: hit);
     final allowed = history.allowedStyles;
     final styles = [
       for (final s in _styleOrder)

@@ -119,8 +119,13 @@ class SessionLogger {
     if (draft.climbs.isEmpty) {
       throw ArgumentError.value(draft.climbs, 'climbs', 'none');
     }
+    // A real calendar day (no 30 February), and not after tomorrow, which
+    // covers every time zone ahead of the device's clock.
+    final day = DateTime.tryParse(draft.localDate);
     if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(draft.localDate) ||
-        DateTime.tryParse(draft.localDate) == null) {
+        day == null ||
+        !day.toIso8601String().startsWith(draft.localDate) ||
+        day.isAfter(clock().add(const Duration(days: 1)))) {
       throw ArgumentError.value(draft.localDate, 'localDate');
     }
     if (!RegExp(r'^[A-Za-z_+\-]+(/[A-Za-z0-9_+\-]+)*$').hasMatch(draft.tz)) {
@@ -133,13 +138,13 @@ class SessionLogger {
       maxDescriptionLength,
       'description',
     );
-    if (draft.partners.length > maxPartners) {
-      throw ArgumentError.value(draft.partners.length, 'partners');
-    }
     final partners = [
       for (final name in draft.partners)
         ?_text(name, maxPartnerNameLength, 'partners'),
     ];
+    if (partners.length > maxPartners) {
+      throw ArgumentError.value(partners.length, 'partners');
+    }
     final sessionDefs = await _attributes.definitions(
       level: AttributeLevel.session,
     );
@@ -228,9 +233,15 @@ class SessionLogger {
   Future<void> _checkRules(List<ClimbDraft> climbs, String userId) async {
     final logs = <String, List<LoggedAscent>>{};
     for (final (i, climb) in climbs.indexed) {
-      final route = await (db.select(
-        db.routes,
-      )..where((r) => r.id.equals(climb.routeId))).getSingleOrNull();
+      final route =
+          await (db.select(db.routes)..where(
+                (r) =>
+                    r.id.equals(climb.routeId) &
+                    r.deletedAt.isNull() &
+                    (r.visibility.equals('public') |
+                        r.createdBy.equals(userId)),
+              ))
+              .getSingleOrNull();
       if (route == null || route.kind != 'outdoor') {
         throw ArgumentError.value(climb.routeId, 'routeId');
       }

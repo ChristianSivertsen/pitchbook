@@ -131,6 +131,12 @@ void main() {
     final cases = <String, SessionDraft>{
       'no climbs': day(const []),
       'bad date': day([climb(sport, AscentStyle.onsight)], date: '1.11.26'),
+      'no such day': day([
+        climb(sport, AscentStyle.onsight),
+      ], date: '2026-02-30'),
+      'in the future': day([
+        climb(sport, AscentStyle.onsight),
+      ], date: '2027-01-01'),
       'unknown type': day([climb(sport, AscentStyle.onsight, type: 'jetpack')]),
       'unknown route': day([climb('nowhere', AscentStyle.onsight)]),
     };

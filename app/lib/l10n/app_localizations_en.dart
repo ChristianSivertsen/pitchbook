@@ -536,4 +536,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logSaved => 'Session saved';
+
+  @override
+  String logClimbRejected(int number) {
+    return 'Climb $number no longer fits the style and tries rules. Check it and try again.';
+  }
+
+  @override
+  String get logLaterClimbsRemoved =>
+      'Later climbs on that route no longer fit the rules, so they were removed too.';
 }
