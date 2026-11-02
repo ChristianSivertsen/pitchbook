@@ -100,7 +100,7 @@ void main() {
             of: find.byType(RouteHitTile),
             matching: find.text('Hjemmebane'),
           ),
-        ).first,
+        ),
       );
       await tap(inSheet(find.text(l10n.ascentStyle('attempt'))));
       if (i == 0) await tap(inSheet(find.text(l10n.logAddClimb)));
