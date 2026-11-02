@@ -25,7 +25,7 @@ The look and feel follows the Sva design language in [`DESIGN.md`](DESIGN.md). T
 | Backend | Supabase: Postgres, Auth, Storage, Edge Functions | Relational data, row-level security, an API any client can call |
 | Sign-in | Sign in with Apple and Google | Covers both platforms |
 | Charts | fl_chart plus custom painters | Charts that match the design |
-| Maps and location | flutter_map or Google Maps, geolocator | Crag maps, location for weather |
+| Maps and location | flutter_map with Mapbox tiles (Outdoors style); location plugin to be decided | Crag maps, location for weather |
 | Weather | Open-Meteo (historical and current), called from an Edge Function | Free historical data, same for every client |
 | Media | image_picker, video compression, EXIF stripping | Photos and videos on sessions |
 | Push | Firebase Cloud Messaging, sent from an Edge Function | One push service for iOS and Android |
@@ -152,7 +152,7 @@ Prices checked in November 2026. Check the services' pricing pages before you pa
 | Supabase | 500 MB database, 1 GB file storage, 5 GB downloads a month, 50,000 monthly users. Pauses after a week without activity; no backups | File storage: 1 GB is about 3,000 photos or 50–100 short videos. The database lasts a few hundred active users | Pro, $25 a month: 8 GB database, 100 GB files, 250 GB downloads, daily backups |
 | PowerSync | 2 GB synced a month, 500 MB stored, 50 users connected at once. Switched off after about a week without activity | 50 users online at once, roughly a few hundred active users | Pro, $49 a month: 1,000 users online at once |
 | Open-Meteo | 10,000 calls a day, non-commercial use only | Fine for a free app if weather is stored per crag and day | Commercial use: $29 a month, or $99 a month for historical weather |
-| Maps | OpenStreetMap's own tiles do not allow heavy app use. MapTiler: 5,000 map loads a month for personal or non-commercial use | Decide when maps are built | MapTiler from $30 a month. Google's Maps SDK for phones is believed to be free; check before choosing |
+| Maps | Mapbox Static Tiles API with a free monthly allowance (see Mapbox pricing) | Chosen by the user on 2 Nov 2026 (M2-9). The token is a public `pk.` token kept in the `MAPBOX_ACCESS_TOKEN` secret, never committed; set a usage alert in Mapbox. Privacy: Mapbox sees the device's IP address and which map tiles it loads (around crags, never the phone's GPS position); list it as a processor in the privacy policy | Pay as you go above the free allowance |
 | Firebase Cloud Messaging, Crashlytics | Free | | |
 | Sentry (if chosen over Crashlytics) | 5,000 errors a month, one person | | Team, $26 a month |
 | GitHub Actions | Free for public repositories, macOS runners included | | |

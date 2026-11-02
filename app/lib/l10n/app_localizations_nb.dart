@@ -560,4 +560,11 @@ class AppLocalizationsNb extends AppLocalizations {
   String routeLoggedAt(String grade) {
     return 'gradert $grade da';
   }
+
+  @override
+  String get cragFormMap => 'Kart. Trykk for å plassere feltet.';
+
+  @override
+  String get cragFormLocationHintMap =>
+      'Trykk på kartet, eller skriv desimalgrader, for eksempel 59,92 og 10,50. La begge stå tomme hvis du er usikker.';
 }

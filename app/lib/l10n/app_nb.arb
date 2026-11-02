@@ -115,5 +115,7 @@
   "logLaterClimbsRemoved": "Senere klatringer på ruten passet ikke lenger med reglene, så de ble også fjernet.",
   "routeYourGrade": "Din grad: {grade}",
   "routeYourFeel": "Opplevd som: {feel}",
-  "routeLoggedAt": "gradert {grade} da"
+  "routeLoggedAt": "gradert {grade} da",
+  "cragFormMap": "Kart. Trykk for å plassere feltet.",
+  "cragFormLocationHintMap": "Trykk på kartet, eller skriv desimalgrader, for eksempel 59,92 og 10,50. La begge stå tomme hvis du er usikker."
 }

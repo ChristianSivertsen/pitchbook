@@ -12,9 +12,11 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  flutter_map: ^8.3.2
   flutter_riverpod: ^3.4.3
   go_router: ^18.1.2
   intl: ^0.20.3
+  latlong2: ^0.10.1
   lucide_icons_flutter: ^3.1.25
   path_provider: ^2.1.6
   sva_core:

@@ -560,4 +560,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String routeLoggedAt(String grade) {
     return 'graded $grade then';
   }
+
+  @override
+  String get cragFormMap => 'Map. Tap to place the crag.';
+
+  @override
+  String get cragFormLocationHintMap =>
+      'Tap the map, or type decimal degrees such as 59.92 and 10.50. Leave both empty if you are not sure.';
 }
