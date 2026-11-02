@@ -38,3 +38,11 @@ mixin SharedRow on SyncedRow {
 mixin Visible on Table {
   TextColumn get visibility => text()();
 }
+
+/// Search keys for a row's `name` (sva_core `searchKey` and `asciiKey`).
+/// Derived, never typed in: the repositories set them on every write and
+/// the server computes the same keys for rows it syncs down.
+mixin NameKeys on Table {
+  TextColumn get searchKey => text().nullable()();
+  TextColumn get asciiKey => text().nullable()();
+}

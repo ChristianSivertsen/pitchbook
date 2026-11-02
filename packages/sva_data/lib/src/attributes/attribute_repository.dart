@@ -270,6 +270,19 @@ class AttributeRepository {
     return values;
   }
 
+  /// What applies to a route: its own values, then every area above it,
+  /// nearest first (see [resolveAttributes]). Rock type comes from the
+  /// crag this way.
+  Future<AttributeValues> resolvedForRoute(String routeId) async {
+    final route = await (_db.select(
+      _db.routes,
+    )..where((r) => r.id.equals(routeId))).getSingle();
+    return resolveAttributes([
+      ...await _areaLayers(route.areaId),
+      await valuesAt(AttributeLevel.route, route.id),
+    ]);
+  }
+
   /// What applies to an ascent: its own values, then its route's, then
   /// every area above the route, nearest first (see [resolveAttributes]).
   Future<AttributeValues> resolvedForAscent(String ascentId) async {
@@ -279,21 +292,27 @@ class AttributeRepository {
     final route = await (_db.select(
       _db.routes,
     )..where((r) => r.id.equals(ascent.routeId))).getSingle();
-    final areaLayers = <AttributeValues>[];
-    final seen = <String>{};
-    String? areaId = route.areaId;
-    while (areaId != null && seen.add(areaId)) {
-      areaLayers.insert(0, await valuesAt(AttributeLevel.area, areaId));
-      final area = await (_db.select(
-        _db.areas,
-      )..where((a) => a.id.equals(areaId!))).getSingleOrNull();
-      areaId = area?.parentId;
-    }
     return resolveAttributes([
-      ...areaLayers,
+      ...await _areaLayers(route.areaId),
       await valuesAt(AttributeLevel.route, route.id),
       await valuesAt(AttributeLevel.ascent, ascentId),
     ]);
+  }
+
+  /// The values of [areaId] and every area above it, top-most first.
+  Future<List<AttributeValues>> _areaLayers(String? areaId) async {
+    final layers = <AttributeValues>[];
+    final seen = <String>{};
+    var id = areaId;
+    while (id != null && seen.add(id)) {
+      layers.insert(0, await valuesAt(AttributeLevel.area, id));
+      final current = id;
+      final area = await (_db.select(
+        _db.areas,
+      )..where((a) => a.id.equals(current))).getSingleOrNull();
+      id = area?.parentId;
+    }
+    return layers;
   }
 
   /// What to change so the live rows hold exactly [wanted]: rows are

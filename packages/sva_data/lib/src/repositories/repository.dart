@@ -90,8 +90,14 @@ abstract class Repository<T extends Table, R> {
     if (blocked.isNotEmpty) {
       throw ArgumentError.value(blocked, 'changes', 'protected columns');
     }
-    return writeChecked(id, userId, columns);
+    return writeChecked(id, userId, {...columns, ...derivedColumns(columns)});
   }
+
+  /// For subclasses: columns computed from [changes], such as search keys
+  /// from a name, written in the same statement.
+  Map<String, Expression<Object>> derivedColumns(
+    Map<String, Expression<Object>> changes,
+  ) => const {};
 
   /// For subclasses: checks [userId] may change the row, then writes
   /// [columns] with a new `updated_at` in one statement.

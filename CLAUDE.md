@@ -81,7 +81,8 @@ flutter analyze
 flutter test                      # in app/ and each package
 tool/check.sh                     # everything CI runs (except flow tests)
 cd packages/sva_data && dart run build_runner build   # after changing drift tables
-cd packages/sva_data && dart run drift_dev make-migrations   # after bumping schemaVersion
+cd packages/sva_data && dart run drift_dev schema dump lib/src/database/sva_database.dart drift_schemas/sva/   # after bumping schemaVersion
+cd packages/sva_data && dart run drift_dev schema generate drift_schemas/sva/ test/generated_migrations/sva/generated/   # then this
 swift tool/render_app_icons.swift   # after changing assets/brand/sva-app-icon.svg (macOS)
 ```
 

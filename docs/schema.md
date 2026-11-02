@@ -97,6 +97,7 @@ erDiagram
 | parent_id | uuid → areas | Null for top-level countries |
 | type | text | `country`, `region`, `area`, `crag`, `sector`, `wall`, `boulder_block`, `gym` |
 | name | text | |
+| search_key, ascii_key | text | Derived from `name` for search, never typed in: see Name search below |
 | country_code | text | ISO 3166-1 alpha-2, set on every row for fast filtering |
 | latitude, longitude | double | |
 | altitude_m | integer | Important for alpine and ice |
@@ -154,6 +155,7 @@ A request about a row is handled by the moderators of the nearest crag or gym ab
 | area_id | uuid → areas | Sector, wall or boulder block outdoors; the gym indoors |
 | kind | text | `outdoor` or `gym` |
 | name | text | Null allowed for gym routes, which are shown as colour, grade, wall and date set, for example "Blue 6a · Cave wall · set 12 Oct" |
+| search_key, ascii_key | text | Derived from `name`, as on areas |
 | discipline | text | `sport`, `trad`, `boulder`, `alpine`, `ice`, `mixed`, `aid`, `dws` |
 | pitch_count | integer | Multipitch when greater than 1 |
 | length_m | numeric | For gym routes, copied from the wall height |
@@ -187,6 +189,13 @@ A request about a row is handled by the moderators of the nearest crag or gym ab
 - marks it as the same as an existing route: the two are merged, the creator's ascents and photos move to the existing route, and the name they used becomes an alias
 
 New sectors and crags follow the same steps with `add_area` requests. Once a row is public, every change goes through an `edit` request.
+
+**Name search.** Places and routes carry two keys made from the name (sva_core `searchKey` and `asciiKey`, with shared cases in `shared/test_cases/name_keys.json`):
+
+- `search_key`: lower case with æ, ø and å kept as letters. "Aa" counts as "å", "ä" and "ö" as "æ" and "ø", other accents are dropped (é → e), and punctuation becomes a space.
+- `ascii_key`: the same with æ → ae, ø → o, å → a, so "floyen" typed on a foreign keyboard finds "Fløyen".
+
+A search term gets the same treatment. It matches `search_key`, and also `ascii_key` when the term itself has no æ, ø or å: someone who types "smått" means å and does not want "Smatt". Lists sort in Norwegian order, with æ, ø and å after z. The device sets the keys on every write; the server computes them in a generated column with the same rules (M11-2), so synced rows arrive with them.
 
 **Duplicate checks.** When someone adds a route, the app searches for similar routes before saving: names and aliases with `pg_trgm` similarity and `unaccent` (so "Fløyen" matches "Floyen"), in the same crag or within about 200 m. Offline, it searches the rows on the device. The moderator sees the same candidates with the request. There is no unique constraint on names, since real duplicates exist (many crags have a route called "Project").
 
@@ -452,7 +461,7 @@ Pieces are grouped by model in the UI, so two #1 cams show as "×2" but keep the
 
 ## On the device
 
-The drift schema in `packages/sva_data/lib/src/database/` holds every table above except the server-only ones: `device_tokens`, `aliases`, `external_ids`, `area_moderators`, `suggested_edits`, `edit_votes`, `route_history` and the social tables in §9 (social rows reach the device with M13). Saved schema versions live in `packages/sva_data/drift_schemas/`, and a test migrates every saved version to the latest. To change a table, bump `schemaVersion`, add a migration step, run `dart run drift_dev make-migrations` in `packages/sva_data`, and commit the generated files.
+The drift schema in `packages/sva_data/lib/src/database/` holds every table above except the server-only ones: `device_tokens`, `aliases`, `external_ids`, `area_moderators`, `suggested_edits`, `edit_votes`, `route_history` and the social tables in §9 (social rows reach the device with M13). Saved schema versions live in `packages/sva_data/drift_schemas/`, and a test migrates every saved version to the latest. To change a table, bump `schemaVersion`, add a migration step, run the two `drift_dev schema` commands from CLAUDE.md, and commit the generated files.
 
 ## Sync scope
 

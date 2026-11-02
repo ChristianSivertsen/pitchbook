@@ -1,14 +1,61 @@
+import 'dart:math';
+
 import 'package:drift/drift.dart';
+import 'package:sva_core/sva_core.dart';
 import 'package:sva_data/src/database/sva_database.dart';
 import 'package:sva_data/src/ids.dart';
 import 'package:sva_data/src/repositories/repository.dart';
 
-/// Escapes `%`, `_` and `\` so a search term matches itself in LIKE.
-String _likePattern(String term) =>
-    '%${term.trim().replaceAllMapped(RegExp(r'[\\%_]'), (m) => '\\${m[0]}')}%';
+/// The keys a search term is matched with. A term typed with æ, ø or å
+/// means those letters, so it matches only the search key; a term without
+/// them also matches the ascii key, so "floyen" finds "Fløyen".
+({String search, String ascii}) _termKeys(String term) {
+  final key = searchKey(term);
+  return (
+    search: key,
+    ascii: key.contains(RegExp('[æøå]')) ? key : asciiKey(term),
+  );
+}
+
+/// [_termKeys] as LIKE patterns. Keys hold only letters, digits and single
+/// spaces, so nothing needs escaping.
+({String search, String ascii}) _patterns(String term) {
+  final keys = _termKeys(term);
+  return (search: '%${keys.search}%', ascii: '%${keys.ascii}%');
+}
+
+/// The search keys for a name, as companion values.
+({Value<String?> search, Value<String?> ascii}) _keysFor(String? name) => (
+  search: Value(name == null ? null : searchKey(name)),
+  ascii: Value(name == null ? null : asciiKey(name)),
+);
+
+/// Keeps the search keys in step with the name on every update.
+mixin _NameKeyed<T extends Table, R> on Repository<T, R> {
+  @override
+  Set<String> get protectedColumns => {
+    ...super.protectedColumns,
+    'search_key',
+    'ascii_key',
+  };
+
+  @override
+  Map<String, Expression<Object>> derivedColumns(
+    Map<String, Expression<Object>> changes,
+  ) {
+    final name = changes['name'];
+    if (name == null) return const {};
+    final keys = _keysFor((name as Variable<Object>).value as String?);
+    return {
+      'search_key': Variable(keys.search.value),
+      'ascii_key': Variable(keys.ascii.value),
+    };
+  }
+}
 
 /// Countries, regions, crags, sectors, walls, boulders and gyms.
-class AreaRepository extends Repository<$AreasTable, Area> {
+class AreaRepository extends Repository<$AreasTable, Area>
+    with _NameKeyed<$AreasTable, Area> {
   new(super.db, {super.clock});
 
   @override
@@ -25,6 +72,7 @@ class AreaRepository extends Repository<$AreasTable, Area> {
   }) async {
     final id = newId();
     final now = clock();
+    final keys = _keysFor(draft.name.present ? draft.name.value : null);
     await insert(
       draft.copyWith(
         id: Value(id),
@@ -34,13 +82,15 @@ class AreaRepository extends Repository<$AreasTable, Area> {
         createdBy: Value(userId),
         visibility: const Value('private'),
         mergedIntoId: const Value(null),
+        searchKey: keys.search,
+        asciiKey: keys.ascii,
       ),
     );
     return id;
   }
 
   /// The places directly under [parentId] (top-level ones when `null`),
-  /// by name. Others' private places are left out.
+  /// in Norwegian name order. Others' private places are left out.
   Stream<List<Area>> watchChildren(String? parentId, {required String userId}) {
     final query = live()
       ..where(
@@ -49,34 +99,55 @@ class AreaRepository extends Repository<$AreasTable, Area> {
                 ? a.parentId.isNull()
                 : a.parentId.equals(parentId)) &
             _visibleTo(a, userId),
-      )
-      ..orderBy([(a) => OrderingTerm(expression: a.name)]);
-    return query.watch();
+      );
+    return query.watch().map(_byName);
   }
 
-  /// Places whose name contains [term], up to [limit], by name.
+  /// Places whose name contains [term], up to [limit], in Norwegian name
+  /// order. Æ, ø and å match as Norwegians expect (sva_core `searchKey`).
   Future<List<Area>> search(
     String term, {
     required String userId,
     int limit = 30,
-  }) {
+  }) async {
+    final like = _patterns(term);
     final query = live()
       ..where(
         (a) =>
-            a.name.like(_likePattern(term), escapeChar: r'\') &
+            (a.searchKey.like(like.search) | a.asciiKey.like(like.ascii)) &
             _visibleTo(a, userId),
-      )
-      ..orderBy([(a) => OrderingTerm(expression: a.name)])
-      ..limit(limit);
-    return query.get();
+      );
+    return _byName(await query.get()).take(limit).toList();
   }
+
+  static List<Area> _byName(List<Area> areas) =>
+      areas..sort((a, b) => compareNames(a.name, b.name));
 
   static Expression<bool> _visibleTo($AreasTable a, String userId) =>
       a.visibility.equals('public') | a.createdBy.equals(userId);
 }
 
+/// A point on the map, in degrees.
+typedef LatLon = ({double lat, double lon});
+
+/// A route in search results, with what the list shows and why it ranks
+/// where it does.
+///
+/// - `grade`: the official grade's label, such as `7-`, or `null`.
+/// - `crag`: the crag the route is in, or its nearest place without one.
+/// - `lastClimbed`: `YYYY-MM-DD` of the user's latest climb on it.
+/// - `distanceKm`: from the point searched from, `null` without one.
+typedef RouteHit = ({
+  Route route,
+  String? grade,
+  String? crag,
+  String? lastClimbed,
+  double? distanceKm,
+});
+
 /// Every climbable line, outdoors or in a gym.
-class RouteRepository extends Repository<$RoutesTable, Route> {
+class RouteRepository extends Repository<$RoutesTable, Route>
+    with _NameKeyed<$RoutesTable, Route> {
   new(super.db, {super.clock});
 
   @override
@@ -92,6 +163,7 @@ class RouteRepository extends Repository<$RoutesTable, Route> {
   }) async {
     final id = newId();
     final now = clock();
+    final keys = _keysFor(draft.name.present ? draft.name.value : null);
     await insert(
       draft.copyWith(
         id: Value(id),
@@ -103,40 +175,233 @@ class RouteRepository extends Repository<$RoutesTable, Route> {
         mergedIntoId: const Value(null),
         consensusScore: const Value(null),
         qualityAvg: const Value(null),
+        searchKey: keys.search,
+        asciiKey: keys.ascii,
       ),
     );
     return id;
   }
 
-  /// The routes in one place, by name, without others' private routes.
+  /// The routes in one place, in Norwegian name order, without others'
+  /// private routes.
   Stream<List<Route>> watchInArea(String areaId, {required String userId}) {
     final query = live()
-      ..where((r) => r.areaId.equals(areaId) & _visibleTo(r, userId))
-      ..orderBy([(r) => OrderingTerm(expression: r.name)]);
-    return query.watch();
+      ..where((r) => r.areaId.equals(areaId) & _visibleTo(r, userId));
+    return query.watch().map(
+      (routes) =>
+          routes..sort((a, b) => compareNames(a.name ?? '', b.name ?? '')),
+    );
   }
 
-  /// Outdoor routes whose name contains [term], up to [limit]. Gym routes
-  /// never appear in the outdoor route list (PLAN.md 4).
-  Future<List<Route>> search(
-    String term, {
+  /// Outdoor routes for search and the route picker, best first, up to
+  /// [limit]. Gym routes never appear here (PLAN.md 4).
+  ///
+  /// With a [term], only routes whose name, or the name of one of the
+  /// three places above them, contains it; æ, ø and å match as Norwegians
+  /// expect (sva_core `searchKey`). The order is: routes [userId] climbed,
+  /// most recent first; then nearest to [near]; then routes with a word
+  /// in their own name starting with the term, then whose name contains
+  /// it, then whose place matches; then by name.
+  ///
+  /// Ranking happens in Dart over every match, which stays fast for the
+  /// few thousand routes a device holds. Move it into SQL if devices start
+  /// holding far more.
+  Future<List<RouteHit>> find({
     required String userId,
+    String term = '',
+    LatLon? near,
     int limit = 30,
+  }) async => _rank(
+    await _select(userId: userId, term: term).get(),
+    term: term,
+    near: near,
+    limit: limit,
+  );
+
+  /// [find], updating whenever a route, place, climb or grade changes, so
+  /// a route added or logged shows up straight away.
+  Stream<List<RouteHit>> watchFind({
+    required String userId,
+    String term = '',
+    LatLon? near,
+    int limit = 30,
+  }) => _select(
+    userId: userId,
+    term: term,
+  ).watch().map((rows) => _rank(rows, term: term, near: near, limit: limit));
+
+  /// One route as [find] shows it, or `null` when it is gone, a gym route
+  /// or private to someone else.
+  Future<RouteHit?> hit(
+    String routeId, {
+    required String userId,
+    LatLon? near,
+  }) async {
+    final rows = await _select(userId: userId, routeId: routeId).get();
+    return _rank(rows, near: near, limit: 1).firstOrNull;
+  }
+
+  Selectable<QueryRow> _select({
+    required String userId,
+    String term = '',
+    String? routeId,
   }) {
-    final query = live()
-      ..where(
-        (r) =>
-            r.kind.equals('outdoor') &
-            r.name.like(_likePattern(term), escapeChar: r'\') &
-            _visibleTo(r, userId),
-      )
-      ..orderBy([(r) => OrderingTerm(expression: r.name)])
-      ..limit(limit);
-    return query.get();
+    final like = _patterns(term);
+    return db.customSelect(
+      'SELECT r.*, '
+      'COALESCE('
+      "CASE WHEN a1.type = 'crag' THEN a1.name END, "
+      "CASE WHEN a2.type = 'crag' THEN a2.name END, "
+      "CASE WHEN a3.type = 'crag' THEN a3.name END, "
+      'a1.name) AS crag_name, '
+      'COALESCE(a1.latitude, a2.latitude, a3.latitude) AS lat, '
+      'COALESCE(a1.longitude, a2.longitude, a3.longitude) AS lon, '
+      'mine.last_climbed, '
+      '(SELECT g.label FROM route_grades rg '
+      'JOIN grades g ON g.id = rg.grade_id AND g.deleted_at IS NULL '
+      'WHERE rg.route_id = r.id AND rg.pitch_id IS NULL '
+      "AND rg.source = 'official' AND rg.deleted_at IS NULL "
+      'ORDER BY g.sort LIMIT 1) AS grade_label '
+      'FROM routes r '
+      'LEFT JOIN areas a1 ON a1.id = r.area_id AND a1.deleted_at IS NULL '
+      'LEFT JOIN areas a2 ON a2.id = a1.parent_id '
+      'AND a2.deleted_at IS NULL '
+      'LEFT JOIN areas a3 ON a3.id = a2.parent_id '
+      'AND a3.deleted_at IS NULL '
+      'LEFT JOIN ( '
+      'SELECT x.route_id, MAX(s.local_date) AS last_climbed '
+      'FROM ascents x JOIN sessions s ON s.id = x.session_id '
+      'WHERE x.owner_id = ?1 AND x.deleted_at IS NULL '
+      'AND s.deleted_at IS NULL '
+      'GROUP BY x.route_id '
+      ') mine ON mine.route_id = r.id '
+      "WHERE r.deleted_at IS NULL AND r.kind = 'outdoor' "
+      "AND (r.visibility = 'public' OR r.created_by = ?1) "
+      // An empty term ('%%') matches every route, named or not.
+      "AND (?2 = '%%' OR ${_matchAny(const ['r', 'a1', 'a2', 'a3'])}) "
+      'AND (?4 IS NULL OR r.id = ?4)',
+      variables: [
+        Variable.withString(userId),
+        Variable.withString(like.search),
+        Variable.withString(like.ascii),
+        Variable<String>(routeId),
+      ],
+      readsFrom: {
+        db.routes,
+        db.areas,
+        db.ascents,
+        db.sessions,
+        db.routeGrades,
+        db.grades,
+      },
+    );
+  }
+
+  List<RouteHit> _rank(
+    List<QueryRow> rows, {
+    required LatLon? near,
+    required int limit,
+    String term = '',
+  }) {
+    final (search: key, :ascii) = _termKeys(term);
+    final ranked = [
+      for (final row in rows)
+        (
+          hit: (
+            route: db.routes.map(row.data),
+            grade: row.readNullable<String>('grade_label'),
+            crag: row.readNullable<String>('crag_name'),
+            lastClimbed: row.readNullable<String>('last_climbed'),
+            distanceKm: _distanceKm(
+              near,
+              row.readNullable<double>('lat'),
+              row.readNullable<double>('lon'),
+            ),
+          ),
+          sortKey: nameSortKey(row.readNullable<String>('name') ?? ''),
+          tier: _matchTier(
+            key,
+            ascii,
+            row.readNullable<String>('search_key'),
+            row.readNullable<String>('ascii_key'),
+          ),
+        ),
+    ]..sort(_compareRanked);
+    return [for (final r in ranked.take(limit)) r.hit];
+  }
+
+  /// SQL that is true when the term matches the name keys of any of
+  /// [aliases]. `?2` and `?3` are the search and ascii patterns.
+  static String _matchAny(List<String> aliases) => [
+    for (final t in aliases) ...[
+      '$t.search_key LIKE ?2',
+      '$t.ascii_key LIKE ?3',
+    ],
+  ].join(' OR ');
+
+  /// 0 when a word in the route's own name starts with the term, 1 when
+  /// the name contains it elsewhere, 2 when only a place matches.
+  static int _matchTier(
+    String key,
+    String ascii,
+    String? routeKey,
+    String? routeAscii,
+  ) {
+    if (key.isEmpty) return 0;
+    bool startsWord(String? name, String term) =>
+        name != null && (name.startsWith(term) || name.contains(' $term'));
+    if (startsWord(routeKey, key) || startsWord(routeAscii, ascii)) return 0;
+    if ((routeKey?.contains(key) ?? false) ||
+        (routeAscii?.contains(ascii) ?? false)) {
+      return 1;
+    }
+    return 2;
+  }
+
+  static int _compareRanked(
+    ({RouteHit hit, String sortKey, int tier}) a,
+    ({RouteHit hit, String sortKey, int tier}) b,
+  ) {
+    // Climbed before not climbed, the latest first.
+    final climbed = _compareNullsLast(
+      a.hit.lastClimbed,
+      b.hit.lastClimbed,
+      descending: true,
+    );
+    if (climbed != 0) return climbed;
+    final distance = _compareNullsLast(a.hit.distanceKm, b.hit.distanceKm);
+    if (distance != 0) return distance;
+    final tier = a.tier.compareTo(b.tier);
+    if (tier != 0) return tier;
+    return a.sortKey.compareTo(b.sortKey);
+  }
+
+  /// Orders values ascending, or [descending], with `null` last either way.
+  static int _compareNullsLast<C extends Comparable<Object>>(
+    C? a,
+    C? b, {
+    bool descending = false,
+  }) {
+    if (a == null) return b == null ? 0 : 1;
+    if (b == null) return -1;
+    return descending ? b.compareTo(a) : a.compareTo(b);
   }
 
   static Expression<bool> _visibleTo($RoutesTable r, String userId) =>
       r.visibility.equals('public') | r.createdBy.equals(userId);
+}
+
+/// Great-circle distance in km, or `null` when a point is missing.
+double? _distanceKm(LatLon? from, double? lat, double? lon) {
+  if (from == null || lat == null || lon == null) return null;
+  const earthKm = 6371.0;
+  double rad(double deg) => deg * pi / 180;
+  final dLat = rad(lat - from.lat);
+  final dLon = rad(lon - from.lon);
+  final h =
+      pow(sin(dLat / 2), 2) +
+      cos(rad(from.lat)) * cos(rad(lat)) * pow(sin(dLon / 2), 2);
+  return 2 * earthKm * asin(sqrt(h));
 }
 
 /// A user's own walls in a gym; gyms themselves are shared areas.
