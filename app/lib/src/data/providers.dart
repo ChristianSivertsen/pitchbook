@@ -1,22 +1,29 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
+import 'package:sva_core/sva_core.dart' show AttributeValues;
 import 'package:sva_data/sva_data.dart';
 
-/// The local database. `main` opens it on the device once the first data
-/// screen lands (M2-3); tests override it with [SvaDatabase.inMemory].
+/// The local database. `main` opens it on the device; tests override it
+/// with [SvaDatabase.inMemory].
 final databaseProvider = Provider<SvaDatabase>(
   (ref) => throw UnimplementedError('Override databaseProvider'),
 );
 
-/// The user whose rows screens read and write. Before sign-in this is a
-/// local id, replaced on first sign-in (docs/schema.md, profiles).
-final currentUserIdProvider = Provider<String>((ref) => 'local');
+/// The user id before sign-in, replaced on first sign-in (docs/schema.md,
+/// profiles).
+const localUserId = 'local';
+
+/// The user whose rows screens read and write.
+final currentUserIdProvider = Provider<String>((ref) => localUserId);
 
 final Provider<AreaRepository> areaRepositoryProvider = Provider(
   (ref) => AreaRepository(ref.watch(databaseProvider)),
 );
 final Provider<RouteRepository> routeRepositoryProvider = Provider(
   (ref) => RouteRepository(ref.watch(databaseProvider)),
+);
+final Provider<AttributeRepository> attributeRepositoryProvider = Provider(
+  (ref) => AttributeRepository(ref.watch(databaseProvider)),
 );
 final Provider<GymWallRepository> gymWallRepositoryProvider = Provider(
   (ref) => GymWallRepository(ref.watch(databaseProvider)),
@@ -118,4 +125,49 @@ final StreamProvider<List<Goal>> activeGoalsProvider = StreamProvider(
   (ref) => ref
       .watch(goalRepositoryProvider)
       .watchMine(userId: ref.watch(currentUserIdProvider), status: 'active'),
+);
+
+/// Where route search measures "nearby" from: the user's latest outdoor
+/// climbing place, until the app reads the phone's location.
+final FutureProvider<LatLon?> searchOriginProvider = FutureProvider(
+  (ref) => ref
+      .watch(sessionRepositoryProvider)
+      .lastOutdoorLocation(userId: ref.watch(currentUserIdProvider)),
+);
+
+/// Outdoor routes matching a search term, best first, live.
+final StreamProviderFamily<List<RouteHit>, String> routeSearchProvider =
+    StreamProvider.autoDispose.family((ref, term) async* {
+      final near = await ref.watch(searchOriginProvider.future);
+      yield* ref
+          .watch(routeRepositoryProvider)
+          .watchFind(
+            term: term,
+            userId: ref.watch(currentUserIdProvider),
+            near: near,
+          );
+    });
+
+/// One route as search shows it, or `null` when it is gone or private.
+final FutureProviderFamily<RouteHit?, String> routeHitProvider = FutureProvider
+    .autoDispose
+    .family(
+      (ref, routeId) => ref
+          .watch(routeRepositoryProvider)
+          .hit(routeId, userId: ref.watch(currentUserIdProvider)),
+    );
+
+/// A route's details, with what it inherits from its crag.
+final FutureProviderFamily<AttributeValues, String> routeDetailsProvider =
+    FutureProvider.autoDispose.family(
+      (ref, routeId) =>
+          ref.watch(attributeRepositoryProvider).resolvedForRoute(routeId),
+    );
+
+/// The user's climbs on one route, newest first, live.
+final StreamProviderFamily<List<({String date, Ascent ascent})>, String>
+routeClimbsProvider = StreamProvider.autoDispose.family(
+  (ref, routeId) => ref
+      .watch(ascentRepositoryProvider)
+      .watchOnRoute(routeId, userId: ref.watch(currentUserIdProvider)),
 );

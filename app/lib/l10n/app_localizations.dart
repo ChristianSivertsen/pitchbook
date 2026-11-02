@@ -229,6 +229,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go to the feed'**
   String get notFoundAction;
+
+  /// Tooltip of the search button on the History tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a route'**
+  String get routeSearchOpen;
+
+  /// No description provided for @routeSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a route'**
+  String get routeSearchTitle;
+
+  /// Label of the search field.
+  ///
+  /// In en, this message translates to:
+  /// **'Route or crag'**
+  String get routeSearchField;
+
+  /// No description provided for @routeSearchNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No routes match \"{term}\".'**
+  String routeSearchNoMatch(String term);
+
+  /// No description provided for @routeSearchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Routes you add and climb show up here.'**
+  String get routeSearchEmpty;
+
+  /// No description provided for @routeNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This route is gone or private.'**
+  String get routeNotFound;
+
+  /// No description provided for @routeUngraded.
+  ///
+  /// In en, this message translates to:
+  /// **'Ungraded'**
+  String get routeUngraded;
+
+  /// No description provided for @routeLength.
+  ///
+  /// In en, this message translates to:
+  /// **'{metres} m'**
+  String routeLength(int metres);
+
+  /// No description provided for @routePitches.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 pitch} other{{count} pitches}}'**
+  String routePitches(int count);
+
+  /// No description provided for @routeRopeLength.
+  ///
+  /// In en, this message translates to:
+  /// **'{metres} m rope'**
+  String routeRopeLength(int metres);
+
+  /// No description provided for @routeDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get routeDetails;
+
+  /// No description provided for @routeYourClimbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Your climbs'**
+  String get routeYourClimbs;
+
+  /// No description provided for @routeNotClimbed.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t logged this route yet.'**
+  String get routeNotClimbed;
+
+  /// No description provided for @routeLastClimbed.
+  ///
+  /// In en, this message translates to:
+  /// **'Last climbed {date}'**
+  String routeLastClimbed(String date);
+
+  /// A route's discipline, by its stable key.
+  ///
+  /// In en, this message translates to:
+  /// **'{discipline, select, sport{Sport} trad{Trad} boulder{Boulder} alpine{Alpine} ice{Ice} mixed{Mixed} aid{Aid} dws{Deep water solo} other{}}'**
+  String discipline(String discipline);
+
+  /// A climb's style, by its stable key.
+  ///
+  /// In en, this message translates to:
+  /// **'{style, select, onsight{Onsight} flash{Flash} redpoint{Redpoint} repeat{Repeat} attempt{Attempt} other{}}'**
+  String ascentStyle(String style);
+
+  /// No description provided for @ascentTries.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 try} other{{count} tries}}'**
+  String ascentTries(int count);
+
+  /// Which way a crag faces, by compass key.
+  ///
+  /// In en, this message translates to:
+  /// **'{direction, select, N{Faces north} NE{Faces northeast} E{Faces east} SE{Faces southeast} S{Faces south} SW{Faces southwest} W{Faces west} NW{Faces northwest} other{}}'**
+  String aspect(String direction);
+
+  /// A route detail by its stable key, with the dot replaced by an underscore (hold.crimp is hold_crimp). Empty for unknown keys.
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, rock_granite{Granite} rock_gneiss{Gneiss} rock_limestone{Limestone} rock_sandstone{Sandstone} rock_basalt{Basalt} rock_conglomerate{Conglomerate} rock_quartzite{Quartzite} rock_schist{Schist} rock_dolerite{Dolerite} angle_slab{Slab} angle_vertical{Vertical} angle_overhang{Overhang} angle_roof{Roof} feature_face{Face} feature_finger_crack{Finger crack} feature_hand_crack{Hand crack} feature_offwidth{Offwidth} feature_chimney{Chimney} feature_corner{Corner} feature_arete{Arête} feature_tufa{Tufa} feature_ice_pillar{Ice pillar} feature_ice_curtain{Ice curtain} feature_mixed_dry_tool{Dry tooling} hold_crimp{Crimps} hold_pocket{Pockets} hold_pinch{Pinches} hold_sloper{Slopers} hold_jug{Jugs} hold_undercling{Underclings} hold_sidepull{Sidepulls} protection_bolted{Bolted} protection_trad{Trad gear} protection_mixed{Mixed protection} protection_runout{Runout} protection_none{No protection} protection_pads{Pads} protection_ice_screws{Ice screws} descent_lower_off{Lower off} descent_rappel{Rappel} descent_walk_off{Walk off} descent_downclimb{Downclimb} descent_swim{Swim} other{}}'**
+  String attributeValue(String value);
 }
 
 class _AppLocalizationsDelegate

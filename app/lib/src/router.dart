@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sva/src/places/route_detail_screen.dart';
+import 'package:sva/src/places/route_search_screen.dart';
 import 'package:sva/src/routes.dart';
 import 'package:sva/src/shell/app_shell.dart';
 import 'package:sva/src/shell/log_sheet.dart';
@@ -50,6 +52,18 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: Routes.history,
                 builder: (context, state) => const HistoryScreen(),
+                routes: [
+                  GoRoute(
+                    path: Routes.routeSearchSegment,
+                    builder: (context, state) => const RouteSearchScreen(),
+                  ),
+                  GoRoute(
+                    path: Routes.routeSegment,
+                    builder: (context, state) => RouteDetailScreen(
+                      routeId: state.pathParameters['routeId']!,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
