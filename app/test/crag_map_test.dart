@@ -67,5 +67,21 @@ void main() {
     expect(double.parse(field('Latitude')), closeTo(64.5, 0.01));
     expect(double.parse(field('Longitude')), closeTo(11, 0.01));
     expect(find.byIcon(LucideIcons.mapPin), findsOneWidget);
+
+    // Typed coordinates move the map: tapping its centre now gives them.
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Latitude'),
+      '59,92',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Longitude'),
+      '10.5',
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(FlutterMap));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+    expect(double.parse(field('Latitude')), closeTo(59.92, 0.01));
+    expect(double.parse(field('Longitude')), closeTo(10.5, 0.01));
   });
 }
