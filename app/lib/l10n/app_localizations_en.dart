@@ -243,4 +243,124 @@ class AppLocalizationsEn extends AppLocalizations {
     });
     return '$_temp0';
   }
+
+  @override
+  String get routeAdd => 'Add a route';
+
+  @override
+  String get routeFormTitle => 'New route';
+
+  @override
+  String get formName => 'Name';
+
+  @override
+  String get routeFormNameMissing => 'Give the route a name.';
+
+  @override
+  String get routeFormCrag => 'Crag';
+
+  @override
+  String get routeFormCragMissing => 'Pick the crag the route is in.';
+
+  @override
+  String routeFormRockFromCrag(String rock) {
+    return 'Rock type comes from the crag: $rock.';
+  }
+
+  @override
+  String get routeFormDiscipline => 'Discipline';
+
+  @override
+  String routeFormGrade(String system) {
+    return 'Grade ($system)';
+  }
+
+  @override
+  String get routeFormNoGrade => 'No grade yet';
+
+  @override
+  String get routeFormLength => 'Length in metres';
+
+  @override
+  String get routeFormPitches => 'Pitches';
+
+  @override
+  String routeFormPitch(int number) {
+    return 'Pitch $number';
+  }
+
+  @override
+  String formNumberInvalid(int max) {
+    return 'Enter a number from 1 to $max.';
+  }
+
+  @override
+  String get routeFormAngle => 'Angle';
+
+  @override
+  String get routeFormFeatures => 'Features';
+
+  @override
+  String get routeFormHolds => 'Holds';
+
+  @override
+  String get routeFormProtection => 'Protection';
+
+  @override
+  String get routeFormDescent => 'Descent';
+
+  @override
+  String get routeFormRope => 'Rope needed';
+
+  @override
+  String get routeFormFirstAscent => 'First ascent';
+
+  @override
+  String get routeFormFirstAscentHint => 'Names and year';
+
+  @override
+  String get routeFormSave => 'Save route';
+
+  @override
+  String get formSaveFailed =>
+      'Couldn\'t save. Check the fields and try again.';
+
+  @override
+  String get cragAdd => 'New crag';
+
+  @override
+  String get cragFormTitle => 'New crag';
+
+  @override
+  String get cragFormNameMissing => 'Give the crag a name.';
+
+  @override
+  String get cragFormCountry => 'Country code';
+
+  @override
+  String get cragFormCountryInvalid => 'Use two letters, such as NO.';
+
+  @override
+  String get cragFormRock => 'Rock type';
+
+  @override
+  String get cragFormLatitude => 'Latitude';
+
+  @override
+  String get cragFormLongitude => 'Longitude';
+
+  @override
+  String get cragFormLocationHint =>
+      'Decimal degrees, such as 59.92 and 10.50. Leave both empty if you are not sure.';
+
+  @override
+  String get cragFormLocationInvalid => 'Enter both, as decimal degrees.';
+
+  @override
+  String get cragFormSave => 'Save crag';
+
+  @override
+  String formLengthInvalid(int max) {
+    return 'Enter a length in metres, up to $max.';
+  }
 }

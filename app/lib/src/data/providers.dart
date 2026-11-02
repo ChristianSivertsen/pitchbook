@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
-import 'package:sva_core/sva_core.dart' show AttributeValues;
+import 'package:sva_core/sva_core.dart' show AttributeValues, GradeSystem;
 import 'package:sva_data/sva_data.dart';
 
 /// The local database. `main` opens it on the device; tests override it
@@ -180,4 +180,23 @@ routeClimbsProvider = StreamProvider.autoDispose.family(
   (ref, routeId) => ref
       .watch(ascentRepositoryProvider)
       .watchOnRoute(routeId, userId: ref.watch(currentUserIdProvider)),
+);
+
+/// Adds crags and routes from the forms.
+final Provider<RouteEditor> routeEditorProvider = Provider(
+  (ref) => RouteEditor(ref.watch(databaseProvider)),
+);
+
+/// The crags and sectors a route can be added to, by name, live.
+final StreamProvider<List<Area>> routePlacesProvider =
+    StreamProvider.autoDispose(
+      (ref) => ref.watch(areaRepositoryProvider).watchOfTypes({
+        'crag',
+        'sector',
+      }, userId: ref.watch(currentUserIdProvider)),
+    );
+
+/// Every grade system on the device, easiest grade first.
+final FutureProvider<List<GradeSystem>> gradeSystemsProvider = FutureProvider(
+  (ref) => GradeRepository(ref.watch(databaseProvider)).systems(),
 );

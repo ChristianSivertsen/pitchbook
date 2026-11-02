@@ -244,4 +244,123 @@ class AppLocalizationsNb extends AppLocalizations {
     });
     return '$_temp0';
   }
+
+  @override
+  String get routeAdd => 'Legg til en rute';
+
+  @override
+  String get routeFormTitle => 'Ny rute';
+
+  @override
+  String get formName => 'Navn';
+
+  @override
+  String get routeFormNameMissing => 'Gi ruten et navn.';
+
+  @override
+  String get routeFormCrag => 'Felt';
+
+  @override
+  String get routeFormCragMissing => 'Velg feltet ruten er i.';
+
+  @override
+  String routeFormRockFromCrag(String rock) {
+    return 'Bergarten følger feltet: $rock.';
+  }
+
+  @override
+  String get routeFormDiscipline => 'Disiplin';
+
+  @override
+  String routeFormGrade(String system) {
+    return 'Grad ($system)';
+  }
+
+  @override
+  String get routeFormNoGrade => 'Ingen grad ennå';
+
+  @override
+  String get routeFormLength => 'Lengde i meter';
+
+  @override
+  String get routeFormPitches => 'Taulengder';
+
+  @override
+  String routeFormPitch(int number) {
+    return 'Taulengde $number';
+  }
+
+  @override
+  String formNumberInvalid(int max) {
+    return 'Skriv et tall fra 1 til $max.';
+  }
+
+  @override
+  String get routeFormAngle => 'Vinkel';
+
+  @override
+  String get routeFormFeatures => 'Formasjoner';
+
+  @override
+  String get routeFormHolds => 'Grep';
+
+  @override
+  String get routeFormProtection => 'Sikring';
+
+  @override
+  String get routeFormDescent => 'Nedstigning';
+
+  @override
+  String get routeFormRope => 'Tau som trengs';
+
+  @override
+  String get routeFormFirstAscent => 'Førstebestigning';
+
+  @override
+  String get routeFormFirstAscentHint => 'Navn og år';
+
+  @override
+  String get routeFormSave => 'Lagre ruten';
+
+  @override
+  String get formSaveFailed => 'Kunne ikke lagre. Sjekk feltene og prøv igjen.';
+
+  @override
+  String get cragAdd => 'Nytt felt';
+
+  @override
+  String get cragFormTitle => 'Nytt felt';
+
+  @override
+  String get cragFormNameMissing => 'Gi feltet et navn.';
+
+  @override
+  String get cragFormCountry => 'Landskode';
+
+  @override
+  String get cragFormCountryInvalid => 'Bruk to bokstaver, som NO.';
+
+  @override
+  String get cragFormRock => 'Bergart';
+
+  @override
+  String get cragFormLatitude => 'Breddegrad';
+
+  @override
+  String get cragFormLongitude => 'Lengdegrad';
+
+  @override
+  String get cragFormLocationHint =>
+      'Desimalgrader, for eksempel 59,92 og 10,50. La begge stå tomme hvis du er usikker.';
+
+  @override
+  String get cragFormLocationInvalid => 'Fyll inn begge, som desimalgrader.';
+
+  @override
+  String get cragFormSave => 'Lagre feltet';
+
+  @override
+  String formLengthInvalid(int max) {
+    return 'Skriv en lengde i meter, opptil $max.';
+  }
 }
