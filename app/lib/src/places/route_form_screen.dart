@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Route;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sva/l10n/app_localizations.dart';
@@ -70,12 +71,21 @@ class _RouteFormScreenState extends ConsumerState<RouteFormScreen> {
     });
   }
 
-  String? _checkCount(String? text, int max, AppLocalizations l10n) {
+  String? _checkPitches(String? text, AppLocalizations l10n) {
     final value = (text ?? '').trim();
     if (value.isEmpty) return null;
-    final number = parseDecimal(value);
-    return number == null || number < 1 || number > max
-        ? l10n.formNumberInvalid(max)
+    final number = int.tryParse(value);
+    return number == null || number < 1 || number > maxPitches
+        ? l10n.formNumberInvalid(maxPitches)
+        : null;
+  }
+
+  String? _checkLength(String? text, AppLocalizations l10n) {
+    final value = (text ?? '').trim();
+    if (value.isEmpty) return null;
+    final metres = parseDecimal(value);
+    return metres == null || metres <= 0 || metres > maxRouteLengthM
+        ? l10n.formLengthInvalid(maxRouteLengthM.toInt())
         : null;
   }
 
@@ -255,8 +265,7 @@ class _RouteFormScreenState extends ConsumerState<RouteFormScreen> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    validator: (v) =>
-                        _checkCount(v, maxRouteLengthM.toInt(), l10n),
+                    validator: (v) => _checkLength(v, l10n),
                   ),
                 ),
                 const SizedBox(width: SvaSpace.sm),
@@ -267,8 +276,9 @@ class _RouteFormScreenState extends ConsumerState<RouteFormScreen> {
                       labelText: l10n.routeFormPitches,
                     ),
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     onChanged: _setPitches,
-                    validator: (v) => _checkCount(v, maxPitches, l10n),
+                    validator: (v) => _checkPitches(v, l10n),
                   ),
                 ),
               ],
@@ -297,8 +307,7 @@ class _RouteFormScreenState extends ConsumerState<RouteFormScreen> {
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
-                          validator: (v) =>
-                              _checkCount(v, maxRouteLengthM.toInt(), l10n),
+                          validator: (v) => _checkLength(v, l10n),
                         ),
                       ),
                     ],

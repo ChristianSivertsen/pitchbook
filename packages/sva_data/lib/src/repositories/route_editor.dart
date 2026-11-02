@@ -89,9 +89,11 @@ const maxRouteLengthM = 3000.0;
 /// Everything is checked here, at the boundary: a bad value throws
 /// [ArgumentError] naming the field, and nothing is written.
 class RouteEditor {
-  new(this.db, {DateTime Function()? clock})
-    : clock = clock ?? (() => DateTime.now().toUtc()),
-      _areas = AreaRepository(db, clock: clock),
+  new(SvaDatabase db, {DateTime Function()? clock})
+    : this._(db, clock ?? (() => DateTime.now().toUtc()));
+
+  new _(this.db, this.clock)
+    : _areas = AreaRepository(db, clock: clock),
       _routes = RouteRepository(db, clock: clock),
       _attributes = AttributeRepository(db, clock: clock);
 
@@ -119,7 +121,7 @@ class RouteEditor {
     _checkValue(areaDefs, 'rock_type', crag.rockType);
     return await db.transaction(() async {
       if (crag.parentId case final parent?) {
-        await _visibleArea(parent, userId, 'parentId');
+        await _visibleArea(parent, userId, 'parentId', _cragParents);
       }
       return await _areas.createPrivate(
         AreasCompanion(
@@ -165,13 +167,12 @@ class RouteEditor {
     for (final value in route.holds) {
       _checkValue(defs, 'hold', value);
     }
+    // Ice, mixed, aid and alpine grades come with their own systems later;
+    // until then every route that is not a boulder takes a free grade.
     final gradeType = route.discipline == 'boulder' ? 'boulder' : 'free_route';
 
     return await db.transaction(() async {
-      final area = await _visibleArea(route.areaId, userId, 'areaId');
-      if (area.type == 'gym') {
-        throw ArgumentError.value(route.areaId, 'areaId', 'a gym');
-      }
+      await _visibleArea(route.areaId, userId, 'areaId', _routePlaces);
       for (final id in [
         route.gradeId,
         for (final p in route.pitches) p.gradeId,
@@ -276,10 +277,22 @@ class RouteEditor {
     }
   }
 
-  /// The live place [id] that [userId] can see, or [ArgumentError].
-  Future<Area> _visibleArea(String id, String userId, String field) async {
+  /// Places a crag can sit under, and places a route can be in.
+  static const _cragParents = {'country', 'region', 'area'};
+  static const _routePlaces = {'crag', 'sector', 'wall', 'boulder_block'};
+
+  /// The live, unmerged place [id] of one of [types] that [userId] can
+  /// see, or [ArgumentError].
+  Future<Area> _visibleArea(
+    String id,
+    String userId,
+    String field,
+    Set<String> types,
+  ) async {
     final area = await _areas.get(id);
     if (area == null ||
+        area.mergedIntoId != null ||
+        !types.contains(area.type) ||
         (area.visibility != 'public' && area.createdBy != userId)) {
       throw ArgumentError.value(id, field, 'no such place');
     }

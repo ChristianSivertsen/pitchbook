@@ -160,6 +160,30 @@ void main() {
       throwsArgumentError,
       reason: "someone else's private crag",
     );
+    final region = await AreaRepository(db).createPrivate(
+      const AreasCompanion(
+        type: Value('region'),
+        name: Value('Viken'),
+        countryCode: Value('NO'),
+      ),
+      userId: 'me',
+    );
+    await expectLater(
+      editor.addRoute(
+        NewRoute(areaId: region, name: 'X', discipline: 'sport'),
+        userId: 'me',
+      ),
+      throwsArgumentError,
+      reason: 'routes go in a crag or sector, not a region',
+    );
+    await expectLater(
+      editor.addCrag(
+        NewCrag(name: 'X', countryCode: 'NO', parentId: crag),
+        userId: 'me',
+      ),
+      throwsArgumentError,
+      reason: 'a crag does not go inside a crag',
+    );
     for (final crag in [
       const NewCrag(name: 'X', countryCode: 'norway'),
       const NewCrag(name: 'X', countryCode: 'NO', location: (lat: 91, lon: 0)),
@@ -171,7 +195,7 @@ void main() {
       );
     }
     expect(await db.select(db.routes).get(), isEmpty);
-    expect(await db.select(db.areas).get(), hasLength(2));
+    expect(await db.select(db.areas).get(), hasLength(3));
   });
 
   test('M2-2: the route form lists crags and sectors you can see', () async {

@@ -186,5 +186,13 @@
   "cragFormLongitude": "Longitude",
   "cragFormLocationHint": "Decimal degrees, such as 59.92 and 10.50. Leave both empty if you are not sure.",
   "cragFormLocationInvalid": "Enter both, as decimal degrees.",
-  "cragFormSave": "Save crag"
+  "cragFormSave": "Save crag",
+  "formLengthInvalid": "Enter a length in metres, up to {max}.",
+  "@formLengthInvalid": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  }
 }

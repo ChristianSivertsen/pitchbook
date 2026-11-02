@@ -57,9 +57,9 @@
   "formNumberInvalid": "Skriv et tall fra 1 til {max}.",
   "routeFormAngle": "Vinkel",
   "routeFormFeatures": "Formasjoner",
-  "routeFormHolds": "Tak",
+  "routeFormHolds": "Grep",
   "routeFormProtection": "Sikring",
-  "routeFormDescent": "Retur",
+  "routeFormDescent": "Nedstigning",
   "routeFormRope": "Tau som trengs",
   "routeFormFirstAscent": "Førstebestigning",
   "routeFormFirstAscentHint": "Navn og år",
@@ -75,5 +75,6 @@
   "cragFormLongitude": "Lengdegrad",
   "cragFormLocationHint": "Desimalgrader, for eksempel 59,92 og 10,50. La begge stå tomme hvis du er usikker.",
   "cragFormLocationInvalid": "Fyll inn begge, som desimalgrader.",
-  "cragFormSave": "Lagre feltet"
+  "cragFormSave": "Lagre feltet",
+  "formLengthInvalid": "Skriv en lengde i meter, opptil {max}."
 }

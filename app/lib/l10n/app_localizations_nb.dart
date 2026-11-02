@@ -302,13 +302,13 @@ class AppLocalizationsNb extends AppLocalizations {
   String get routeFormFeatures => 'Formasjoner';
 
   @override
-  String get routeFormHolds => 'Tak';
+  String get routeFormHolds => 'Grep';
 
   @override
   String get routeFormProtection => 'Sikring';
 
   @override
-  String get routeFormDescent => 'Retur';
+  String get routeFormDescent => 'Nedstigning';
 
   @override
   String get routeFormRope => 'Tau som trengs';
@@ -358,4 +358,9 @@ class AppLocalizationsNb extends AppLocalizations {
 
   @override
   String get cragFormSave => 'Lagre feltet';
+
+  @override
+  String formLengthInvalid(int max) {
+    return 'Skriv en lengde i meter, opptil $max.';
+  }
 }

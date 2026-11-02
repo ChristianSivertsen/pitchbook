@@ -29,10 +29,13 @@ class ChipGroup extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: context.svaText.label.copyWith(
-              color: context.svaColors.textMuted,
+          // The group's semantic label already says this.
+          ExcludeSemantics(
+            child: Text(
+              label,
+              style: context.svaText.label.copyWith(
+                color: context.svaColors.textMuted,
+              ),
             ),
           ),
           const SizedBox(height: SvaSpace.xs),

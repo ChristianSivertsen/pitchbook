@@ -553,6 +553,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save crag'**
   String get cragFormSave;
+
+  /// No description provided for @formLengthInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a length in metres, up to {max}.'**
+  String formLengthInvalid(int max);
 }
 
 class _AppLocalizationsDelegate

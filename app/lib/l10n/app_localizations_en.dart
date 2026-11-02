@@ -358,4 +358,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cragFormSave => 'Save crag';
+
+  @override
+  String formLengthInvalid(int max) {
+    return 'Enter a length in metres, up to $max.';
+  }
 }

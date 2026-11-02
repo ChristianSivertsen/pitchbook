@@ -83,7 +83,7 @@ void main() {
     expect(find.text('Pitch 2'), findsOneWidget);
     await tester.tap(find.text('Save route'));
     await tester.pumpAndSettle();
-    expect(find.text('Enter a number from 1 to 3000.'), findsOneWidget);
+    expect(find.text('Enter a length in metres, up to 3000.'), findsOneWidget);
     expect(editor.saved, isNull);
 
     await tester.enterText(field('Length in metres'), '62,5');
