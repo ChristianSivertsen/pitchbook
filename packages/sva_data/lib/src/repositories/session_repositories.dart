@@ -88,6 +88,17 @@ class SessionRepository extends Repository<$SessionsTable, Session> {
     return query.watch();
   }
 
+  /// `outdoor` or `indoor`: the setting of the session [userId] logged
+  /// last (whatever its date), so the log sheet opens on the last choice.
+  /// `null` before the first.
+  Future<String?> lastSetting({required String userId}) async {
+    final query = live()
+      ..where((s) => s.ownerId.equals(userId))
+      ..orderBy([(s) => OrderingTerm.desc(s.createdAt)])
+      ..limit(1);
+    return (await query.getSingleOrNull())?.setting;
+  }
+
   /// Where [userId] climbed outdoors most recently: the place of their
   /// latest outdoor session with a known location (the session's place, or
   /// else its first climb's), looked up to three levels up. `null` when
