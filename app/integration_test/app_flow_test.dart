@@ -9,7 +9,6 @@ import 'package:sva/src/sessions/session_screen.dart';
 import 'package:sva/src/shell/app_shell.dart';
 import 'package:sva/src/shell/log_sheet.dart';
 import 'package:sva/src/shell/tab_screens.dart';
-import 'package:sva_ui/sva_ui.dart';
 
 /// Flows: journeys across screens on a real device or emulator. See
 /// docs/TESTING.md, layer 5. Texts come from the app's translations, so
@@ -80,23 +79,32 @@ void main() {
     final l10n = AppLocalizations.of(tester.element(find.byType(AppShell)));
     final (:inSheet, :reveal, :tap) = _sheetHelpers(tester);
 
-    // An example session from October.
-    final past = find.text('After-work laps');
-    await tester.scrollUntilVisible(
-      past,
-      200,
-      scrollable: find
-          .descendant(
-            of: find.byType(FeedScreen),
-            matching: find.byType(Scrollable),
-          )
-          .first,
-    );
-    await tester.tap(past);
-    await tester.pumpAndSettle();
+    // An example session from October. Its feed row says how many climbs
+    // it has; rows build lazily, so scroll to it first.
     final day = formatDay(l10n, '2026-10-17');
+    final feed = find
+        .descendant(
+          of: find.byType(FeedScreen),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    final row = find.descendant(
+      of: find.byType(FeedScreen),
+      matching: find.textContaining('$day · '),
+    );
+    Future<int> climbsInRow() async {
+      await tester.scrollUntilVisible(row, 200, scrollable: feed);
+      final line = (row.evaluate().single.widget as Text).data!;
+      return [
+        for (var n = 1; n < 100; n++)
+          if (line.endsWith(l10n.logClimbCount(n))) n,
+      ].single;
+    }
+
+    final before = await climbsInRow();
+    await tester.tap(find.text('After-work laps'));
+    await tester.pumpAndSettle();
     expect(find.textContaining(day), findsOneWidget);
-    final before = find.byType(SvaStyleTag).evaluate().length;
 
     await tester.tap(find.text(l10n.sessionEdit));
     await tester.pumpAndSettle();
@@ -112,9 +120,12 @@ void main() {
     await tap(inSheet(find.text(l10n.ascentStyle('attempt'))));
     await tap(inSheet(find.text(l10n.logEditSave)));
 
+    expect(find.text(l10n.logEditSaved), findsOneWidget);
     expect(find.byType(SessionScreen), findsOneWidget);
     expect(find.textContaining(day), findsOneWidget, reason: 'same day');
-    expect(find.byType(SvaStyleTag), findsNWidgets(before + 1));
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(await climbsInRow(), before + 1);
   });
 }
 
