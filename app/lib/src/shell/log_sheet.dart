@@ -12,7 +12,8 @@ import 'package:sva/src/places/form_parts.dart';
 import 'package:sva/src/places/labels.dart';
 import 'package:sva/src/routes.dart';
 import 'package:sva/src/sessions/session_screen.dart';
-import 'package:sva_core/sva_core.dart' show LoggedAscent, RouteHistory;
+import 'package:sva_core/sva_core.dart'
+    show LoggedAscent, RouteHistory, seasonOf;
 import 'package:sva_data/sva_data.dart';
 import 'package:sva_ui/sva_ui.dart';
 
@@ -234,8 +235,13 @@ class _LogSheetState extends ConsumerState<LogSheet> {
             userId: ref.read(currentUserIdProvider),
           );
       if (!mounted) return;
+      final weather = ref.read(weatherFillerProvider);
+      final userId = ref.read(currentUserIdProvider);
       closeLogSheet(context);
       messenger.showSnackBar(SnackBar(content: Text(l10n.logSaved)));
+      // Look up the weather now if there is signal; otherwise later. The
+      // session is saved either way, so a failure here is not the user's.
+      unawaited(weather.fillMissing(userId: userId).catchError((_) => 0));
     } on ClimbRejected catch (e) {
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.logClimbRejected(e.index + 1))),
@@ -440,6 +446,9 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                               final s? => DateTime.parse(s.localDate),
                               null => _date,
                             },
+                            latitude: [
+                              for (final c in _toSave) c.hit.location?.lat,
+                            ].nonNulls.firstOrNull,
                             // A session keeps the day it was logged on.
                             onPickDate: editing ? null : _pickDate,
                             title: _title,
@@ -695,6 +704,7 @@ class _ExistingRow extends ConsumerWidget {
 class _SessionFields extends StatelessWidget {
   const new({
     required this.date,
+    required this.latitude,
     required this.onPickDate,
     required this.title,
     required this.description,
@@ -704,6 +714,9 @@ class _SessionFields extends StatelessWidget {
   });
 
   final DateTime date;
+
+  /// Where the first climb is, to name the season; `null` until known.
+  final double? latitude;
 
   /// `null` when the date is fixed.
   final VoidCallback? onPickDate;
@@ -716,6 +729,7 @@ class _SessionFields extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final day = DateFormat('yyyy-MM-dd').format(date);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -730,8 +744,11 @@ class _SessionFields extends StatelessWidget {
             onPressed: onPickDate,
             icon: const Icon(LucideIcons.calendar),
             label: Text(
-              '${l10n.logDate}: '
-              '${formatDay(l10n, DateFormat('yyyy-MM-dd').format(date))}',
+              [
+                '${l10n.logDate}: ${formatDay(l10n, day)}',
+                if (latitude case final lat?)
+                  l10n.season(seasonOf(date, latitude: lat).name),
+              ].join(' · '),
             ),
           ),
         ),

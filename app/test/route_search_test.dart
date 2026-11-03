@@ -33,6 +33,7 @@ RouteHit _hit(
   crag: 'Kolsås',
   lastClimbed: lastClimbed,
   distanceKm: null,
+  location: (lat: 59.92, lon: 10.5),
 );
 
 final _routes = <RouteHit>[

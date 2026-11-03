@@ -569,6 +569,33 @@ class AppLocalizationsNb extends AppLocalizations {
       'Trykk på kartet, eller skriv desimalgrader, for eksempel 59,92 og 10,50. La begge stå tomme hvis du er usikker.';
 
   @override
+  String season(String season) {
+    String _temp0 = intl.Intl.selectLogic(season, {
+      'spring': 'Vår',
+      'summer': 'Sommer',
+      'autumn': 'Høst',
+      'winter': 'Vinter',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String weatherTemp(String temp) {
+    return '$temp °C';
+  }
+
+  @override
+  String weatherRain(String mm) {
+    return '$mm mm regn';
+  }
+
+  @override
+  String weatherWind(String speed) {
+    return '$speed m/s vind';
+  }
+
+  @override
   String get sessionNotFound =>
       'Denne økta finnes ikke på telefonen. Den kan være slettet.';
 

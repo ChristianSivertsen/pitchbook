@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:sva/l10n/app_localizations.dart';
 import 'package:sva_core/sva_core.dart' show AttributeValues;
+import 'package:sva_data/sva_data.dart' show WeatherSnapshot;
 
 /// Route details shown as tags, in this order. Discipline is shown on its
 /// own line, so it is not here.
@@ -38,3 +39,18 @@ String? _label(AppLocalizations l10n, String key, String value) =>
 /// (docs/DESIGN.md, Writing).
 String formatDay(AppLocalizations l10n, String day) =>
     DateFormat('d MMM y', l10n.localeName).format(DateTime.parse(day));
+
+/// A day's weather in one line, such as `10 °C · 0,4 mm regn · 3 m/s
+/// vind`, with numbers in the app's language. Empty when nothing is known.
+String weatherLine(AppLocalizations l10n, WeatherSnapshot weather) {
+  final number = NumberFormat.decimalPattern(l10n.localeName)
+    ..maximumFractionDigits = 1;
+  return [
+    if (weather.tempC case final t?) l10n.weatherTemp(number.format(t.round())),
+    // Less than a tenth of a millimetre would read as 0 mm.
+    if (weather.precipMm case final mm? when mm >= 0.05)
+      l10n.weatherRain(number.format(mm)),
+    if (weather.windMs case final ms?)
+      l10n.weatherWind(number.format(ms.round())),
+  ].join(' · ');
+}

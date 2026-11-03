@@ -102,6 +102,14 @@ class SessionRepository extends Repository<$SessionsTable, Session> {
     return query.watch().map((rows) => [for (final m in rows) ?m.guestName]);
   }
 
+  /// A session's weather, once it has been fetched, live.
+  Stream<WeatherSnapshot?> watchWeather(String sessionId) =>
+      (db.select(db.weatherSnapshots)
+            ..where((w) => w.sessionId.equals(sessionId) & w.deletedAt.isNull())
+            ..orderBy([(w) => OrderingTerm.desc(w.fetchedAt)])
+            ..limit(1))
+          .watchSingleOrNull();
+
   /// `outdoor` or `indoor`: the setting of the session [userId] logged
   /// last (whatever its date), so the log sheet opens on the last choice.
   /// `null` before the first.

@@ -15,3 +15,5 @@ export 'src/repositories/session_logger.dart';
 export 'src/repositories/session_repositories.dart';
 export 'src/seed/attribute_seed.dart';
 export 'src/seed/example_data.dart';
+export 'src/weather/open_meteo.dart';
+export 'src/weather/weather_filler.dart';

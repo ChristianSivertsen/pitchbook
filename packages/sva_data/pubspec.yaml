@@ -8,6 +8,7 @@ environment:
 
 dependencies:
   drift: ^2.35.2
+  http: ^1.6.0
   sva_core:
     path: ../sva_core
   uuid: ^4.6.0
