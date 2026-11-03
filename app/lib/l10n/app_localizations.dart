@@ -805,6 +805,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap the map, or type decimal degrees such as 59.92 and 10.50. Leave both empty if you are not sure.'**
   String get cragFormLocationHintMap;
+
+  /// A season by name (spring, summer, autumn, winter).
+  ///
+  /// In en, this message translates to:
+  /// **'{season, select, spring{Spring} summer{Summer} autumn{Autumn} winter{Winter} other{}}'**
+  String season(String season);
+
+  /// No description provided for @weatherTemp.
+  ///
+  /// In en, this message translates to:
+  /// **'{temp} °C'**
+  String weatherTemp(String temp);
+
+  /// No description provided for @weatherRain.
+  ///
+  /// In en, this message translates to:
+  /// **'{mm} mm rain'**
+  String weatherRain(String mm);
+
+  /// No description provided for @weatherWind.
+  ///
+  /// In en, this message translates to:
+  /// **'{speed} m/s wind'**
+  String weatherWind(String speed);
 }
 
 class _AppLocalizationsDelegate

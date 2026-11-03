@@ -223,3 +223,16 @@ final FutureProviderFamily<List<LoggedAscent>, String> routeLogProvider =
           .watch(ascentRepositoryProvider)
           .routeLog(routeId, userId: ref.watch(currentUserIdProvider)),
     );
+
+/// Adds weather to sessions that lack it. `main` overrides this with the
+/// one it runs on a timer, so every caller shares one run at a time.
+final Provider<WeatherFiller> weatherFillerProvider = Provider(
+  (ref) => WeatherFiller(ref.watch(databaseProvider), OpenMeteo()),
+);
+
+/// A session's weather, once fetched, live.
+final StreamProviderFamily<WeatherSnapshot?, String> sessionWeatherProvider =
+    StreamProvider.autoDispose.family(
+      (ref, sessionId) =>
+          ref.watch(sessionRepositoryProvider).watchWeather(sessionId),
+    );

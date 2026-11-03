@@ -567,4 +567,31 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get cragFormLocationHintMap =>
       'Tap the map, or type decimal degrees such as 59.92 and 10.50. Leave both empty if you are not sure.';
+
+  @override
+  String season(String season) {
+    String _temp0 = intl.Intl.selectLogic(season, {
+      'spring': 'Spring',
+      'summer': 'Summer',
+      'autumn': 'Autumn',
+      'winter': 'Winter',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String weatherTemp(String temp) {
+    return '$temp °C';
+  }
+
+  @override
+  String weatherRain(String mm) {
+    return '$mm mm rain';
+  }
+
+  @override
+  String weatherWind(String speed) {
+    return '$speed m/s wind';
+  }
 }

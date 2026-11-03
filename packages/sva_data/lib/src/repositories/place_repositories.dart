@@ -145,12 +145,15 @@ typedef LatLon = ({double lat, double lon});
 /// - `crag`: the crag the route is in, or its nearest place without one.
 /// - `lastClimbed`: `YYYY-MM-DD` of the user's latest climb on it.
 /// - `distanceKm`: from the point searched from, `null` without one.
+/// - `location`: where the route is, from the nearest place above it that
+///   has one, or `null`.
 typedef RouteHit = ({
   Route route,
   String? grade,
   String? crag,
   String? lastClimbed,
   double? distanceKm,
+  LatLon? location,
 });
 
 /// Every climbable line, outdoors or in a gym.
@@ -337,6 +340,13 @@ class RouteRepository extends Repository<$RoutesTable, Route>
               row.readNullable<double>('lat'),
               row.readNullable<double>('lon'),
             ),
+            location: switch ((
+              row.readNullable<double>('lat'),
+              row.readNullable<double>('lon'),
+            )) {
+              (final lat?, final lon?) => (lat: lat, lon: lon),
+              _ => null,
+            },
           ),
           sortKey: nameSortKey(row.readNullable<String>('name') ?? ''),
           tier: _matchTier(
