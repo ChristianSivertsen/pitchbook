@@ -155,7 +155,10 @@ class _ClimbRow extends StatelessWidget {
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text(formatDay(l10n, date), style: text.body),
-          _StyleTag(ascent.style),
+          SvaStyleTag(
+            style: ascent.style,
+            label: l10n.ascentStyle(ascent.style),
+          ),
           Text(
             l10n.ascentTries(ascent.tries),
             style: text.caption.copyWith(color: context.svaColors.textMuted),
@@ -172,44 +175,6 @@ class _ClimbRow extends StatelessWidget {
               style: text.caption.copyWith(color: context.svaColors.textMuted),
             ),
         ],
-      ),
-    );
-  }
-}
-
-/// A climb's style in its climbing colour; repeats and attempts are quiet
-/// outlines (docs/DESIGN.md, Style tag).
-class _StyleTag extends StatelessWidget {
-  const new(this.style);
-
-  final String style;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.svaColors;
-    final fill = switch (style) {
-      'onsight' => colors.onsight,
-      'flash' => colors.flash,
-      'redpoint' => colors.redpoint,
-      _ => null,
-    };
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: fill,
-        border: fill == null ? Border.all(color: colors.textMuted) : null,
-        borderRadius: const BorderRadius.all(SvaRadius.small),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: SvaSpace.xs,
-          vertical: SvaSpace.xxs,
-        ),
-        child: Text(
-          AppLocalizations.of(context).ascentStyle(style),
-          style: context.svaText.caption.copyWith(
-            color: fill == null ? colors.textMuted : colors.onStyle,
-          ),
-        ),
       ),
     );
   }

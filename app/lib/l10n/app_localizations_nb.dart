@@ -567,4 +567,77 @@ class AppLocalizationsNb extends AppLocalizations {
   @override
   String get cragFormLocationHintMap =>
       'Trykk på kartet, eller skriv desimalgrader, for eksempel 59,92 og 10,50. La begge stå tomme hvis du er usikker.';
+
+  @override
+  String get sessionNotFound =>
+      'Denne økta finnes ikke lenger. Den kan være slettet.';
+
+  @override
+  String sessionWith(String names) {
+    return 'Med $names';
+  }
+
+  @override
+  String get sessionClimbs => 'Klatringer';
+
+  @override
+  String get sessionEdit => 'Rediger økt';
+
+  @override
+  String get sessionDelete => 'Slett økt';
+
+  @override
+  String get sessionDeleteTitle => 'Slette denne økta?';
+
+  @override
+  String get sessionDeleteBody =>
+      'Klatringene, partnerne og været slettes sammen med den, og senere klatringer på de samme rutene teller fra klatringene som er igjen.';
+
+  @override
+  String get sessionDeleteLastBody =>
+      'Dette var den siste klatringen i økta, så når du lagrer, slettes hele økta med partnere og vær.';
+
+  @override
+  String get sessionDeleteConfirm => 'Slett';
+
+  @override
+  String get sessionKeep => 'Behold';
+
+  @override
+  String get sessionDeleted => 'Økta er slettet';
+
+  @override
+  String get logEditTitle => 'Rediger økt';
+
+  @override
+  String get logEditExisting => 'I denne økta';
+
+  @override
+  String get logEditForgotten => 'Legg til en klatring du glemte';
+
+  @override
+  String logEditMarked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count klatringer fjernes når du lagrer.',
+      one: '1 klatring fjernes når du lagrer.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String logEditKeep(String route) {
+    return 'Behold $route';
+  }
+
+  @override
+  String get logEditSave => 'Lagre endringer';
+
+  @override
+  String get logEditSaved => 'Endringene er lagret';
+
+  @override
+  String get logLaterClimbRejected =>
+      'En senere klatring på samme rute bygger på denne. Endre eller fjern den klatringen først.';
 }

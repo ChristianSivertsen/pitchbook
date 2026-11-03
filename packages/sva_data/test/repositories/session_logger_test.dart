@@ -165,4 +165,120 @@ void main() {
     );
     expect(await db.select(db.sessions).get(), isEmpty);
   });
+
+  Future<List<(String, int)>> onRoute(String route) async => [
+    for (final e in await AscentRepository(
+      db,
+    ).routeEntries(route, userId: 'me'))
+      (e.ascent.style.name, e.ascent.tries),
+  ];
+
+  test('M2-6: removing a climb recalculates later tries', () async {
+    final first = await logger.logOutdoor(
+      day([
+        climb(sport, AscentStyle.attempt, tries: 3),
+        climb(boulder, AscentStyle.flash, type: 'boulder'),
+      ]),
+      userId: 'me',
+    );
+    await logger.logOutdoor(
+      day([climb(sport, AscentStyle.redpoint, tries: 5)], date: '2026-11-02'),
+      userId: 'me',
+    );
+    final attempt = (await AscentRepository(
+      db,
+    ).watchInSession(first).first).first.id;
+
+    // The redpoint took 2 tries of its own after the 3 on the attempt.
+    await logger.editOutdoor(
+      first,
+      SessionEdit(removed: {attempt}),
+      userId: 'me',
+    );
+    expect(await onRoute(sport), [('redpoint', 2)]);
+
+    // A forgotten attempt added to the first day counts again.
+    await logger.editOutdoor(
+      first,
+      SessionEdit(added: [climb(sport, AscentStyle.attempt, tries: 4)]),
+      userId: 'me',
+    );
+    expect(await onRoute(sport), [('attempt', 4), ('redpoint', 6)]);
+  });
+
+  test('M2-6: an edit that breaks a later climb is refused', () async {
+    final before = await logger.logOutdoor(
+      day([
+        climb(boulder, AscentStyle.attempt, type: 'boulder'),
+      ], date: '2026-10-31'),
+      userId: 'me',
+    );
+    final first = await logger.logOutdoor(
+      day([climb(sport, AscentStyle.flash)]),
+      userId: 'me',
+    );
+    await logger.logOutdoor(
+      day([climb(sport, AscentStyle.repeat)], date: '2026-11-02'),
+      userId: 'me',
+    );
+    final flash = (await AscentRepository(
+      db,
+    ).watchInSession(first).first).single.id;
+
+    // The repeat on the last day needs the flash, even when the whole
+    // session goes.
+    await expectLater(
+      logger.editOutdoor(first, SessionEdit(removed: {flash}), userId: 'me'),
+      throwsA(isA<LaterClimbRejected>()),
+    );
+    // A forgotten attempt the day before would make the flash no flash.
+    await expectLater(
+      logger.editOutdoor(
+        before,
+        SessionEdit(added: [climb(sport, AscentStyle.attempt)]),
+        userId: 'me',
+      ),
+      throwsA(isA<LaterClimbRejected>()),
+    );
+    // An added climb is checked against the session's own climbs.
+    await expectLater(
+      logger.editOutdoor(
+        first,
+        SessionEdit(
+          added: [
+            climb(boulder, AscentStyle.attempt, type: 'boulder'),
+            climb(sport, AscentStyle.flash),
+          ],
+        ),
+        userId: 'me',
+      ),
+      throwsA(isA<ClimbRejected>().having((e) => e.index, 'index', 1)),
+    );
+    expect(await onRoute(sport), [('flash', 1), ('repeat', 1)]);
+    expect(await SessionRepository(db).get(first), isNotNull);
+  });
+
+  test('M2-6: removing the last climb deletes the session', () async {
+    final id = await logger.logOutdoor(
+      day([climb(sport, AscentStyle.flash)]),
+      userId: 'me',
+    );
+    final only = (await AscentRepository(db).watchInSession(id).first).single;
+
+    final deleted = await logger.editOutdoor(
+      id,
+      SessionEdit(removed: {only.id}),
+      userId: 'me',
+    );
+    expect(deleted, isTrue);
+    expect(await SessionRepository(db).get(id), isNull);
+    expect(await AscentRepository(db).get(only.id), isNull);
+    expect(
+      (await db.select(db.sessionMembers).get()).every(
+        (m) => m.deletedAt != null,
+      ),
+      isTrue,
+      reason: 'partners go with the session',
+    );
+  });
 }

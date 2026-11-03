@@ -805,6 +805,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap the map, or type decimal degrees such as 59.92 and 10.50. Leave both empty if you are not sure.'**
   String get cragFormLocationHintMap;
+
+  /// No description provided for @sessionNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This session is gone. It may have been deleted.'**
+  String get sessionNotFound;
+
+  /// No description provided for @sessionWith.
+  ///
+  /// In en, this message translates to:
+  /// **'With {names}'**
+  String sessionWith(String names);
+
+  /// No description provided for @sessionClimbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Climbs'**
+  String get sessionClimbs;
+
+  /// No description provided for @sessionEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit session'**
+  String get sessionEdit;
+
+  /// No description provided for @sessionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete session'**
+  String get sessionDelete;
+
+  /// No description provided for @sessionDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this session?'**
+  String get sessionDeleteTitle;
+
+  /// No description provided for @sessionDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Its climbs, partners and weather are deleted with it, and later climbs on the same routes count from the climbs that are left.'**
+  String get sessionDeleteBody;
+
+  /// No description provided for @sessionDeleteLastBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This was the session\'s last climb, so saving deletes the whole session with its partners and weather.'**
+  String get sessionDeleteLastBody;
+
+  /// No description provided for @sessionDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get sessionDeleteConfirm;
+
+  /// No description provided for @sessionKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get sessionKeep;
+
+  /// No description provided for @sessionDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Session deleted'**
+  String get sessionDeleted;
+
+  /// No description provided for @logEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit session'**
+  String get logEditTitle;
+
+  /// No description provided for @logEditExisting.
+  ///
+  /// In en, this message translates to:
+  /// **'In this session'**
+  String get logEditExisting;
+
+  /// No description provided for @logEditForgotten.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a climb you forgot'**
+  String get logEditForgotten;
+
+  /// No description provided for @logEditMarked.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 climb is removed when you save.} other{{count} climbs are removed when you save.}}'**
+  String logEditMarked(int count);
+
+  /// No description provided for @logEditKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep {route}'**
+  String logEditKeep(String route);
+
+  /// No description provided for @logEditSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get logEditSave;
+
+  /// No description provided for @logEditSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes saved'**
+  String get logEditSaved;
+
+  /// No description provided for @logLaterClimbRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'A later climb on the same route depends on this one. Change or remove that climb first.'**
+  String get logLaterClimbRejected;
 }
 
 class _AppLocalizationsDelegate

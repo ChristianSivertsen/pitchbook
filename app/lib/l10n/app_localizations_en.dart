@@ -567,4 +567,77 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get cragFormLocationHintMap =>
       'Tap the map, or type decimal degrees such as 59.92 and 10.50. Leave both empty if you are not sure.';
+
+  @override
+  String get sessionNotFound =>
+      'This session is gone. It may have been deleted.';
+
+  @override
+  String sessionWith(String names) {
+    return 'With $names';
+  }
+
+  @override
+  String get sessionClimbs => 'Climbs';
+
+  @override
+  String get sessionEdit => 'Edit session';
+
+  @override
+  String get sessionDelete => 'Delete session';
+
+  @override
+  String get sessionDeleteTitle => 'Delete this session?';
+
+  @override
+  String get sessionDeleteBody =>
+      'Its climbs, partners and weather are deleted with it, and later climbs on the same routes count from the climbs that are left.';
+
+  @override
+  String get sessionDeleteLastBody =>
+      'This was the session\'s last climb, so saving deletes the whole session with its partners and weather.';
+
+  @override
+  String get sessionDeleteConfirm => 'Delete';
+
+  @override
+  String get sessionKeep => 'Keep';
+
+  @override
+  String get sessionDeleted => 'Session deleted';
+
+  @override
+  String get logEditTitle => 'Edit session';
+
+  @override
+  String get logEditExisting => 'In this session';
+
+  @override
+  String get logEditForgotten => 'Add a climb you forgot';
+
+  @override
+  String logEditMarked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count climbs are removed when you save.',
+      one: '1 climb is removed when you save.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String logEditKeep(String route) {
+    return 'Keep $route';
+  }
+
+  @override
+  String get logEditSave => 'Save changes';
+
+  @override
+  String get logEditSaved => 'Changes saved';
+
+  @override
+  String get logLaterClimbRejected =>
+      'A later climb on the same route depends on this one. Change or remove that climb first.';
 }

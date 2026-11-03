@@ -311,7 +311,7 @@ Common filters (discipline, angle, protection, rock type) are typed columns. Att
 | ordinal | integer | Order within the session |
 | ascent_type | text | `lead`, `follow`, `toprope`, `solo`, `free_solo`, `dws`, `aid`, `simul`, `auto_belay`, `boulder` |
 | style | text | `onsight`, `flash`, `redpoint`, `repeat`, `attempt` |
-| tries | integer | Follows the rules in PLAN.md decision 7 |
+| tries | integer | Follows the rules in PLAN.md decision 7. A redpoint counts the attempts before it, so when an edit adds or removes one of those attempts, the redpoint's tries move by the same number (never below 2) |
 | falls | integer | |
 | rests | integer | Hangs or takes |
 | high_point | text | For attempts and projects, for example "third bolt" |

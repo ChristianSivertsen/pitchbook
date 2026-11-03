@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,16 +11,17 @@ import 'package:sva/src/logging/climb_editor.dart';
 import 'package:sva/src/places/form_parts.dart';
 import 'package:sva/src/places/labels.dart';
 import 'package:sva/src/routes.dart';
-import 'package:sva_core/sva_core.dart' show RouteHistory;
+import 'package:sva/src/sessions/session_screen.dart';
+import 'package:sva_core/sva_core.dart' show LoggedAscent, RouteHistory;
 import 'package:sva_data/sva_data.dart';
 import 'package:sva_ui/sva_ui.dart';
 
 /// The log sheet as a page, so `/log` works as a deep link and the system
 /// back gesture closes it. Slides up over the current tab.
 class LogSheetPage extends CustomTransitionPage<void> {
-  new({super.key})
+  new({super.key, String? sessionId})
     : super(
-        child: const LogSheet(),
+        child: LogSheet(sessionId: sessionId),
         fullscreenDialog: true,
         opaque: false,
         barrierDismissible: true,
@@ -55,9 +58,13 @@ void closeLogSheet(BuildContext context) {
 }
 
 /// The log sheet: pick outdoor or indoor, add climbs, then save the
-/// session. Opens on the setting of the session logged last.
+/// session. Opens on the setting of the session logged last. With a
+/// [sessionId] it edits that session instead: remove climbs, add forgotten
+/// ones and change the texts, on the day it was logged.
 class LogSheet extends ConsumerStatefulWidget {
-  const new({super.key});
+  const new({this.sessionId, super.key});
+
+  final String? sessionId;
 
   @override
   ConsumerState<LogSheet> createState() => _LogSheetState();
@@ -78,6 +85,47 @@ class _LogSheetState extends ConsumerState<LogSheet> {
   String? _conditions;
   var _saving = false;
 
+  /// Editing: the session as it was, until it has loaded.
+  Session? _session;
+
+  /// Editing: ids of the session's climbs marked for removal.
+  final _removed = <String>{};
+
+  bool get _editing => widget.sessionId != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.sessionId case final id?) unawaited(_load(id));
+  }
+
+  /// Fills the fields with the session being edited.
+  Future<void> _load(String id) async {
+    final session = await ref.read(sessionProvider(id).future);
+    final partners = await ref.read(sessionPartnersProvider(id).future);
+    if (!mounted || session == null) return;
+    setState(() {
+      _session = session;
+      _title.text = session.title ?? '';
+      _description.text = session.description ?? '';
+      _partners.text = partners.join(', ');
+      _conditions = session.conditions;
+    });
+  }
+
+  /// What the rules see on [routeId] before the new climbs: everything
+  /// logged, or when editing, everything up to this session less the
+  /// climbs marked for removal.
+  Future<List<LoggedAscent>> _logged(String routeId) async {
+    final id = widget.sessionId;
+    if (id == null) return await ref.read(routeLogProvider(routeId).future);
+    final entries = await ref.read(routeLogUpToProvider((routeId, id)).future);
+    return [
+      for (final e in entries)
+        if (!_removed.contains(e.id)) e.ascent,
+    ];
+  }
+
   @override
   void dispose() {
     _title.dispose();
@@ -94,7 +142,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final routeId = _climbs[index].hit.route.id;
-    final logged = await ref.read(routeLogProvider(routeId).future);
+    final logged = await _logged(routeId);
     if (!mounted) return;
     final remaining = [..._climbs]..removeAt(index);
     final history = [...logged];
@@ -147,6 +195,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
   }
 
   Future<void> _save() async {
+    if (widget.sessionId case final id?) return await _saveEdit(id);
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _saving = true);
@@ -182,15 +231,82 @@ class _LogSheetState extends ConsumerState<LogSheet> {
     }
   }
 
+  /// Saves the changes to session [id]. Removing every climb deletes the
+  /// session, so the user is asked first.
+  Future<void> _saveEdit(String id) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final router = GoRouter.of(context);
+    final existing = ref.read(sessionAscentsProvider(id)).value ?? const [];
+    if (_toSave.isEmpty && _removed.length >= existing.length) {
+      final sure = await confirmDelete(context, l10n.sessionDeleteLastBody);
+      if (!sure || !mounted) return;
+    }
+    setState(() => _saving = true);
+    try {
+      final deleted = await ref
+          .read(sessionLoggerProvider)
+          .editOutdoor(
+            id,
+            SessionEdit(
+              title: _title.text,
+              description: _description.text,
+              conditions: _conditions,
+              partners: _partners.text.split(','),
+              removed: {..._removed},
+              added: [for (final c in _toSave) c.draft],
+            ),
+            userId: ref.read(currentUserIdProvider),
+          );
+      if (deleted) {
+        router.go(Routes.feed);
+      } else if (mounted) {
+        closeLogSheet(context);
+      }
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(deleted ? l10n.sessionDeleted : l10n.logEditSaved),
+        ),
+      );
+    } on ClimbRejected catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.logClimbRejected(e.index + 1))),
+      );
+      if (mounted) setState(() => _saving = false);
+    } on LaterClimbRejected {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.logLaterClimbRejected)),
+      );
+      if (mounted) setState(() => _saving = false);
+    } on Object {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.formSaveFailed)));
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  /// Marks one of the session's climbs for removal, or keeps it again.
+  /// Saving checks the new climbs against the climbs that are left.
+  void _toggleRemoved(String ascentId) => setState(() {
+    if (!_removed.remove(ascentId)) _removed.add(ascentId);
+  });
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = context.svaColors;
     final text = context.svaText;
-    final setting =
-        _setting ?? ref.watch(lastSettingProvider).value ?? 'outdoor';
+    final editing = _editing;
+    final setting = editing
+        ? 'outdoor'
+        : _setting ?? ref.watch(lastSettingProvider).value ?? 'outdoor';
     final outdoor = setting == 'outdoor';
     final count = _toSave.length;
+    final existing = editing
+        ? ref.watch(sessionAscentsProvider(widget.sessionId!)).value
+        : null;
+    if (editing && (_session == null || existing == null)) {
+      return const SizedBox.shrink();
+    }
 
     // Lift the sheet above the keyboard so the fields and Save stay
     // reachable.
@@ -234,7 +350,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                           child: Semantics(
                             header: true,
                             child: Text(
-                              l10n.logSheetTitle,
+                              editing ? l10n.logEditTitle : l10n.logSheetTitle,
                               style: text.title,
                               textAlign: TextAlign.center,
                             ),
@@ -249,11 +365,28 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                       shrinkWrap: true,
                       padding: const EdgeInsets.all(SvaSpace.screen),
                       children: [
-                        _SettingPicker(
-                          setting: setting,
-                          onChanged: (s) => setState(() => _setting = s),
-                        ),
-                        formGap,
+                        if (existing != null) ...[
+                          _ExistingClimbs(
+                            climbs: existing,
+                            removed: _removed,
+                            onToggle: _toggleRemoved,
+                          ),
+                          formGap,
+                          Semantics(
+                            header: true,
+                            child: Text(
+                              l10n.logEditForgotten,
+                              style: text.headline,
+                            ),
+                          ),
+                          const SizedBox(height: SvaSpace.xs),
+                        ] else ...[
+                          _SettingPicker(
+                            setting: setting,
+                            onChanged: (s) => setState(() => _setting = s),
+                          ),
+                          formGap,
+                        ],
                         if (!outdoor)
                           Text(
                             l10n.logIndoorSoon,
@@ -269,6 +402,8 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                           if (_climbs.isNotEmpty) formGap,
                           ClimbEditor(
                             key: _editorKey,
+                            upToSession: widget.sessionId,
+                            removed: Set.unmodifiable(_removed),
                             earlierInSession: List.unmodifiable(_climbs),
                             onChanged: (c) => setState(() => _current = c),
                           ),
@@ -281,8 +416,12 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                           ],
                           formGap,
                           _SessionFields(
-                            date: _date,
-                            onPickDate: _pickDate,
+                            date: switch (_session) {
+                              final s? => DateTime.parse(s.localDate),
+                              null => _date,
+                            },
+                            // A session keeps the day it was logged on.
+                            onPickDate: editing ? null : _pickDate,
                             title: _title,
                             description: _description,
                             partners: _partners,
@@ -300,8 +439,14 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                       child: Padding(
                         padding: const EdgeInsets.all(SvaSpace.screen),
                         child: FilledButton(
-                          onPressed: count == 0 || _saving ? null : _save,
-                          child: Text(l10n.logSave(count == 0 ? 1 : count)),
+                          onPressed: _saving || (count == 0 && !editing)
+                              ? null
+                              : _save,
+                          child: Text(
+                            editing
+                                ? l10n.logEditSave
+                                : l10n.logSave(count == 0 ? 1 : count),
+                          ),
                         ),
                       ),
                     ),
@@ -448,6 +593,85 @@ class _PendingRow extends StatelessWidget {
   }
 }
 
+/// The climbs already in the session being edited, each with a button to
+/// mark it for removal or keep it again.
+class _ExistingClimbs extends ConsumerWidget {
+  const new({
+    required this.climbs,
+    required this.removed,
+    required this.onToggle,
+  });
+
+  final List<Ascent> climbs;
+  final Set<String> removed;
+  final ValueChanged<String> onToggle;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final colors = context.svaColors;
+    final text = context.svaText;
+    final marked = climbs.where((c) => removed.contains(c.id)).length;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(l10n.logEditExisting, style: text.headline),
+        ),
+        for (final climb in climbs)
+          _ExistingRow(
+            climb: climb,
+            gone: removed.contains(climb.id),
+            onToggle: () => onToggle(climb.id),
+          ),
+        if (marked > 0)
+          Text(
+            l10n.logEditMarked(marked),
+            style: text.caption.copyWith(color: colors.textMuted),
+          ),
+      ],
+    );
+  }
+}
+
+class _ExistingRow extends ConsumerWidget {
+  const new({required this.climb, required this.gone, required this.onToggle});
+
+  final Ascent climb;
+  final bool gone;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final hit = ref.watch(routeHitProvider(climb.routeId)).value;
+    final name = hit?.route.name ?? '';
+    final style = context.svaText.body;
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            '$name · ${l10n.ascentStyle(climb.style)}',
+            style: gone
+                ? style.copyWith(
+                    decoration: TextDecoration.lineThrough,
+                    color: context.svaColors.textMuted,
+                  )
+                : style,
+          ),
+        ),
+        if (hit?.grade case final grade? when !gone) SvaGradeBadge(grade),
+        IconButton(
+          tooltip: gone ? l10n.logEditKeep(name) : l10n.logRemoveClimb(name),
+          onPressed: onToggle,
+          icon: Icon(gone ? LucideIcons.undo2 : LucideIcons.x),
+        ),
+      ],
+    );
+  }
+}
+
 class _SessionFields extends StatelessWidget {
   const new({
     required this.date,
@@ -460,7 +684,9 @@ class _SessionFields extends StatelessWidget {
   });
 
   final DateTime date;
-  final VoidCallback onPickDate;
+
+  /// `null` when the date is fixed.
+  final VoidCallback? onPickDate;
   final TextEditingController title;
   final TextEditingController description;
   final TextEditingController partners;

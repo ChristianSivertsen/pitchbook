@@ -62,23 +62,27 @@ class _SessionRow extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: SvaSpace.sm),
       child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(SvaSpace.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(session.title ?? day, style: context.svaText.headline),
-              const SizedBox(height: SvaSpace.xxs),
-              Text(
-                [
-                  if (session.title != null) day,
-                  if (climbs != null) l10n.logClimbCount(climbs.length),
-                ].join(' · '),
-                style: context.svaText.caption.copyWith(
-                  color: context.svaColors.textMuted,
+        child: InkWell(
+          onTap: () => context.push(Routes.session(session.id)),
+          borderRadius: const BorderRadius.all(SvaRadius.card),
+          child: Padding(
+            padding: const EdgeInsets.all(SvaSpace.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(session.title ?? day, style: context.svaText.headline),
+                const SizedBox(height: SvaSpace.xxs),
+                Text(
+                  [
+                    if (session.title != null) day,
+                    if (climbs != null) l10n.logClimbCount(climbs.length),
+                  ].join(' · '),
+                  style: context.svaText.caption.copyWith(
+                    color: context.svaColors.textMuted,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

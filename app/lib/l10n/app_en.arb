@@ -307,5 +307,45 @@
     }
   },
   "cragFormMap": "Map. Tap to place the crag.",
-  "cragFormLocationHintMap": "Tap the map, or type decimal degrees such as 59.92 and 10.50. Leave both empty if you are not sure."
+  "cragFormLocationHintMap": "Tap the map, or type decimal degrees such as 59.92 and 10.50. Leave both empty if you are not sure.",
+  "sessionNotFound": "This session is gone. It may have been deleted.",
+  "sessionWith": "With {names}",
+  "@sessionWith": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionClimbs": "Climbs",
+  "sessionEdit": "Edit session",
+  "sessionDelete": "Delete session",
+  "sessionDeleteTitle": "Delete this session?",
+  "sessionDeleteBody": "Its climbs, partners and weather are deleted with it, and later climbs on the same routes count from the climbs that are left.",
+  "sessionDeleteLastBody": "This was the session's last climb, so saving deletes the whole session with its partners and weather.",
+  "sessionDeleteConfirm": "Delete",
+  "sessionKeep": "Keep",
+  "sessionDeleted": "Session deleted",
+  "logEditTitle": "Edit session",
+  "logEditExisting": "In this session",
+  "logEditForgotten": "Add a climb you forgot",
+  "logEditMarked": "{count, plural, =1{1 climb is removed when you save.} other{{count} climbs are removed when you save.}}",
+  "@logEditMarked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "logEditKeep": "Keep {route}",
+  "@logEditKeep": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "logEditSave": "Save changes",
+  "logEditSaved": "Changes saved",
+  "logLaterClimbRejected": "A later climb on the same route depends on this one. Change or remove that climb first."
 }

@@ -30,8 +30,17 @@ class ClimbEditor extends ConsumerStatefulWidget {
   const new({
     required this.earlierInSession,
     required this.onChanged,
+    this.upToSession,
+    this.removed = const {},
     super.key,
   });
+
+  /// When adding to a logged session: that session. The climb then follows
+  /// what was logged up to and including it, not what came later.
+  final String? upToSession;
+
+  /// Climbs in [upToSession] marked for removal, which no longer count.
+  final Set<String> removed;
 
   /// Climbs already added to this session, which count for the rules.
   final List<PendingClimb> earlierInSession;
@@ -60,7 +69,16 @@ class _ClimbEditorState extends ConsumerState<ClimbEditor> {
   /// styles are only offered once the earlier tries are known.
   RouteHistory? _history() {
     final hit = _hit!;
-    final logged = ref.watch(routeLogProvider(hit.route.id)).value;
+    final logged = switch (widget.upToSession) {
+      null => ref.watch(routeLogProvider(hit.route.id)).value,
+      final session =>
+        ref
+            .watch(routeLogUpToProvider((hit.route.id, session)))
+            .value
+            ?.where((e) => !widget.removed.contains(e.id))
+            .map((e) => e.ascent)
+            .toList(),
+    };
     if (logged == null) return null;
     return RouteHistory.from([
       ...logged,
