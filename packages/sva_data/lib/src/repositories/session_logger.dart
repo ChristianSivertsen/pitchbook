@@ -252,7 +252,9 @@ class SessionLogger {
           userId: userId,
         );
       }
-      if (removed.length == current.length && edit.added.isEmpty) {
+      if (removed.isNotEmpty &&
+          removed.length == current.length &&
+          edit.added.isEmpty) {
         await _sessions.softDelete(sessionId, userId: userId);
         return true;
       }
@@ -292,8 +294,12 @@ class SessionLogger {
       for (final a in removed) a.routeId,
       for (final c in added) c.routeId,
     }) {
-      final route = await _route(routeId, userId);
-      final boulder = route.discipline == 'boulder';
+      // A climb can be removed even when its route was since deleted or
+      // hidden; only added climbs need a route the user can log.
+      final boulder = added.any((c) => c.routeId == routeId)
+          ? (await _route(routeId, userId)).discipline == 'boulder'
+          : removed.firstWhere((a) => a.routeId == routeId).discipline ==
+                'boulder';
       final entries = await _ascents.routeEntries(routeId, userId: userId);
       // Added climbs go after everything up to and including this session.
       final upTo = await _ascents.routeEntries(
@@ -437,10 +443,11 @@ class SessionLogger {
     required String? conditions,
     required List<String> partners,
   }) async {
-    final names = [
+    // The same name twice is one partner.
+    final names = {
       for (final name in partners)
         ?_text(name, maxPartnerNameLength, 'partners'),
-    ];
+    }.toList();
     if (names.length > maxPartners) {
       throw ArgumentError.value(names.length, 'partners');
     }

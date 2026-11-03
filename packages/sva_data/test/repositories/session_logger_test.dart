@@ -281,4 +281,19 @@ void main() {
       reason: 'partners go with the session',
     );
   });
+
+  test('M2-6: a climb on a deleted route can still be removed', () async {
+    final id = await logger.logOutdoor(
+      day([
+        climb(sport, AscentStyle.flash),
+        climb(boulder, AscentStyle.flash, type: 'boulder'),
+      ]),
+      userId: 'me',
+    );
+    await RouteRepository(db).softDelete(sport, userId: 'me');
+    final gone = (await AscentRepository(db).watchInSession(id).first).first;
+
+    await logger.editOutdoor(id, SessionEdit(removed: {gone.id}), userId: 'me');
+    expect(await AscentRepository(db).get(gone.id), isNull);
+  });
 }

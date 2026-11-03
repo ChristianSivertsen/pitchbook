@@ -308,7 +308,7 @@
   },
   "cragFormMap": "Map. Tap to place the crag.",
   "cragFormLocationHintMap": "Tap the map, or type decimal degrees such as 59.92 and 10.50. Leave both empty if you are not sure.",
-  "sessionNotFound": "This session is gone. It may have been deleted.",
+  "sessionNotFound": "This session isn't on this phone. It may have been deleted.",
   "sessionWith": "With {names}",
   "@sessionWith": {
     "placeholders": {
@@ -321,8 +321,8 @@
   "sessionEdit": "Edit session",
   "sessionDelete": "Delete session",
   "sessionDeleteTitle": "Delete this session?",
-  "sessionDeleteBody": "Its climbs, partners and weather are deleted with it, and later climbs on the same routes count from the climbs that are left.",
-  "sessionDeleteLastBody": "This was the session's last climb, so saving deletes the whole session with its partners and weather.",
+  "sessionDeleteBody": "Its climbs and partners are deleted with it. Later climbs on the same routes are recounted.",
+  "sessionDeleteLastBody": "This is the session's last climb, so saving deletes the whole session.",
   "sessionDeleteConfirm": "Delete",
   "sessionKeep": "Keep",
   "sessionDeleted": "Session deleted",

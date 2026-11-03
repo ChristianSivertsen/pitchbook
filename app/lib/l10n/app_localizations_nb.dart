@@ -570,7 +570,7 @@ class AppLocalizationsNb extends AppLocalizations {
 
   @override
   String get sessionNotFound =>
-      'Denne økta finnes ikke lenger. Den kan være slettet.';
+      'Denne økta finnes ikke på telefonen. Den kan være slettet.';
 
   @override
   String sessionWith(String names) {
@@ -591,11 +591,11 @@ class AppLocalizationsNb extends AppLocalizations {
 
   @override
   String get sessionDeleteBody =>
-      'Klatringene, partnerne og været slettes sammen med den, og senere klatringer på de samme rutene teller fra klatringene som er igjen.';
+      'Klatringene og partnerne slettes sammen med den. Senere klatringer på de samme rutene telles på nytt.';
 
   @override
   String get sessionDeleteLastBody =>
-      'Dette var den siste klatringen i økta, så når du lagrer, slettes hele økta med partnere og vær.';
+      'Dette er den siste klatringen i økta, så når du lagrer, slettes hele økta.';
 
   @override
   String get sessionDeleteConfirm => 'Slett';

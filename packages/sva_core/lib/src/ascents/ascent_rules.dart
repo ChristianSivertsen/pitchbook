@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 /// How a climb went (docs/schema.md, ascents.style).
 enum AscentStyle {
   /// First try, no prior information.
@@ -197,7 +199,7 @@ List<LoggedAscent> recountTries<K>(
     boulder: boulder,
     gym: gym,
   ).minTries(AscentStyle.redpoint);
-  final tries = (newEarlier + own).clamp(min, maxLoggedTries);
+  final tries = math.max(min, math.min(newEarlier + own, maxLoggedTries));
   result[newIndex] = (style: ascent.style, tries: tries);
   return result;
 }

@@ -377,8 +377,9 @@ class AscentRepository extends Repository<$AscentsTable, Ascent> {
     final until = upToSession == null
         ? null
         : await (db.select(
-            db.sessions,
-          )..where((s) => s.id.equals(upToSession))).getSingleOrNull();
+                db.sessions,
+              )..where((s) => s.id.equals(upToSession))).getSingleOrNull() ??
+              (throw ArgumentError.value(upToSession, 'upToSession'));
     final query =
         db.select(db.ascents).join([
             innerJoin(

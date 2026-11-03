@@ -11,23 +11,35 @@ import 'package:sva_ui/sva_ui.dart';
 
 /// One session: its day, texts, partners and every climb, with edit and
 /// delete for the owner.
-class SessionScreen extends ConsumerWidget {
+class SessionScreen extends ConsumerStatefulWidget {
   const new({required this.sessionId, super.key});
 
   final String sessionId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SessionScreen> createState() => _SessionScreenState();
+}
+
+class _SessionScreenState extends ConsumerState<SessionScreen> {
+  var _deleting = false;
+
+  String get sessionId => widget.sessionId;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final session = ref.watch(sessionProvider(sessionId));
-    final own = session.value?.ownerId == ref.watch(currentUserIdProvider);
+    // Indoor sessions are edited once gyms arrive (M3).
+    final own =
+        session.value?.ownerId == ref.watch(currentUserIdProvider) &&
+        session.value?.setting == 'outdoor';
     return Scaffold(
       appBar: AppBar(
         actions: [
           if (own)
             IconButton(
               tooltip: l10n.sessionDelete,
-              onPressed: () => _delete(context, ref),
+              onPressed: _deleting ? null : _delete,
               icon: Icon(LucideIcons.trash2, color: context.svaColors.danger),
             ),
         ],
@@ -60,12 +72,16 @@ class SessionScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _delete(BuildContext context, WidgetRef ref) async {
+  Future<void> _delete() async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final router = GoRouter.of(context);
+    setState(() => _deleting = true);
     final sure = await confirmDelete(context, l10n.sessionDeleteBody);
-    if (!sure) return;
+    if (!sure || !mounted) {
+      if (mounted) setState(() => _deleting = false);
+      return;
+    }
     try {
       // Through the logger, so later climbs on the same routes are checked
       // and recounted as for any removed climb.
@@ -83,8 +99,10 @@ class SessionScreen extends ConsumerWidget {
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.logLaterClimbRejected)),
       );
+      if (mounted) setState(() => _deleting = false);
     } on Object {
       messenger.showSnackBar(SnackBar(content: Text(l10n.formSaveFailed)));
+      if (mounted) setState(() => _deleting = false);
     }
   }
 }

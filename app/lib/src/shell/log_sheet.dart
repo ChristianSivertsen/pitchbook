@@ -99,17 +99,34 @@ class _LogSheetState extends ConsumerState<LogSheet> {
     if (widget.sessionId case final id?) unawaited(_load(id));
   }
 
-  /// Fills the fields with the session being edited.
+  /// Fills the fields with the session being edited. A session that is
+  /// gone, not the user's or not outdoors closes the sheet with a message.
   Future<void> _load(String id) async {
-    final session = await ref.read(sessionProvider(id).future);
-    final partners = await ref.read(sessionPartnersProvider(id).future);
-    if (!mounted || session == null) return;
+    Session? session;
+    var partners = const <String>[];
+    try {
+      session = await ref.read(sessionProvider(id).future);
+      partners = await ref.read(sessionPartnersProvider(id).future);
+    } on Object {
+      session = null;
+    }
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    if (session == null ||
+        session.ownerId != ref.read(currentUserIdProvider) ||
+        session.setting != 'outdoor') {
+      closeLogSheet(context);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.sessionNotFound)));
+      return;
+    }
+    final loaded = session;
     setState(() {
-      _session = session;
-      _title.text = session.title ?? '';
-      _description.text = session.description ?? '';
+      _session = loaded;
+      _title.text = loaded.title ?? '';
+      _description.text = loaded.description ?? '';
       _partners.text = partners.join(', ');
-      _conditions = session.conditions;
+      _conditions = loaded.conditions;
     });
   }
 
@@ -285,9 +302,12 @@ class _LogSheetState extends ConsumerState<LogSheet> {
   }
 
   /// Marks one of the session's climbs for removal, or keeps it again.
-  /// Saving checks the new climbs against the climbs that are left.
+  /// The open climb may depend on it, so it starts again; saving checks
+  /// the added climbs against the climbs that are left.
   void _toggleRemoved(String ascentId) => setState(() {
     if (!_removed.remove(ascentId)) _removed.add(ascentId);
+    _current = null;
+    _editorKey = UniqueKey();
   });
 
   @override

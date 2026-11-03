@@ -809,7 +809,7 @@ abstract class AppLocalizations {
   /// No description provided for @sessionNotFound.
   ///
   /// In en, this message translates to:
-  /// **'This session is gone. It may have been deleted.'**
+  /// **'This session isn\'t on this phone. It may have been deleted.'**
   String get sessionNotFound;
 
   /// No description provided for @sessionWith.
@@ -845,13 +845,13 @@ abstract class AppLocalizations {
   /// No description provided for @sessionDeleteBody.
   ///
   /// In en, this message translates to:
-  /// **'Its climbs, partners and weather are deleted with it, and later climbs on the same routes count from the climbs that are left.'**
+  /// **'Its climbs and partners are deleted with it. Later climbs on the same routes are recounted.'**
   String get sessionDeleteBody;
 
   /// No description provided for @sessionDeleteLastBody.
   ///
   /// In en, this message translates to:
-  /// **'This was the session\'s last climb, so saving deletes the whole session with its partners and weather.'**
+  /// **'This is the session\'s last climb, so saving deletes the whole session.'**
   String get sessionDeleteLastBody;
 
   /// No description provided for @sessionDeleteConfirm.
