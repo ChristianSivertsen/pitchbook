@@ -143,15 +143,24 @@ class SvaSessionCard extends StatelessWidget {
                     children: [for (final tag in tags) SvaTag(tag)],
                   ),
                 if (stats.isNotEmpty)
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (final stat in stats) Expanded(child: _Stat(stat)),
-                      // Stats keep their quarter width when some are
-                      // unknown, so they line up from card to card.
-                      for (var i = stats.length; i < 4; i++) const Spacer(),
-                    ],
-                  ),
+                  // Large text does not fit four to a row, so the stats
+                  // wrap instead of clipping (docs/DESIGN.md, Accessibility).
+                  if (MediaQuery.textScalerOf(context).scale(10) > 13)
+                    Wrap(
+                      spacing: SvaSpace.xl,
+                      runSpacing: SvaSpace.xs,
+                      children: [for (final stat in stats) _Stat(stat)],
+                    )
+                  else
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final stat in stats) Expanded(child: _Stat(stat)),
+                        // Stats keep their quarter width when some are
+                        // unknown, so they line up from card to card.
+                        for (var i = stats.length; i < 4; i++) const Spacer(),
+                      ],
+                    ),
               ],
             ),
           ),
@@ -187,8 +196,6 @@ class _ClimbRow extends StatelessWidget {
                   ),
               ],
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ),
         SvaStyleTag(style: climb.style, label: climb.styleLabel),
