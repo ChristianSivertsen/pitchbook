@@ -12,7 +12,8 @@ const gymGradings = {'colour', 'standard', 'none'};
 /// What a gym wall is for.
 const wallKinds = {'rope', 'boulder'};
 
-/// Tallest gym wall, in metres.
+/// Lowest and tallest gym wall, in metres.
+const minWallHeightM = 1.0;
 const maxWallHeightM = 60.0;
 
 /// A gym as the gym form fills it in.
@@ -116,9 +117,9 @@ class GymEditor {
   }
 
   /// Changes [userId]'s private gym [gymId] and makes its walls exactly
-  /// [walls]: drafts with an id change that wall, new ones are added and
-  /// walls left out are deleted. Throws [ArgumentError] for a gym that is
-  /// not the user's to change.
+  /// [walls], as [saveWalls] does. Throws [ArgumentError] for a gym that
+  /// is not the user's to change; walls on a shared gym go through
+  /// [saveWalls] alone.
   Future<void> updateGym(
     String gymId,
     NewGym gym, {
@@ -150,6 +151,22 @@ class GymEditor {
           updatedAt: Value(clock()),
         ),
       );
+      await _saveWalls(gymId, walls, userId);
+    });
+  }
+
+  /// Makes [userId]'s walls on gym [gymId] exactly [walls]: drafts with
+  /// an id change that wall, new ones are added and walls left out are
+  /// deleted (soft, like every delete). Works on any gym the user can see,
+  /// since walls are each user's own.
+  Future<void> saveWalls(
+    String gymId, {
+    required List<WallDraft> walls,
+    required String userId,
+  }) async {
+    await _checkWalls(walls);
+    await db.transaction(() async {
+      await _visibleGym(gymId, userId);
       await _saveWalls(gymId, walls, userId);
     });
   }
@@ -212,7 +229,7 @@ class GymEditor {
         throw ArgumentError.value(wall.kind, 'kind');
       }
       if (wall.heightM case final h?
-          when !h.isFinite || h <= 0 || h > maxWallHeightM) {
+          when !h.isFinite || h < minWallHeightM || h > maxWallHeightM) {
         throw ArgumentError.value(h, 'heightM');
       }
       if (wall.angle case final a? when angle == null || !angle.accepts([a])) {

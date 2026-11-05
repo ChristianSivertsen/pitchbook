@@ -159,4 +159,98 @@ void main() {
       );
     },
   );
+
+  test("M3-1: walls on a shared gym are the user's own to change", () async {
+    final id = await gyms.addGym(
+      const NewGym(name: 'Klatreverket', countryCode: 'NO', grading: 'colour'),
+      walls: walls,
+      userId: 'me',
+    );
+    // Moderators accept it (M12): it becomes shared.
+    await (db.update(db.areas)..where((a) => a.id.equals(id))).write(
+      const AreasCompanion(visibility: Value('public')),
+    );
+
+    expect(
+      () => gyms.updateGym(
+        id,
+        const NewGym(name: 'Renamed', countryCode: 'NO', grading: 'none'),
+        walls: walls,
+        userId: 'me',
+      ),
+      throwsArgumentError,
+      reason: 'a shared gym changes through moderators',
+    );
+    await gyms.saveWalls(
+      id,
+      walls: const [WallDraft(name: 'Their cave', kind: 'boulder')],
+      userId: 'someone else',
+    );
+    expect(
+      (await gyms.setup(id, userId: 'someone else'))!.walls.map((w) => w.name),
+      ['Their cave'],
+    );
+    expect((await gyms.setup(id, userId: 'me'))!.walls.map((w) => w.name), [
+      'Main wall',
+      'Cave',
+    ], reason: 'walls are personal');
+    expect((await gyms.setup(id, userId: 'me'))!.gym.name, 'Klatreverket');
+  });
+
+  test('M3-1: wall changes are checked before anything is written', () async {
+    final id = await gyms.addGym(
+      const NewGym(name: 'Klatreverket', countryCode: 'NO', grading: 'colour'),
+      walls: walls,
+      userId: 'me',
+    );
+    final other = await gyms.addGym(
+      const NewGym(name: 'Other', countryCode: 'NO', grading: 'none'),
+      walls: const [WallDraft(name: 'Elsewhere', kind: 'rope')],
+      userId: 'me',
+    );
+    final [main, cave] = (await gyms.setup(id, userId: 'me'))!.walls;
+    final elsewhere = (await gyms.setup(other, userId: 'me'))!.walls.single;
+
+    Future<void> save(List<WallDraft> walls) =>
+        gyms.saveWalls(id, walls: walls, userId: 'me');
+    expect(
+      () => save([WallDraft(id: elsewhere.id, name: 'Moved', kind: 'rope')]),
+      throwsArgumentError,
+      reason: 'a wall from another gym',
+    );
+    for (final height in [double.nan, double.infinity, 0.5, 61.0]) {
+      expect(
+        () => save([WallDraft(name: 'W', kind: 'rope', heightM: height)]),
+        throwsArgumentError,
+        reason: '$height m',
+      );
+    }
+    expect(
+      () => save([WallDraft(name: 'x' * (maxNameLength + 1), kind: 'rope')]),
+      throwsArgumentError,
+    );
+    expect((await gyms.setup(id, userId: 'me'))!.walls.map((w) => w.id), [
+      main.id,
+      cave.id,
+    ], reason: 'nothing changed');
+
+    // A wall left out is deleted, softly.
+    await save([WallDraft(id: main.id, name: 'Main wall', kind: 'rope')]);
+    final row = await (db.select(
+      db.gymWalls,
+    )..where((w) => w.id.equals(cave.id))).getSingle();
+    expect(row.deletedAt, isNotNull);
+
+    // A refused gym leaves no walls behind either.
+    final before = await db.select(db.gymWalls).get();
+    await expectLater(
+      gyms.addGym(
+        const NewGym(name: 'Bad', countryCode: 'NOR', grading: 'none'),
+        walls: walls,
+        userId: 'me',
+      ),
+      throwsArgumentError,
+    );
+    expect(await db.select(db.gymWalls).get(), hasLength(before.length));
+  });
 }
