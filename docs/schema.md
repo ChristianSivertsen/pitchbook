@@ -82,6 +82,7 @@ erDiagram
 | rack_visibility | text | Who can see your rack |
 | grade_prefs | jsonb | Display system per grade type, for example `{"free_route": "nor", "boulder": "font", "ice": "wi"}` |
 | theme | text | `system`, `midnight` or `daylight` |
+| language | text | `nb` or `en`; null follows the phone's language |
 | quiet_hours | jsonb | Start and end for notifications |
 | created_at, updated_at, deleted_at | timestamptz | |
 

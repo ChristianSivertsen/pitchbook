@@ -15,6 +15,9 @@ class Profiles extends Table with SyncedRow {
   /// `system`, `midnight` or `daylight`.
   TextColumn get theme => text()();
 
+  /// `nb` or `en`; `null` follows the phone's language.
+  TextColumn get language => text().nullable()();
+
   /// JSON: start and end of quiet hours for notifications.
   TextColumn get quietHours => text().nullable()();
 }

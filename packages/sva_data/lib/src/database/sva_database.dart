@@ -72,7 +72,7 @@ class SvaDatabase extends _$SvaDatabase {
   new onDevice(File file) : this(NativeDatabase.createInBackground(file));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -86,6 +86,10 @@ class SvaDatabase extends _$SvaDatabase {
         await m.addColumn(routes, routes.asciiKey);
         await m.createIndex(routeGradesRoute);
         await fillNameKeys();
+      }
+      if (from < 3 && to >= 3) {
+        // The app language, chosen in settings (M2-8).
+        await m.addColumn(profiles, profiles.language);
       }
     },
   );
