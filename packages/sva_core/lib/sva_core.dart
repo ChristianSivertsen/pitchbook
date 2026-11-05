@@ -8,3 +8,4 @@ export 'src/grades/grade_system.dart';
 export 'src/grades/grade_tables.dart';
 export 'src/search/name_keys.dart';
 export 'src/seasons/season.dart';
+export 'src/stats/session_totals.dart';
