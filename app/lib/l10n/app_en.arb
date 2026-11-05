@@ -10,6 +10,43 @@
   },
   "feedEmptyTitle": "Your sessions show up here",
   "feedEmptyBody": "Log your first session and it appears in your feed. Friends' sessions join it later.",
+  "feedOpenSession": "Open session",
+  "feedSetting": "{setting, select, outdoor{Outdoors} indoor{Indoors} other{}}",
+  "@feedSetting": {
+    "description": "Where a session was, when its climbs have no crag.",
+    "placeholders": {
+      "setting": {
+        "type": "String"
+      }
+    }
+  },
+  "feedWith": "with {names}",
+  "@feedWith": {
+    "description": "After the day on a feed card, such as '17 Oct 2026 · with Kari'.",
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "feedMoreClimbs": "{count, plural, =1{+1 more climb} other{+{count} more climbs}}",
+  "@feedMoreClimbs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "feedStatPitches": "Pitches",
+  "feedStatClimbed": "Climbed",
+  "@feedStatClimbed": {
+    "description": "Under the metres climbed in a session."
+  },
+  "feedStatElevation": "Elevation gain",
+  "feedStatMetres": "m",
+  "@feedStatMetres": {
+    "description": "Unit after a number of metres in a stat."
+  },
   "historyTitle": "History",
   "historyEmptyTitle": "Your history starts with one session",
   "historyEmptyBody": "Days out, grades, pyramids and insights fill in as you log.",

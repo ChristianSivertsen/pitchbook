@@ -32,6 +32,47 @@ class AppLocalizationsNb extends AppLocalizations {
       'Logg din første økt, så havner den i feeden din. Øktene til vennene dine kommer senere.';
 
   @override
+  String get feedOpenSession => 'Åpne økta';
+
+  @override
+  String feedSetting(String setting) {
+    String _temp0 = intl.Intl.selectLogic(setting, {
+      'outdoor': 'Ute',
+      'indoor': 'Inne',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String feedWith(String names) {
+    return 'med $names';
+  }
+
+  @override
+  String feedMoreClimbs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count klatringer til',
+      one: '+1 klatring til',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feedStatPitches => 'Taulengder';
+
+  @override
+  String get feedStatClimbed => 'Klatret';
+
+  @override
+  String get feedStatElevation => 'Høydemeter';
+
+  @override
+  String get feedStatMetres => 'm';
+
+  @override
   String get historyTitle => 'Historikk';
 
   @override

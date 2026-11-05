@@ -32,6 +32,47 @@ class AppLocalizationsEn extends AppLocalizations {
       'Log your first session and it appears in your feed. Friends\' sessions join it later.';
 
   @override
+  String get feedOpenSession => 'Open session';
+
+  @override
+  String feedSetting(String setting) {
+    String _temp0 = intl.Intl.selectLogic(setting, {
+      'outdoor': 'Outdoors',
+      'indoor': 'Indoors',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String feedWith(String names) {
+    return 'with $names';
+  }
+
+  @override
+  String feedMoreClimbs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count more climbs',
+      one: '+1 more climb',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feedStatPitches => 'Pitches';
+
+  @override
+  String get feedStatClimbed => 'Climbed';
+
+  @override
+  String get feedStatElevation => 'Elevation gain';
+
+  @override
+  String get feedStatMetres => 'm';
+
+  @override
   String get historyTitle => 'History';
 
   @override
