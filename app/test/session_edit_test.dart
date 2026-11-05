@@ -46,6 +46,7 @@ RouteHit _hit(String id, String name, {String discipline = 'sport'}) => (
   crag: 'Kolsås',
   lastClimbed: null,
   distanceKm: null,
+  location: null,
 );
 
 final _session = Session(

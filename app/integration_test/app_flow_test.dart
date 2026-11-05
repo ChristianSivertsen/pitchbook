@@ -120,13 +120,35 @@ void main() {
     await tap(inSheet(find.text(l10n.ascentStyle('attempt'))));
     await tap(inSheet(find.text(l10n.logEditSave)));
 
-    expect(find.text(l10n.logEditSaved), findsOneWidget);
+    // Saving runs on the device's database, which can outlast the button's
+    // animation that pumpAndSettle waits for.
+    await _pumpUntilFound(tester, find.text(l10n.logEditSaved));
     expect(find.byType(SessionScreen), findsOneWidget);
     expect(find.textContaining(day), findsOneWidget, reason: 'same day');
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(await climbsInRow(), before + 1);
   });
+}
+
+/// Pumps until [target] is on screen, for work that pumpAndSettle does not
+/// wait for, such as a database write.
+Future<void> _pumpUntilFound(WidgetTester tester, Finder target) async {
+  for (var i = 0; i < 100 && target.evaluate().isEmpty; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+  if (target.evaluate().isEmpty) fail('Not found: $target\n${_onScreen()}');
+  await tester.pumpAndSettle();
+}
+
+/// The texts on screen, to make a failure on CI readable.
+String _onScreen() {
+  final texts = find
+      .byType(Text)
+      .evaluate()
+      .map((e) => (e.widget as Text).data)
+      .whereType<String>();
+  return 'On screen: ${texts.join(' | ')}';
 }
 
 typedef _SheetHelpers = ({
@@ -165,16 +187,7 @@ _SheetHelpers _sheetHelpers(WidgetTester tester) {
         continue;
       }
     }
-    if (target.evaluate().isEmpty) {
-      // Show what was on screen, to make a failure on CI readable.
-      final texts = find
-          .byType(Text)
-          .evaluate()
-          .map((e) => (e.widget as Text).data)
-          .whereType<String>()
-          .join(' | ');
-      fail('Not found: $target\nOn screen: $texts');
-    }
+    if (target.evaluate().isEmpty) fail('Not found: $target\n${_onScreen()}');
     await tester.ensureVisible(target);
     await tester.pumpAndSettle();
   }
