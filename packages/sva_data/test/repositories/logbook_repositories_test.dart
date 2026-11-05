@@ -154,6 +154,20 @@ void main() {
     },
   );
 
+  test('M2-7: the feed reads the newest sessions a page at a time', () async {
+    for (final day in ['2026-09-01', '2026-10-01', '2026-08-01']) {
+      await session(date: day);
+    }
+    Future<List<String>> page(int limit) async => [
+      for (final s
+          in await sessions.watchMine(userId: 'me', limit: limit).first)
+        s.localDate,
+    ];
+    expect(await page(2), ['2026-10-01', '2026-09-01']);
+    expect(await page(3), ['2026-10-01', '2026-09-01', '2026-08-01']);
+    expect(await page(10), hasLength(3));
+  });
+
   test('M1-5: list streams update when rows change', () async {
     final cragId = await crag();
     final sessionId = await session(date: '2026-10-01');
