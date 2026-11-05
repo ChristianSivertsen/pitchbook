@@ -166,6 +166,11 @@ void main() {
     expect(await page(2), ['2026-10-01', '2026-09-01']);
     expect(await page(3), ['2026-10-01', '2026-09-01', '2026-08-01']);
     expect(await page(10), hasLength(3));
+
+    // Two sessions on one day: the one logged later comes first.
+    final later = await session(date: '2026-10-01');
+    final top = await sessions.watchMine(userId: 'me', limit: 1).first;
+    expect(top.single.id, later);
   });
 
   test('M1-5: list streams update when rows change', () async {

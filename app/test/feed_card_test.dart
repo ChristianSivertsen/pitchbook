@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Route;
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sva/src/app.dart';
@@ -141,7 +142,16 @@ void main() {
         's1': ['Kari', 'Ola'],
       },
       tags: {
-        's1': ['feature.face', 'hold.crimp', 'tag.pumpy', 'unknown.key'],
+        's1': [
+          'feature.face',
+          'unknown.key',
+          'hold.crimp',
+          'tag.pumpy',
+          'feature.corner',
+          'hold.jug',
+          'tag.techy',
+          'tag.scary',
+        ],
       },
     );
 
@@ -175,16 +185,18 @@ void main() {
       find.descendant(of: first, matching: find.byType(SvaGradeBadge)),
       findsNWidgets(6),
     );
-    // Tags the app has words for.
-    for (final tag in ['Face', 'Crimps', 'Pumpy']) {
+    // The first six tags the app has words for.
+    for (final tag in ['Face', 'Crimps', 'Pumpy', 'Corner', 'Jugs']) {
       expect(inFirst(tag), findsOneWidget);
     }
+    expect(inFirst('Technical'), findsOneWidget);
+    expect(inFirst('Scary'), findsNothing);
     expect(
       find.descendant(of: first, matching: find.byType(SvaTag)),
-      findsNWidgets(3),
+      findsNWidgets(6),
     );
-    // 3 + 6 pitches, 90 + 6 × 20 metres, and the elevation gain.
-    expect(inFirst('9'), findsOneWidget);
+    // The totals come from the routes' pitches and lengths (the sums
+    // themselves are tested in sva_core).
     expect(inFirst('Pitches'), findsOneWidget);
     expect(
       find.descendant(
@@ -215,6 +227,65 @@ void main() {
     await tester.tap(inFirst('After-work laps'));
     await tester.pumpAndSettle();
     expect(find.byType(SessionScreen), findsOneWidget);
+  });
+
+  testWidgets('M2-7: a feed card reads out and wraps at large text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 3000);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    final semantics = tester.ensureSemantics();
+    await _start(
+      tester,
+      sessions: (limit) => Stream.value([
+        _session(
+          's1',
+          '2026-10-17',
+          title: 'After-work laps',
+          elevationGainM: 1240,
+        ),
+      ]),
+      climbs: {
+        's1': [_climb('s1', 1, 'multi', 'flash')],
+      },
+      hits: {
+        'multi': _hit(
+          'multi',
+          'Kveldsløftet med den lange avslutningen',
+          pitches: 3,
+          lengthM: 90,
+        ),
+      },
+    );
+
+    // Nothing overflows, and the climb's name is not cut short.
+    expect(tester.takeException(), isNull);
+    expect(
+      find.textContaining('Kveldsløftet med den lange avslutningen'),
+      findsOneWidget,
+    );
+    final name = tester.renderObject<RenderParagraph>(
+      find.textContaining('Kveldsløftet med den lange avslutningen'),
+    );
+    expect(name.didExceedMaxLines, isFalse);
+    // The card opens the session, and edit is its own button.
+    expect(find.bySemanticsLabel(RegExp('^Open session')), findsOneWidget);
+    expect(
+      tester.getSemantics(find.byTooltip('Edit session')),
+      matchesSemantics(
+        tooltip: 'Edit session',
+        isButton: true,
+        hasTapAction: true,
+        hasFocusAction: true,
+        isFocusable: true,
+        hasEnabledState: true,
+        isEnabled: true,
+      ),
+    );
+    semantics.dispose();
   });
 
   testWidgets('M2-7: the feed shows the newest sessions first and loads more '
