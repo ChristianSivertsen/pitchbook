@@ -242,6 +242,8 @@ void main() {
 
       final hit = await routes.hit(id, userId: 'me');
       expect(hit?.grade, '7-');
+      // Its system, so screens can show it in the user's (M2-8).
+      expect(hit?.gradeSystem, 'nor');
       expect(hit?.crag, 'Kolsås');
       expect(hit?.lastClimbed, '2026-10-30');
       expect(await routes.hit(id, userId: 'someone else'), isNull);

@@ -142,6 +142,7 @@ typedef LatLon = ({double lat, double lon});
 /// where it does.
 ///
 /// - `grade`: the official grade's label, such as `7-`, or `null`.
+/// - `gradeSystem`: the key of that grade's system, such as `nor`.
 /// - `crag`: the crag the route is in, or its nearest place without one.
 /// - `lastClimbed`: `YYYY-MM-DD` of the user's latest climb on it.
 /// - `distanceKm`: from the point searched from, `null` without one.
@@ -150,6 +151,7 @@ typedef LatLon = ({double lat, double lon});
 typedef RouteHit = ({
   Route route,
   String? grade,
+  String? gradeSystem,
   String? crag,
   String? lastClimbed,
   double? distanceKm,
@@ -262,6 +264,16 @@ class RouteRepository extends Repository<$RoutesTable, Route>
     return _rank(rows, near: near, limit: 1).firstOrNull;
   }
 
+  /// SQL for one [column] of the route's official climbing grade (not a
+  /// danger or commitment grade), for the route `r`.
+  static String _officialGrade(String column) =>
+      '(SELECT g.$column FROM route_grades rg '
+      'JOIN grades g ON g.id = rg.grade_id AND g.deleted_at IS NULL '
+      'WHERE rg.route_id = r.id AND rg.pitch_id IS NULL '
+      "AND rg.grade_type IN ('free_route', 'boulder') "
+      "AND rg.source = 'official' AND rg.deleted_at IS NULL "
+      'ORDER BY g.sort LIMIT 1)';
+
   Selectable<QueryRow> _select({
     required String userId,
     String term = '',
@@ -278,13 +290,8 @@ class RouteRepository extends Repository<$RoutesTable, Route>
       'COALESCE(a1.latitude, a2.latitude, a3.latitude) AS lat, '
       'COALESCE(a1.longitude, a2.longitude, a3.longitude) AS lon, '
       'mine.last_climbed, '
-      '(SELECT g.label FROM route_grades rg '
-      'JOIN grades g ON g.id = rg.grade_id AND g.deleted_at IS NULL '
-      'WHERE rg.route_id = r.id AND rg.pitch_id IS NULL '
-      // The climbing grade, not a danger or commitment grade.
-      "AND rg.grade_type IN ('free_route', 'boulder') "
-      "AND rg.source = 'official' AND rg.deleted_at IS NULL "
-      'ORDER BY g.sort LIMIT 1) AS grade_label '
+      '${_officialGrade('label')} AS grade_label, '
+      '${_officialGrade('system_key')} AS grade_system '
       'FROM routes r '
       'LEFT JOIN areas a1 ON a1.id = r.area_id AND ${_visibleArea('a1')} '
       'LEFT JOIN areas a2 ON a2.id = a1.parent_id '
@@ -333,6 +340,7 @@ class RouteRepository extends Repository<$RoutesTable, Route>
           hit: (
             route: db.routes.map(row.data),
             grade: row.readNullable<String>('grade_label'),
+            gradeSystem: row.readNullable<String>('grade_system'),
             crag: row.readNullable<String>('crag_name'),
             lastClimbed: row.readNullable<String>('last_climbed'),
             distanceKm: _distanceKm(
