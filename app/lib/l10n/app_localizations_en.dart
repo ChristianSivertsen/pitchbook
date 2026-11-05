@@ -594,4 +594,77 @@ class AppLocalizationsEn extends AppLocalizations {
   String weatherWind(String speed) {
     return '$speed m/s wind';
   }
+
+  @override
+  String get sessionNotFound =>
+      'This session isn\'t on this phone. It may have been deleted.';
+
+  @override
+  String sessionWith(String names) {
+    return 'With $names';
+  }
+
+  @override
+  String get sessionClimbs => 'Climbs';
+
+  @override
+  String get sessionEdit => 'Edit session';
+
+  @override
+  String get sessionDelete => 'Delete session';
+
+  @override
+  String get sessionDeleteTitle => 'Delete this session?';
+
+  @override
+  String get sessionDeleteBody =>
+      'Its climbs and partners are deleted with it. Later climbs on the same routes are recounted.';
+
+  @override
+  String get sessionDeleteLastBody =>
+      'This is the session\'s last climb, so saving deletes the whole session.';
+
+  @override
+  String get sessionDeleteConfirm => 'Delete';
+
+  @override
+  String get sessionKeep => 'Keep';
+
+  @override
+  String get sessionDeleted => 'Session deleted';
+
+  @override
+  String get logEditTitle => 'Edit session';
+
+  @override
+  String get logEditExisting => 'In this session';
+
+  @override
+  String get logEditForgotten => 'Add a climb you forgot';
+
+  @override
+  String logEditMarked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count climbs are removed when you save.',
+      one: '1 climb is removed when you save.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String logEditKeep(String route) {
+    return 'Keep $route';
+  }
+
+  @override
+  String get logEditSave => 'Save changes';
+
+  @override
+  String get logEditSaved => 'Changes saved';
+
+  @override
+  String get logLaterClimbRejected =>
+      'A later climb on the same route depends on this one. Change or remove that climb first.';
 }

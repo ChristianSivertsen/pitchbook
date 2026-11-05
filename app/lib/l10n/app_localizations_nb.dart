@@ -594,4 +594,77 @@ class AppLocalizationsNb extends AppLocalizations {
   String weatherWind(String speed) {
     return '$speed m/s vind';
   }
+
+  @override
+  String get sessionNotFound =>
+      'Denne økta finnes ikke på telefonen. Den kan være slettet.';
+
+  @override
+  String sessionWith(String names) {
+    return 'Med $names';
+  }
+
+  @override
+  String get sessionClimbs => 'Klatringer';
+
+  @override
+  String get sessionEdit => 'Rediger økt';
+
+  @override
+  String get sessionDelete => 'Slett økt';
+
+  @override
+  String get sessionDeleteTitle => 'Slette denne økta?';
+
+  @override
+  String get sessionDeleteBody =>
+      'Klatringene og partnerne slettes sammen med den. Senere klatringer på de samme rutene telles på nytt.';
+
+  @override
+  String get sessionDeleteLastBody =>
+      'Dette er den siste klatringen i økta, så når du lagrer, slettes hele økta.';
+
+  @override
+  String get sessionDeleteConfirm => 'Slett';
+
+  @override
+  String get sessionKeep => 'Behold';
+
+  @override
+  String get sessionDeleted => 'Økta er slettet';
+
+  @override
+  String get logEditTitle => 'Rediger økt';
+
+  @override
+  String get logEditExisting => 'I denne økta';
+
+  @override
+  String get logEditForgotten => 'Legg til en klatring du glemte';
+
+  @override
+  String logEditMarked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count klatringer fjernes når du lagrer.',
+      one: '1 klatring fjernes når du lagrer.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String logEditKeep(String route) {
+    return 'Behold $route';
+  }
+
+  @override
+  String get logEditSave => 'Lagre endringer';
+
+  @override
+  String get logEditSaved => 'Endringene er lagret';
+
+  @override
+  String get logLaterClimbRejected =>
+      'En senere klatring på samme rute bygger på denne. Endre eller fjern den klatringen først.';
 }

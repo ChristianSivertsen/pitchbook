@@ -7,6 +7,7 @@ import 'package:sva/src/places/route_detail_screen.dart';
 import 'package:sva/src/places/route_form_screen.dart';
 import 'package:sva/src/places/route_search_screen.dart';
 import 'package:sva/src/routes.dart';
+import 'package:sva/src/sessions/session_screen.dart';
 import 'package:sva/src/shell/app_shell.dart';
 import 'package:sva/src/shell/log_sheet.dart';
 import 'package:sva/src/shell/not_found_screen.dart';
@@ -44,6 +45,22 @@ final routerProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: rootNavigatorKey,
                     pageBuilder: (context, state) =>
                         LogSheetPage(key: state.pageKey),
+                  ),
+                  GoRoute(
+                    path: Routes.sessionSegment,
+                    builder: (context, state) => SessionScreen(
+                      sessionId: state.pathParameters['sessionId']!,
+                    ),
+                    routes: [
+                      GoRoute(
+                        path: Routes.editSegment,
+                        parentNavigatorKey: rootNavigatorKey,
+                        pageBuilder: (context, state) => LogSheetPage(
+                          key: state.pageKey,
+                          sessionId: state.pathParameters['sessionId'],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

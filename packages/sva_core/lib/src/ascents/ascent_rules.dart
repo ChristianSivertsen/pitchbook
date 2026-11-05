@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 /// How a climb went (docs/schema.md, ascents.style).
 enum AscentStyle {
   /// First try, no prior information.
@@ -168,3 +170,48 @@ List<List<AscentIssue>> checkRouteLog(
       gym: gym,
     ).check(ascents[i]),
 ];
+
+/// One route's log after an edit, oldest first, with the first send's
+/// tries recounted. A redpoint's tries include the attempts before it, so
+/// when attempts before it are added or removed, its tries move by the
+/// same number, never below the fewest a redpoint can log. [before] and
+/// [after] are the log before and after the edit, each ascent with a key
+/// that identifies it in both.
+List<LoggedAscent> recountTries<K>(
+  List<(K, LoggedAscent)> before,
+  List<(K, LoggedAscent)> after, {
+  bool boulder = false,
+  bool gym = false,
+}) {
+  final result = [for (final (_, ascent) in after) ascent];
+  final old = _firstSend(before);
+  final now = _firstSend(after);
+  if (old == null || now == null) return result;
+  final (oldIndex, oldEarlier) = old;
+  final (newIndex, newEarlier) = now;
+  final (oldKey, ascent) = before[oldIndex];
+  if (after[newIndex].$1 != oldKey || ascent.style != AscentStyle.redpoint) {
+    return result;
+  }
+  final own = ascent.tries - oldEarlier;
+  final min = RouteHistory.from(
+    result.take(newIndex),
+    boulder: boulder,
+    gym: gym,
+  ).minTries(AscentStyle.redpoint);
+  final tries = math.max(min, math.min(newEarlier + own, maxLoggedTries));
+  result[newIndex] = (style: ascent.style, tries: tries);
+  return result;
+}
+
+/// Where the first send is in [log] and the tries on attempts before it.
+(int, int)? _firstSend<K>(List<(K, LoggedAscent)> log) {
+  for (var i = 0; i < log.length; i++) {
+    if (log[i].$2.style.isSend) {
+      final earlier = RouteHistory.from([for (final (_, a) in log.take(i)) a])
+          .earlierTries;
+      return (i, earlier);
+    }
+  }
+  return null;
+}

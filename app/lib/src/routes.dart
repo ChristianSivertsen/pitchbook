@@ -3,7 +3,6 @@
 /// only with a redirect from the old path.
 ///
 /// Planned paths that later tickets add under the same scheme:
-/// - `/feed/session/:sessionId` for a session (share links, notifications)
 /// - `/cv/rack/:pieceId`, `/cv/shoes/:shoeId` for gear details
 /// - `/training/:benchmarkId` for a benchmark
 /// - `/people/:userId` for a climber's profile
@@ -27,6 +26,17 @@ abstract final class Routes {
   static String route(String routeId) =>
       '$history/route/${Uri.encodeComponent(routeId)}';
   static const routeSegment = 'route/:routeId';
+
+  /// One session. Share links and notifications open it, so the id is
+  /// checked by the screen.
+  static String session(String sessionId) =>
+      '$feed/session/${Uri.encodeComponent(sessionId)}';
+  static const sessionSegment = 'session/:sessionId';
+
+  /// The log sheet editing one session, over the session page.
+  static String sessionEdit(String sessionId) =>
+      '${session(sessionId)}/$editSegment';
+  static const editSegment = 'edit';
 
   /// The log sheet, opened from inside the app with `push`. Opens over
   /// whichever tab is showing.

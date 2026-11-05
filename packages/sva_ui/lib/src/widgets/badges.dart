@@ -60,3 +60,43 @@ class SvaTag extends StatelessWidget {
     );
   }
 }
+
+/// A climb's style in its climbing colour; repeats and attempts are quiet
+/// outlines (docs/DESIGN.md, Style tag).
+class SvaStyleTag extends StatelessWidget {
+  const new({required this.style, required this.label, super.key});
+
+  /// The style's stable key, such as `flash`.
+  final String style;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.svaColors;
+    final fill = switch (style) {
+      'onsight' => colors.onsight,
+      'flash' => colors.flash,
+      'redpoint' => colors.redpoint,
+      _ => null,
+    };
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: fill,
+        border: fill == null ? Border.all(color: colors.textMuted) : null,
+        borderRadius: const BorderRadius.all(SvaRadius.small),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: SvaSpace.xs,
+          vertical: SvaSpace.xxs,
+        ),
+        child: Text(
+          label,
+          style: context.svaText.caption.copyWith(
+            color: fill == null ? colors.textMuted : colors.onStyle,
+          ),
+        ),
+      ),
+    );
+  }
+}

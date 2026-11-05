@@ -45,6 +45,17 @@ final StreamProvider<List<Session>> mySessionsProvider = StreamProvider(
       .watchMine(userId: ref.watch(currentUserIdProvider)),
 );
 
+/// One session, or `null` once it is deleted, live.
+final StreamProviderFamily<Session?, String> sessionProvider = StreamProvider
+    .autoDispose
+    .family((ref, id) => ref.watch(sessionRepositoryProvider).watch(id));
+
+/// The partners' names on one session, live.
+final StreamProviderFamily<List<String>, String> sessionPartnersProvider =
+    StreamProvider.autoDispose.family(
+      (ref, id) => ref.watch(sessionRepositoryProvider).watchPartners(id),
+    );
+
 /// The climbs in one session, in order, live.
 final StreamProviderFamily<List<Ascent>, String> sessionAscentsProvider =
     StreamProvider.autoDispose.family(
@@ -213,6 +224,19 @@ final FutureProvider<String?> lastSettingProvider = FutureProvider.autoDispose(
   (ref) => ref
       .watch(sessionRepositoryProvider)
       .lastSetting(userId: ref.watch(currentUserIdProvider)),
+);
+
+/// What the user logged on a route up to and including one session,
+/// oldest first: what a climb added to that session follows.
+final FutureProviderFamily<List<RouteLogEntry>, (String, String)>
+routeLogUpToProvider = FutureProvider.autoDispose.family(
+  (ref, key) => ref
+      .watch(ascentRepositoryProvider)
+      .routeEntries(
+        key.$1,
+        userId: ref.watch(currentUserIdProvider),
+        upToSession: key.$2,
+      ),
 );
 
 /// What the user has logged on one route, oldest first, for the style and

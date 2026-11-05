@@ -340,5 +340,45 @@
         "type": "String"
       }
     }
-  }
+  },
+  "sessionNotFound": "This session isn't on this phone. It may have been deleted.",
+  "sessionWith": "With {names}",
+  "@sessionWith": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionClimbs": "Climbs",
+  "sessionEdit": "Edit session",
+  "sessionDelete": "Delete session",
+  "sessionDeleteTitle": "Delete this session?",
+  "sessionDeleteBody": "Its climbs and partners are deleted with it. Later climbs on the same routes are recounted.",
+  "sessionDeleteLastBody": "This is the session's last climb, so saving deletes the whole session.",
+  "sessionDeleteConfirm": "Delete",
+  "sessionKeep": "Keep",
+  "sessionDeleted": "Session deleted",
+  "logEditTitle": "Edit session",
+  "logEditExisting": "In this session",
+  "logEditForgotten": "Add a climb you forgot",
+  "logEditMarked": "{count, plural, =1{1 climb is removed when you save.} other{{count} climbs are removed when you save.}}",
+  "@logEditMarked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "logEditKeep": "Keep {route}",
+  "@logEditKeep": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "logEditSave": "Save changes",
+  "logEditSaved": "Changes saved",
+  "logLaterClimbRejected": "A later climb on the same route depends on this one. Change or remove that climb first."
 }

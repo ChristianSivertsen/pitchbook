@@ -88,6 +88,20 @@ class SessionRepository extends Repository<$SessionsTable, Session> {
     return query.watch();
   }
 
+  /// The names of the partners on a session without the app, in the order
+  /// they were added, live.
+  Stream<List<String>> watchPartners(String sessionId) {
+    final query = db.select(db.sessionMembers)
+      ..where(
+        (m) =>
+            m.sessionId.equals(sessionId) &
+            m.deletedAt.isNull() &
+            m.status.equals('guest'),
+      )
+      ..orderBy([(m) => OrderingTerm(expression: m.createdAt)]);
+    return query.watch().map((rows) => [for (final m in rows) ?m.guestName]);
+  }
+
   /// A session's weather, once it has been fetched, live.
   Stream<WeatherSnapshot?> watchWeather(String sessionId) =>
       (db.select(db.weatherSnapshots)
@@ -208,6 +222,9 @@ typedef RouteClimb = ({
   String? officialGrade,
   String? personalGrade,
 });
+
+/// One live ascent in a route's log, with its id and session.
+typedef RouteLogEntry = ({String id, String sessionId, LoggedAscent ascent});
 
 /// Climbs logged in a session.
 class AscentRepository extends Repository<$AscentsTable, Ascent> {
@@ -352,7 +369,25 @@ class AscentRepository extends Repository<$AscentsTable, Ascent> {
   Future<List<LoggedAscent>> routeLog(
     String routeId, {
     required String userId,
+  }) async => [
+    for (final entry in await routeEntries(routeId, userId: userId))
+      entry.ascent,
+  ];
+
+  /// [routeLog] with each ascent's id and session. With [upToSession],
+  /// only the ascents in that session and the sessions before it: what a
+  /// climb added to that session follows.
+  Future<List<RouteLogEntry>> routeEntries(
+    String routeId, {
+    required String userId,
+    String? upToSession,
   }) async {
+    final until = upToSession == null
+        ? null
+        : await (db.select(
+                db.sessions,
+              )..where((s) => s.id.equals(upToSession))).getSingleOrNull() ??
+              (throw ArgumentError.value(upToSession, 'upToSession'));
     final query =
         db.select(db.ascents).join([
             innerJoin(
@@ -364,7 +399,8 @@ class AscentRepository extends Repository<$AscentsTable, Ascent> {
             db.ascents.routeId.equals(routeId) &
                 db.ascents.ownerId.equals(userId) &
                 db.ascents.deletedAt.isNull() &
-                db.sessions.deletedAt.isNull(),
+                db.sessions.deletedAt.isNull() &
+                (until == null ? const Constant(true) : _upTo(until)),
           )
           ..orderBy([
             OrderingTerm(expression: db.sessions.localDate),
@@ -376,7 +412,23 @@ class AscentRepository extends Repository<$AscentsTable, Ascent> {
       for (final row in await query.get())
         if (AscentStyle.values.asNameMap()[row.readTable(db.ascents).style]
             case final style?)
-          (style: style, tries: row.readTable(db.ascents).tries),
+          (
+            id: row.readTable(db.ascents).id,
+            sessionId: row.readTable(db.sessions).id,
+            ascent: (style: style, tries: row.readTable(db.ascents).tries),
+          ),
     ];
+  }
+
+  /// Sessions that sort no later than [session], in [routeLog]'s order.
+  Expression<bool> _upTo(Session session) {
+    final s = db.sessions;
+    final date = Variable(session.localDate);
+    final created = Variable(session.createdAt);
+    return s.localDate.isSmallerThan(date) |
+        (s.localDate.equalsExp(date) &
+            (s.createdAt.isSmallerThan(created) |
+                (s.createdAt.equalsExp(created) &
+                    s.id.isSmallerOrEqualValue(session.id))));
   }
 }
