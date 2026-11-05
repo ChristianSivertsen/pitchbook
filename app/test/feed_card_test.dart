@@ -68,6 +68,7 @@ RouteHit _hit(
     status: 'open',
   ),
   grade: '6+',
+  gradeSystem: 'nor',
   crag: 'Kolsås',
   lastClimbed: null,
   distanceKm: null,

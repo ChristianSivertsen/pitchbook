@@ -1,11 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sva/src/app.dart';
+import 'package:sva/src/data/providers.dart';
 import 'package:sva/src/router.dart';
 import 'package:sva/src/routes.dart';
 import 'package:sva/src/shell/app_shell.dart';
-import 'package:sva/src/theme_mode.dart';
+import 'package:sva_data/sva_data.dart' show Settings;
 import 'package:sva_ui/sva_ui.dart';
 
 void main() {
@@ -38,7 +41,11 @@ void main() {
   ) async {
     tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
     addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-    final container = ProviderContainer();
+    final settings = StreamController<Settings>();
+    addTearDown(settings.close);
+    final container = ProviderContainer(
+      overrides: [settingsProvider.overrideWith((ref) => settings.stream)],
+    );
     addTearDown(container.dispose);
 
     await tester.pumpWidget(
@@ -46,7 +53,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    container.read(themeModeProvider.notifier).select(ThemeMode.dark);
+    settings.add(const Settings(theme: 'midnight'));
     await tester.pumpAndSettle();
     expect(brightnessOf(tester), Brightness.dark);
     expect(
@@ -56,7 +63,7 @@ void main() {
 
     // With the system in dark mode, choosing light must override it.
     tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
-    container.read(themeModeProvider.notifier).select(ThemeMode.light);
+    settings.add(const Settings(theme: 'daylight'));
     await tester.pumpAndSettle();
     expect(brightnessOf(tester), Brightness.light);
   });

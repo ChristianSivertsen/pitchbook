@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:sva/l10n/app_localizations.dart';
 import 'package:sva/src/data/providers.dart';
+import 'package:sva/src/places/grade_badge.dart';
 import 'package:sva/src/places/labels.dart';
 import 'package:sva/src/routes.dart';
 import 'package:sva_data/sva_data.dart';
@@ -224,7 +225,8 @@ class _ClimbCard extends ConsumerWidget {
                     Expanded(
                       child: Text(hit?.route.name ?? '', style: text.headline),
                     ),
-                    if (hit?.grade case final grade?) SvaGradeBadge(grade),
+                    if (hit?.grade case final grade?)
+                      GradeBadge(grade, system: hit?.gradeSystem),
                   ],
                 ),
                 if (hit?.crag case final crag?) Text(crag, style: muted),

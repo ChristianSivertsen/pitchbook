@@ -93,6 +93,103 @@ class AppLocalizationsEn extends AppLocalizations {
       'Every climb you log adds to your levels and experience, and shows what you have not tried yet.';
 
   @override
+  String get settingsOpen => 'Settings';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsTheme => 'Theme';
+
+  @override
+  String settingsThemeOption(String theme) {
+    String _temp0 = intl.Intl.selectLogic(theme, {
+      'system': 'Follow the phone',
+      'midnight': 'Midnight sun',
+      'daylight': 'Daylight',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsLanguage => 'Language';
+
+  @override
+  String get settingsLanguageSystem => 'Follow the phone';
+
+  @override
+  String get settingsLanguageNb => 'Norsk (bokmål)';
+
+  @override
+  String get settingsLanguageEn => 'English';
+
+  @override
+  String get settingsGrades => 'Grades';
+
+  @override
+  String get settingsGradesNote =>
+      'Grades show in these systems. What you logged is kept as you logged it.';
+
+  @override
+  String settingsGradeType(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'free_route': 'Routes',
+      'boulder': 'Boulders',
+      'ice': 'Ice',
+      'mixed': 'Mixed',
+      'aid': 'Aid',
+      'alpine': 'Alpine',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String gradeSystemName(String system) {
+    String _temp0 = intl.Intl.selectLogic(system, {
+      'nor': 'Norwegian',
+      'french': 'French',
+      'yds': 'YDS',
+      'uiaa': 'UIAA',
+      'font': 'Font',
+      'v': 'V scale',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsVisibility => 'New sessions are visible to';
+
+  @override
+  String settingsVisibilityOption(String visibility) {
+    String _temp0 = intl.Intl.selectLogic(visibility, {
+      'private': 'Only you',
+      'friends': 'Friends',
+      'public': 'Everyone',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsVisibilityNote =>
+      'Nothing leaves this phone until you sign in.';
+
+  @override
+  String get settingsAbout => 'About';
+
+  @override
+  String get settingsVersion => 'Version';
+
+  @override
+  String get settingsLicences => 'Licences';
+
+  @override
+  String get settingsSaveFailed => 'Couldn\'t save the setting. Try again.';
+
+  @override
   String get trainingTitle => 'Training';
 
   @override

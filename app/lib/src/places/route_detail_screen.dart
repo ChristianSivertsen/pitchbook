@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sva/l10n/app_localizations.dart';
 import 'package:sva/src/data/providers.dart';
+import 'package:sva/src/places/grade_badge.dart';
 import 'package:sva/src/places/labels.dart';
 import 'package:sva_data/sva_data.dart';
 import 'package:sva_ui/sva_ui.dart';
@@ -80,12 +81,16 @@ class _RouteDetail extends ConsumerWidget {
           runSpacing: SvaSpace.xs,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            SvaGradeBadge(hit.grade ?? l10n.routeUngraded),
+            switch (hit.grade) {
+              final grade? => GradeBadge(grade, system: hit.gradeSystem),
+              null => SvaGradeBadge(l10n.routeUngraded),
+            },
             if (hit.crag case final crag?)
               Text(crag, style: text.body.copyWith(color: colors.textMuted)),
           ],
         ),
-        if (_yourTake(l10n, climbs) case final take?) ...[
+        if (_yourTake(l10n, climbs, ref.watch(gradeDisplayProvider))
+            case final take?) ...[
           const SizedBox(height: SvaSpace.xs),
           Text(take, style: text.label),
         ],
@@ -115,10 +120,14 @@ class _RouteDetail extends ConsumerWidget {
   /// Your own grade for the route, from the newest climb that has one, or
   /// else how the newest climb with a feel felt. Shown under the official
   /// grade.
-  static String? _yourTake(AppLocalizations l10n, List<RouteClimb>? climbs) {
+  static String? _yourTake(
+    AppLocalizations l10n,
+    List<RouteClimb>? climbs,
+    String Function(String label, String? systemKey) showGrade,
+  ) {
     for (final climb in climbs ?? const <RouteClimb>[]) {
       if (climb.personalGrade case final grade?) {
-        return l10n.routeYourGrade(grade);
+        return l10n.routeYourGrade(showGrade(grade, climb.personalSystem));
       }
     }
     for (final climb in climbs ?? const <RouteClimb>[]) {
@@ -132,7 +141,7 @@ class _RouteDetail extends ConsumerWidget {
   }
 }
 
-class _ClimbRow extends StatelessWidget {
+class _ClimbRow extends ConsumerWidget {
   const new({required this.climb, required this.currentGrade});
 
   final RouteClimb climb;
@@ -141,9 +150,10 @@ class _ClimbRow extends StatelessWidget {
   final String? currentGrade;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final text = context.svaText;
+    final showGrade = ref.watch(gradeDisplayProvider);
     final ascent = climb.ascent;
     final date = climb.date;
     return Padding(
@@ -166,12 +176,12 @@ class _ClimbRow extends StatelessWidget {
           if (climb.officialGrade case final then?
               when currentGrade != null && then != currentGrade)
             Text(
-              l10n.routeLoggedAt(then),
+              l10n.routeLoggedAt(showGrade(then, climb.officialSystem)),
               style: text.caption.copyWith(color: context.svaColors.textMuted),
             ),
           if (climb.personalGrade case final grade?)
             Text(
-              l10n.routeYourGrade(grade),
+              l10n.routeYourGrade(showGrade(grade, climb.personalSystem)),
               style: text.caption.copyWith(color: context.svaColors.textMuted),
             ),
         ],

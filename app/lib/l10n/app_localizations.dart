@@ -224,6 +224,120 @@ abstract class AppLocalizations {
   /// **'Every climb you log adds to your levels and experience, and shows what you have not tried yet.'**
   String get cvEmptyBody;
 
+  /// No description provided for @settingsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsOpen;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get settingsTheme;
+
+  /// Midnight sun and Daylight are the names of Sva's dark and light themes.
+  ///
+  /// In en, this message translates to:
+  /// **'{theme, select, system{Follow the phone} midnight{Midnight sun} daylight{Daylight} other{}}'**
+  String settingsThemeOption(String theme);
+
+  /// No description provided for @settingsLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsLanguage;
+
+  /// No description provided for @settingsLanguageSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow the phone'**
+  String get settingsLanguageSystem;
+
+  /// Always written in Norwegian, so Norwegian speakers find it.
+  ///
+  /// In en, this message translates to:
+  /// **'Norsk (bokmål)'**
+  String get settingsLanguageNb;
+
+  /// Always written in English, so English speakers find it.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get settingsLanguageEn;
+
+  /// No description provided for @settingsGrades.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades'**
+  String get settingsGrades;
+
+  /// No description provided for @settingsGradesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades show in these systems. What you logged is kept as you logged it.'**
+  String get settingsGradesNote;
+
+  /// No description provided for @settingsGradeType.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, free_route{Routes} boulder{Boulders} ice{Ice} mixed{Mixed} aid{Aid} alpine{Alpine} other{}}'**
+  String settingsGradeType(String type);
+
+  /// No description provided for @gradeSystemName.
+  ///
+  /// In en, this message translates to:
+  /// **'{system, select, nor{Norwegian} french{French} yds{YDS} uiaa{UIAA} font{Font} v{V scale} other{}}'**
+  String gradeSystemName(String system);
+
+  /// No description provided for @settingsVisibility.
+  ///
+  /// In en, this message translates to:
+  /// **'New sessions are visible to'**
+  String get settingsVisibility;
+
+  /// No description provided for @settingsVisibilityOption.
+  ///
+  /// In en, this message translates to:
+  /// **'{visibility, select, private{Only you} friends{Friends} public{Everyone} other{}}'**
+  String settingsVisibilityOption(String visibility);
+
+  /// No description provided for @settingsVisibilityNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing leaves this phone until you sign in.'**
+  String get settingsVisibilityNote;
+
+  /// No description provided for @settingsAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAbout;
+
+  /// No description provided for @settingsVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get settingsVersion;
+
+  /// No description provided for @settingsLicences.
+  ///
+  /// In en, this message translates to:
+  /// **'Licences'**
+  String get settingsLicences;
+
+  /// No description provided for @settingsSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the setting. Try again.'**
+  String get settingsSaveFailed;
+
   /// No description provided for @trainingTitle.
   ///
   /// In en, this message translates to:

@@ -93,6 +93,104 @@ class AppLocalizationsNb extends AppLocalizations {
       'Hver rute du logger, bygger opp nivåene og erfaringen din og viser hva du ikke har prøvd ennå.';
 
   @override
+  String get settingsOpen => 'Innstillinger';
+
+  @override
+  String get settingsTitle => 'Innstillinger';
+
+  @override
+  String get settingsTheme => 'Tema';
+
+  @override
+  String settingsThemeOption(String theme) {
+    String _temp0 = intl.Intl.selectLogic(theme, {
+      'system': 'Følg telefonen',
+      'midnight': 'Midnattssol',
+      'daylight': 'Dagslys',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsLanguage => 'Språk';
+
+  @override
+  String get settingsLanguageSystem => 'Følg telefonen';
+
+  @override
+  String get settingsLanguageNb => 'Norsk (bokmål)';
+
+  @override
+  String get settingsLanguageEn => 'English';
+
+  @override
+  String get settingsGrades => 'Grader';
+
+  @override
+  String get settingsGradesNote =>
+      'Gradene vises i disse systemene. Det du har logget, beholdes slik du logget det.';
+
+  @override
+  String settingsGradeType(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'free_route': 'Ruter',
+      'boulder': 'Buldre',
+      'ice': 'Is',
+      'mixed': 'Mixed',
+      'aid': 'Aid',
+      'alpine': 'Alpint',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String gradeSystemName(String system) {
+    String _temp0 = intl.Intl.selectLogic(system, {
+      'nor': 'Norsk',
+      'french': 'Fransk',
+      'yds': 'YDS',
+      'uiaa': 'UIAA',
+      'font': 'Font',
+      'v': 'V-skala',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsVisibility => 'Nye økter er synlige for';
+
+  @override
+  String settingsVisibilityOption(String visibility) {
+    String _temp0 = intl.Intl.selectLogic(visibility, {
+      'private': 'Bare deg',
+      'friends': 'Venner',
+      'public': 'Alle',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsVisibilityNote =>
+      'Ingenting forlater telefonen før du logger inn.';
+
+  @override
+  String get settingsAbout => 'Om appen';
+
+  @override
+  String get settingsVersion => 'Versjon';
+
+  @override
+  String get settingsLicences => 'Lisenser';
+
+  @override
+  String get settingsSaveFailed =>
+      'Kunne ikke lagre innstillingen. Prøv igjen.';
+
+  @override
   String get trainingTitle => 'Trening';
 
   @override

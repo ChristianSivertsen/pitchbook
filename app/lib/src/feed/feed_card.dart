@@ -36,6 +36,7 @@ class FeedCard extends ConsumerWidget {
     final partners = ref.watch(sessionPartnersProvider(session.id)).value;
     final weather = ref.watch(sessionWeatherProvider(session.id)).value;
     final tags = ref.watch(sessionTagsProvider(session.id)).value ?? [];
+    final showGrade = ref.watch(gradeDisplayProvider);
 
     final crags = {for (final c in climbs) ?hits[c.routeId]?.crag};
     final shown = climbs.take(_climbsShown);
@@ -71,7 +72,7 @@ class FeedCard extends ConsumerWidget {
             detail: _detail(l10n, hits[climb.routeId]?.route),
             style: climb.style,
             styleLabel: l10n.ascentStyle(climb.style),
-            grade: hits[climb.routeId]?.grade,
+            grade: _grade(hits[climb.routeId], showGrade),
           ),
       ],
       more: climbs.length > _climbsShown
@@ -112,6 +113,15 @@ class FeedCard extends ConsumerWidget {
           : null,
     );
   }
+
+  /// The route's grade in the user's system, or `null` without one.
+  static String? _grade(
+    RouteHit? hit,
+    String Function(String label, String? systemKey) show,
+  ) => switch (hit?.grade) {
+    final grade? => show(grade, hit?.gradeSystem),
+    null => null,
+  };
 
   /// A climb's kind, such as `Sport · 3 pitches`.
   static String _detail(AppLocalizations l10n, Route? route) {

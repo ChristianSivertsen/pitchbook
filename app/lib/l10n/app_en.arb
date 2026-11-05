@@ -53,6 +53,60 @@
   "cvTitle": "Climbing CV",
   "cvEmptyTitle": "Your CV builds itself",
   "cvEmptyBody": "Every climb you log adds to your levels and experience, and shows what you have not tried yet.",
+  "settingsOpen": "Settings",
+  "settingsTitle": "Settings",
+  "settingsTheme": "Theme",
+  "settingsThemeOption": "{theme, select, system{Follow the phone} midnight{Midnight sun} daylight{Daylight} other{}}",
+  "@settingsThemeOption": {
+    "description": "Midnight sun and Daylight are the names of Sva's dark and light themes.",
+    "placeholders": {
+      "theme": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsLanguage": "Language",
+  "settingsLanguageSystem": "Follow the phone",
+  "settingsLanguageNb": "Norsk (bokmål)",
+  "@settingsLanguageNb": {
+    "description": "Always written in Norwegian, so Norwegian speakers find it."
+  },
+  "settingsLanguageEn": "English",
+  "@settingsLanguageEn": {
+    "description": "Always written in English, so English speakers find it."
+  },
+  "settingsGrades": "Grades",
+  "settingsGradesNote": "Grades show in these systems. What you logged is kept as you logged it.",
+  "settingsGradeType": "{type, select, free_route{Routes} boulder{Boulders} ice{Ice} mixed{Mixed} aid{Aid} alpine{Alpine} other{}}",
+  "@settingsGradeType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "gradeSystemName": "{system, select, nor{Norwegian} french{French} yds{YDS} uiaa{UIAA} font{Font} v{V scale} other{}}",
+  "@gradeSystemName": {
+    "placeholders": {
+      "system": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsVisibility": "New sessions are visible to",
+  "settingsVisibilityOption": "{visibility, select, private{Only you} friends{Friends} public{Everyone} other{}}",
+  "@settingsVisibilityOption": {
+    "placeholders": {
+      "visibility": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsVisibilityNote": "Nothing leaves this phone until you sign in.",
+  "settingsAbout": "About",
+  "settingsVersion": "Version",
+  "settingsLicences": "Licences",
+  "settingsSaveFailed": "Couldn't save the setting. Try again.",
   "trainingTitle": "Training",
   "trainingEmptyTitle": "Track strength and mobility",
   "trainingEmptyBody": "Finger strength, pulling, core and mobility tests arrive here, with your progress over time.",
