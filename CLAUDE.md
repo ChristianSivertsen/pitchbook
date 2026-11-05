@@ -85,6 +85,7 @@ cd packages/sva_data && dart run drift_dev schema dump lib/src/database/sva_data
 cd packages/sva_data && dart run drift_dev schema generate drift_schemas/sva/ test/generated_migrations/sva/generated/   # then this
 cd app && flutter run --dart-define-from-file=mapbox.json   # with the map; mapbox.json is untracked
 swift tool/render_app_icons.swift   # after changing assets/brand/sva-app-icon.svg (macOS)
+swift tool/render_brand_pngs.swift  # after changing any SVG in assets/brand (macOS)
 ```
 
 Add new commands here as tooling is set up.

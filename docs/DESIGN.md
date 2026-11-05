@@ -1,6 +1,6 @@
 # Sva design language
 
-Sva is named after the smooth, sea-worn granite of the Norwegian coast. The brand comes from one scene: Lofoten granite rising straight out of the sea under the midnight sun. Read from left to right, the peaks rise like a graph, because the app is about seeing your climbing grow. A low midnight sun sits beside them at night and stands over them by day.
+Sva is named after the smooth, sea-worn granite of the Norwegian coast. The brand comes from one scene: northern Norwegian granite rising straight out of the fjord under the midnight sun. The logo is Stetind, Norway's national mountain, as seen from the summit of Titinden to the west, with **sva** carved into the rock. Looking east, north is on the left: the midnight sun hangs low beside the mountain at night, and the day sun stands high on the right, in the south.
 
 Every screen should feel like that scene: calm and dark like a summer night by the sea, warm where it matters, and clear enough to read at a glance.
 
@@ -16,24 +16,43 @@ The clickable prototype in [`prototype/index.html`](../prototype/index.html) sho
 
 ## Logo
 
-The mark is three shapes on a horizon line: the sun, a peak and a higher peak. The wordmark is always lowercase: **sva**.
+The logo is Stetind's real skyline, traced from Kartverket's height data at true proportions, with the letters **sva** carved out of the granite. The wordmark is always lowercase. The rock has four faces that catch the light, split by a soft bowl line.
 
-The sun tells the time of day. In Midnight sun it hangs low on the left, just above the horizon. In Daylight it stands high on the upper right of the higher peak. Wherever the theme changes, the sun rises or sets along an arc, slipping behind the summit (`SvaMotion.daybreak`, 900 ms), and the mark's colours fade with it. With reduce motion on, it moves straight to its new place.
+The sun is true to the compass. In Midnight it hangs low on the left (north), partly behind the mountain's foot, with two strokes of water below it. In Daylight it stands high on the right (south) with hand-drawn rays, and there is no water.
+
+The letters are drawn from Inter Black (SIL Open Font License, [`assets/brand/OFL-Inter.txt`](../assets/brand/OFL-Inter.txt)), with rounded corners and fitted to the mountain. Keep the licence file with the logo files.
+
+Every file is an SVG in `assets/brand`, with a PNG of the same name in `assets/brand/png`, 2048 px on its long side. After changing an SVG, run `swift tool/render_brand_pngs.swift` to update the PNGs.
 
 | Asset | File | Use |
 |---|---|---|
-| Mark, dark background | [`assets/brand/sva-mark-midnight.svg`](../assets/brand/sva-mark-midnight.svg) | Dark mode, splash, social |
-| Mark, light background | [`assets/brand/sva-mark-daylight.svg`](../assets/brand/sva-mark-daylight.svg) | Light mode, documents (sun upper right) |
-| Mark, one colour | [`assets/brand/sva-mark-mono.svg`](../assets/brand/sva-mark-mono.svg) | Watermarks, embossing, single-colour print |
-| App icon | [`assets/brand/sva-app-icon.svg`](../assets/brand/sva-app-icon.svg) | 1024 × 1024 source for iOS and Android icons |
-| Lockup | [`assets/brand/sva-lockup-midnight.svg`](../assets/brand/sva-lockup-midnight.svg) | Splash screen, store listing, stickers |
+| Logo, Midnight | [`sva-logo-midnight.svg`](../assets/brand/sva-logo-midnight.svg) | Dark mode, splash, social, store listing |
+| Logo, Daylight | [`sva-logo-daylight.svg`](../assets/brand/sva-logo-daylight.svg) | Light mode, documents, print |
+| Small sizes, Midnight | [`sva-logo-small-midnight.svg`](../assets/brand/sva-logo-small-midnight.svg) | Below about 64 px: one rock colour, no faces |
+| Small sizes, Daylight | [`sva-logo-small-daylight.svg`](../assets/brand/sva-logo-small-daylight.svg) | Below about 64 px: one rock colour, no faces |
+| App icon | [`sva-app-icon.svg`](../assets/brand/sva-app-icon.svg) | 1024 × 1024 source for the iOS and Android launcher icons |
+| App icon, Daylight | [`sva-app-icon-daylight.svg`](../assets/brand/sva-app-icon-daylight.svg) | Square avatar on light backgrounds |
+| One colour, dark | [`sva-logo-mono-dark.svg`](../assets/brand/sva-logo-mono-dark.svg) | Single-colour print, embossing; transparent background |
+| One colour, light | [`sva-logo-mono-light.svg`](../assets/brand/sva-logo-mono-light.svg) | White on photos and dark backgrounds; transparent background |
+| One colour, Daylight | [`sva-logo-mono-daylight.svg`](../assets/brand/sva-logo-mono-daylight.svg) | Single colour with the day sun; transparent background |
+| Wordmark, Midnight | [`sva-wordmark-midnight.svg`](../assets/brand/sva-wordmark-midnight.svg) | The letters alone, where the mountain would be too small |
+| Wordmark, Daylight | [`sva-wordmark-daylight.svg`](../assets/brand/sva-wordmark-daylight.svg) | The letters alone, on light backgrounds |
+
+Logo colours:
+
+| | Sky | Sun | Rays or water | Rock faces, lit to shaded |
+|---|---|---|---|---|
+| Midnight | `#11293A` | `#EE6A49` | `#C9826D` | `#F7DACC` `#E9C0AF` `#DAA692` `#CB8D77` |
+| Daylight | `#F7F1E6` | `#F0AC38` | `#D4694C` | `#53618B` `#445075` `#36405F` `#28314A` |
 
 Rules:
 
-- **Clear space** around the mark equals the sun's diameter.
-- **Minimum size:** 24 px for the mark with wordmark, 16 px for the mark alone.
-- **Do not** recolour the mark outside the palettes below, rotate it, add effects, or change the order of the peaks. The rising peaks are the progress story; only the sun moves, and only between its two places.
-- The app icon is full-bleed and square; iOS and Android apply their own rounding.
+- **Clear space** around the logo is 11 % of its width on every side, with the mark lifted slightly above centre. The app icon keeps a 7 % margin.
+- **Small sizes:** below about 64 px wide the faces turn to noise; use the small-size version.
+- The carved letters are holes in the rock: put the logo on its own sky colour, or use a one-colour version on anything else.
+- **Do not** recolour the logo outside the colours above, stretch it, rotate it, add effects, or move the sun to the other side. The sun's place is the time of day.
+- The app icon is full-bleed and square; iOS and Android apply their own rounding. On Android the mark sits inside the adaptive icon's 66 dp safe zone, on the Midnight sky.
+- The in-app mark (`SvaMark` in `sva_ui`, with its sunrise animation `SvaMotion.daybreak`) still draws the earlier three-shape mark until it is redrawn for this logo.
 
 ## Colour
 
@@ -98,7 +117,7 @@ Gym colour grades use the gym's own colours from the data, shown as a filled chi
 
 | Role | Family | Size / line height | Weight | Use |
 |---|---|---|---|---|
-| Wordmark | Fraunces | — | 600 | The logo only |
+| Wordmark | Inter Black, redrawn | — | 900 | The logo only, as artwork in `assets/brand`; never set as text |
 | Display | Fraunces | 32 / 36 | 600 | Screen titles (Feed, History, CV) |
 | Title | Fraunces | 22 / 28 | 600 | Session titles, section headers |
 | Headline | Inter | 17 / 24 | 600 | Card titles, route names |
