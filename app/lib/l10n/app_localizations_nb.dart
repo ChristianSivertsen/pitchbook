@@ -178,6 +178,108 @@ class AppLocalizationsNb extends AppLocalizations {
       'Ingenting forlater telefonen før du logger inn.';
 
   @override
+  String get settingsGyms => 'Klatresentre';
+
+  @override
+  String get settingsGymsNote =>
+      'Legg inn klatresentrene du klatrer på én gang, så går loggingen raskt der.';
+
+  @override
+  String get settingsGymAdd => 'Legg til klatresenter';
+
+  @override
+  String get gymFormNew => 'Nytt klatresenter';
+
+  @override
+  String get gymFormEdit => 'Rediger klatresenter';
+
+  @override
+  String get gymFormNotFound =>
+      'Klatresenteret finnes ikke på denne telefonen. Det kan ha blitt slettet.';
+
+  @override
+  String get gymFormNameMissing => 'Gi klatresenteret et navn.';
+
+  @override
+  String get gymFormMap => 'Kart. Trykk for å plassere klatresenteret.';
+
+  @override
+  String get gymFormGrading => 'Gradering';
+
+  @override
+  String gymGrading(String grading) {
+    String _temp0 = intl.Intl.selectLogic(grading, {
+      'colour': 'Fargeskala',
+      'standard': 'Vanlige grader',
+      'none': 'Ugradert',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get gymFormWalls => 'Vegger';
+
+  @override
+  String get gymFormWallsNote =>
+      'Hver klatring du logger på en vegg får veggens høyde og starter med vinkelen. Vinkelen kan endres per klatring.';
+
+  @override
+  String get gymFormWallAdd => 'Legg til vegg';
+
+  @override
+  String get gymFormWallName => 'Navn på veggen';
+
+  @override
+  String get gymFormWallNameMissing => 'Gi veggen et navn.';
+
+  @override
+  String get gymFormWallHeight => 'Høyde i meter';
+
+  @override
+  String get gymFormWallHeightInvalid =>
+      'Bruk en høyde fra 1 til 60 m, eller la feltet stå tomt.';
+
+  @override
+  String get gymFormWallKind => 'Type';
+
+  @override
+  String gymWallKind(String kind) {
+    String _temp0 = intl.Intl.selectLogic(kind, {
+      'rope': 'Tau',
+      'boulder': 'Buldring',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get gymFormWallAngle => 'Vinkel';
+
+  @override
+  String gymFormWallRemove(String name) {
+    return 'Fjern $name';
+  }
+
+  @override
+  String get gymFormWallDefaultRope => 'Hovedvegg';
+
+  @override
+  String get gymFormWallDefaultBoulder => 'Buldreområde';
+
+  @override
+  String gymFormWallDefault(int number) {
+    return 'Vegg $number';
+  }
+
+  @override
+  String get gymFormSave => 'Lagre klatresenter';
+
+  @override
+  String get gymFormNotYours =>
+      'Klatresenteret er delt, så bare veggene dine kan endres her.';
+
+  @override
   String get settingsAbout => 'Om appen';
 
   @override

@@ -103,6 +103,60 @@
     }
   },
   "settingsVisibilityNote": "Nothing leaves this phone until you sign in.",
+  "settingsGyms": "Gyms",
+  "settingsGymsNote": "Set up the gyms you climb in once, so logging there is quick.",
+  "settingsGymAdd": "Add a gym",
+  "gymFormNew": "New gym",
+  "gymFormEdit": "Edit gym",
+  "gymFormNotFound": "This gym isn't on this phone. It may have been deleted.",
+  "gymFormNameMissing": "Give the gym a name.",
+  "gymFormMap": "Map. Tap to place the gym.",
+  "gymFormGrading": "Grading",
+  "gymGrading": "{grading, select, colour{Colour scale} standard{Standard grades} none{Ungraded} other{}}",
+  "@gymGrading": {
+    "placeholders": {
+      "grading": {
+        "type": "String"
+      }
+    }
+  },
+  "gymFormWalls": "Walls",
+  "gymFormWallsNote": "Each climb you log on a wall gets its height and starts with its angle. You can change the angle per climb.",
+  "gymFormWallAdd": "Add a wall",
+  "gymFormWallName": "Wall name",
+  "gymFormWallNameMissing": "Give the wall a name.",
+  "gymFormWallHeight": "Height in metres",
+  "gymFormWallHeightInvalid": "Use a height from 1 to 60 m, or leave it empty.",
+  "gymFormWallKind": "Type",
+  "gymWallKind": "{kind, select, rope{Rope} boulder{Boulder} other{}}",
+  "@gymWallKind": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "gymFormWallAngle": "Angle",
+  "gymFormWallRemove": "Remove {name}",
+  "@gymFormWallRemove": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "gymFormWallDefaultRope": "Main wall",
+  "gymFormWallDefaultBoulder": "Boulder area",
+  "gymFormWallDefault": "Wall {number}",
+  "@gymFormWallDefault": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "gymFormSave": "Save gym",
+  "gymFormNotYours": "This gym is shared, so only your walls can be changed here.",
   "settingsAbout": "About",
   "settingsVersion": "Version",
   "settingsLicences": "Licences",

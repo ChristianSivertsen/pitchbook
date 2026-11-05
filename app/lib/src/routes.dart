@@ -52,6 +52,13 @@ abstract final class Routes {
   static const settings = '$cv/$settingsSegment';
   static const settingsSegment = 'settings';
 
+  /// The form for a new gym, and for one gym and its walls.
+  static const gymNew = '$settings/gyms/$newSegment';
+  static String gym(String gymId) =>
+      '$settings/gyms/${Uri.encodeComponent(gymId)}';
+  static const gymNewSegment = 'gyms/$newSegment';
+  static const gymSegment = 'gyms/:gymId';
+
   /// Debug builds only: every design token.
   static const tokenPreview = '/debug/tokens';
 }

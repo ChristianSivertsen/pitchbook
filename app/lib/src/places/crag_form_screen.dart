@@ -33,21 +33,7 @@ class _CragFormScreenState extends ConsumerState<CragFormScreen> {
     super.dispose();
   }
 
-  /// Both coordinates, or `null` when both are empty.
-  LatLon? get _location {
-    final lat = parseDecimal(_lat.text);
-    final lon = parseDecimal(_lon.text);
-    return lat == null || lon == null ? null : (lat: lat, lon: lon);
-  }
-
-  String? _checkLocation(AppLocalizations l10n) {
-    final empty = _lat.text.trim().isEmpty && _lon.text.trim().isEmpty;
-    if (empty) return null;
-    final at = _location;
-    return at == null || at.lat.abs() > 90 || at.lon.abs() > 180
-        ? l10n.cragFormLocationInvalid
-        : null;
-  }
+  LatLon? get _location => LocationFields.locationOf(_lat, _lon);
 
   Future<void> _save() async {
     if (!_form.currentState!.validate()) return;
@@ -118,58 +104,11 @@ class _CragFormScreenState extends ConsumerState<CragFormScreen> {
               onChanged: (v) => setState(() => _rock = v.firstOrNull),
             ),
             formGap,
-            LocationPicker(
-              value: _location,
-              onChanged: (at) => setState(() {
-                _lat.text = at.lat.toStringAsFixed(5);
-                _lon.text = at.lon.toStringAsFixed(5);
-              }),
-            ),
-            const SizedBox(height: SvaSpace.xs),
-            Text(
-              ref.watch(mapTilesProvider) == null
-                  ? l10n.cragFormLocationHint
-                  : l10n.cragFormLocationHintMap,
-              style: context.svaText.caption.copyWith(
-                color: context.svaColors.textMuted,
-              ),
-            ),
-            const SizedBox(height: SvaSpace.xs),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _lat,
-                    decoration: InputDecoration(
-                      labelText: l10n.cragFormLatitude,
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                      signed: true,
-                    ),
-                    // Moves the pin on the map as you type.
-                    onChanged: (_) => setState(() {}),
-                    validator: (_) => _checkLocation(l10n),
-                  ),
-                ),
-                const SizedBox(width: SvaSpace.sm),
-                Expanded(
-                  child: TextFormField(
-                    controller: _lon,
-                    decoration: InputDecoration(
-                      labelText: l10n.cragFormLongitude,
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                      signed: true,
-                    ),
-                    // Moves the pin on the map as you type.
-                    onChanged: (_) => setState(() {}),
-                    validator: (_) => _checkLocation(l10n),
-                  ),
-                ),
-              ],
+            LocationFields(
+              lat: _lat,
+              lon: _lon,
+              mapLabel: l10n.cragFormMap,
+              onChanged: () => setState(() {}),
             ),
           ],
         ),

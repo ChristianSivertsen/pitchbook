@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sva/src/gyms/gym_form_screen.dart';
 import 'package:sva/src/places/crag_form_screen.dart';
 import 'package:sva/src/places/route_detail_screen.dart';
 import 'package:sva/src/places/route_form_screen.dart';
@@ -106,6 +107,17 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: Routes.settingsSegment,
                     builder: (context, state) => const SettingsScreen(),
+                    routes: [
+                      GoRoute(
+                        path: Routes.gymNewSegment,
+                        builder: (context, state) => const GymFormScreen(),
+                      ),
+                      GoRoute(
+                        path: Routes.gymSegment,
+                        builder: (context, state) =>
+                            GymFormScreen(gymId: state.pathParameters['gymId']),
+                      ),
+                    ],
                   ),
                 ],
               ),

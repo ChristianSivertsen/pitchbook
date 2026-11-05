@@ -105,18 +105,9 @@ class RouteEditor {
 
   /// Adds a crag for [userId]. Returns its id.
   Future<String> addCrag(NewCrag crag, {required String userId}) async {
-    final name = _name(crag.name);
-    if (!RegExp(r'^[A-Z]{2}$').hasMatch(crag.countryCode)) {
-      throw ArgumentError.value(crag.countryCode, 'countryCode');
-    }
-    if (crag.location case final at?) {
-      if (!at.lat.isFinite || at.lat.abs() > 90) {
-        throw ArgumentError.value(at.lat, 'location', 'latitude');
-      }
-      if (!at.lon.isFinite || at.lon.abs() > 180) {
-        throw ArgumentError.value(at.lon, 'location', 'longitude');
-      }
-    }
+    final name = checkName(crag.name);
+    checkCountry(crag.countryCode);
+    checkLocation(crag.location);
     final areaDefs = await _attributes.definitions(level: AttributeLevel.area);
     _checkValue(areaDefs, 'rock_type', crag.rockType);
     return await db.transaction(() async {
@@ -141,7 +132,7 @@ class RouteEditor {
   /// Adds a route with its grade, details and pitches for [userId].
   /// Returns its id.
   Future<String> addRoute(NewRoute route, {required String userId}) async {
-    final name = _name(route.name);
+    final name = checkName(route.name);
     if (route.pitches.length > maxPitches) {
       throw ArgumentError.value(route.pitches.length, 'pitches');
     }
@@ -254,12 +245,31 @@ class RouteEditor {
     });
   }
 
-  static String _name(String raw) {
+  /// [raw] trimmed, or [ArgumentError] when empty or too long.
+  static String checkName(String raw) {
     final name = raw.trim();
     if (name.isEmpty || name.length > maxNameLength) {
       throw ArgumentError.value(raw, 'name');
     }
     return name;
+  }
+
+  /// Throws [ArgumentError] unless [code] is an ISO 3166-1 alpha-2 code.
+  static void checkCountry(String code) {
+    if (!RegExp(r'^[A-Z]{2}$').hasMatch(code)) {
+      throw ArgumentError.value(code, 'countryCode');
+    }
+  }
+
+  /// Throws [ArgumentError] unless [at] is `null` or a point on Earth.
+  static void checkLocation(LatLon? at) {
+    if (at == null) return;
+    if (!at.lat.isFinite || at.lat.abs() > 90) {
+      throw ArgumentError.value(at.lat, 'location', 'latitude');
+    }
+    if (!at.lon.isFinite || at.lon.abs() > 180) {
+      throw ArgumentError.value(at.lon, 'location', 'longitude');
+    }
   }
 
   static void _length(double? metres, String field) {

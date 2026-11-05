@@ -178,6 +178,108 @@ class AppLocalizationsEn extends AppLocalizations {
       'Nothing leaves this phone until you sign in.';
 
   @override
+  String get settingsGyms => 'Gyms';
+
+  @override
+  String get settingsGymsNote =>
+      'Set up the gyms you climb in once, so logging there is quick.';
+
+  @override
+  String get settingsGymAdd => 'Add a gym';
+
+  @override
+  String get gymFormNew => 'New gym';
+
+  @override
+  String get gymFormEdit => 'Edit gym';
+
+  @override
+  String get gymFormNotFound =>
+      'This gym isn\'t on this phone. It may have been deleted.';
+
+  @override
+  String get gymFormNameMissing => 'Give the gym a name.';
+
+  @override
+  String get gymFormMap => 'Map. Tap to place the gym.';
+
+  @override
+  String get gymFormGrading => 'Grading';
+
+  @override
+  String gymGrading(String grading) {
+    String _temp0 = intl.Intl.selectLogic(grading, {
+      'colour': 'Colour scale',
+      'standard': 'Standard grades',
+      'none': 'Ungraded',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get gymFormWalls => 'Walls';
+
+  @override
+  String get gymFormWallsNote =>
+      'Each climb you log on a wall gets its height and starts with its angle. You can change the angle per climb.';
+
+  @override
+  String get gymFormWallAdd => 'Add a wall';
+
+  @override
+  String get gymFormWallName => 'Wall name';
+
+  @override
+  String get gymFormWallNameMissing => 'Give the wall a name.';
+
+  @override
+  String get gymFormWallHeight => 'Height in metres';
+
+  @override
+  String get gymFormWallHeightInvalid =>
+      'Use a height from 1 to 60 m, or leave it empty.';
+
+  @override
+  String get gymFormWallKind => 'Type';
+
+  @override
+  String gymWallKind(String kind) {
+    String _temp0 = intl.Intl.selectLogic(kind, {
+      'rope': 'Rope',
+      'boulder': 'Boulder',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get gymFormWallAngle => 'Angle';
+
+  @override
+  String gymFormWallRemove(String name) {
+    return 'Remove $name';
+  }
+
+  @override
+  String get gymFormWallDefaultRope => 'Main wall';
+
+  @override
+  String get gymFormWallDefaultBoulder => 'Boulder area';
+
+  @override
+  String gymFormWallDefault(int number) {
+    return 'Wall $number';
+  }
+
+  @override
+  String get gymFormSave => 'Save gym';
+
+  @override
+  String get gymFormNotYours =>
+      'This gym is shared, so only your walls can be changed here.';
+
+  @override
   String get settingsAbout => 'About';
 
   @override

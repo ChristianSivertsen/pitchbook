@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:sva/l10n/app_localizations.dart';
 import 'package:sva/src/app_version.dart';
 import 'package:sva/src/data/providers.dart';
 import 'package:sva/src/places/form_parts.dart';
+import 'package:sva/src/routes.dart';
 import 'package:sva_core/sva_core.dart' show GradeSystem;
 import 'package:sva_data/sva_data.dart';
 import 'package:sva_ui/sva_ui.dart';
@@ -129,6 +132,24 @@ class SettingsScreen extends ConsumerWidget {
               },
             ),
           ],
+          section(l10n.settingsGyms),
+          Text(l10n.settingsGymsNote, style: muted),
+          for (final gym in ref.watch(gymsProvider).value ?? const <Area>[])
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(gym.name, style: text.body),
+              trailing: const Icon(LucideIcons.chevronRight),
+              onTap: () => context.push(Routes.gym(gym.id)),
+            ),
+          const SizedBox(height: SvaSpace.xs),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              onPressed: () => context.push(Routes.gymNew),
+              icon: const Icon(LucideIcons.plus),
+              label: Text(l10n.settingsGymAdd),
+            ),
+          ),
           section(l10n.settingsAbout),
           ListTile(
             contentPadding: EdgeInsets.zero,
