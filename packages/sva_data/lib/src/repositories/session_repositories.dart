@@ -77,14 +77,17 @@ class SessionRepository extends Repository<$SessionsTable, Session> {
     return id;
   }
 
-  /// [userId]'s sessions, newest day first.
-  Stream<List<Session>> watchMine({required String userId}) {
+  /// [userId]'s sessions, newest day first. With [limit], only that many
+  /// of the newest, so a feed can read one page at a time.
+  Stream<List<Session>> watchMine({required String userId, int? limit}) {
     final query = live()
       ..where((s) => s.ownerId.equals(userId))
       ..orderBy([
         (s) => OrderingTerm.desc(s.localDate),
         (s) => OrderingTerm.desc(s.createdAt),
+        (s) => OrderingTerm.desc(s.id),
       ]);
+    if (limit != null) query.limit(limit);
     return query.watch();
   }
 

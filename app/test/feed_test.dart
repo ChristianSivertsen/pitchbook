@@ -35,7 +35,9 @@ void main() {
     );
     final container = ProviderContainer(
       overrides: [
-        mySessionsProvider.overrideWith((ref) => Stream.value([session])),
+        feedSessionsProvider.overrideWith(
+          (ref, limit) => Stream.value([session]),
+        ),
         sessionAscentsProvider.overrideWith((ref, id) => Stream.value([])),
         sessionWeatherProvider.overrideWith((ref, id) => Stream.value(weather)),
       ],

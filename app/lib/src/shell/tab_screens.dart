@@ -4,96 +4,87 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:sva/l10n/app_localizations.dart';
 import 'package:sva/src/data/providers.dart';
-import 'package:sva/src/places/labels.dart';
+import 'package:sva/src/feed/feed_card.dart';
 import 'package:sva/src/routes.dart';
 import 'package:sva_data/sva_data.dart';
 import 'package:sva_ui/sva_ui.dart';
 
-/// Feed tab: your sessions, newest first. The full session cards arrive
-/// in M2-7; until then each session is a simple row.
-class FeedScreen extends ConsumerWidget {
+/// Feed tab: your sessions as cards, newest first. More load as you
+/// scroll to the end.
+class FeedScreen extends ConsumerStatefulWidget {
   const new({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FeedScreen> createState() => _FeedScreenState();
+}
+
+class _FeedScreenState extends ConsumerState<FeedScreen> {
+  /// Sessions read at a time.
+  static const _page = 20;
+
+  int _limit = _page;
+
+  /// The last page shown, kept while a longer page loads so the list does
+  /// not blink.
+  List<Session>? _shown;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final sessions = ref.watch(mySessionsProvider).value ?? const [];
-    if (sessions.isNotEmpty) {
-      return SafeArea(
-        bottom: false,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            SvaSpace.screen,
-            SvaSpace.lg,
-            SvaSpace.screen,
-            SvaSpace.xl,
-          ),
-          children: [
-            const Align(alignment: Alignment.centerLeft, child: _Wordmark()),
-            const SizedBox(height: SvaSpace.md),
-            for (final session in sessions) _SessionRow(session: session),
-          ],
+    final page = ref.watch(feedSessionsProvider(_limit));
+    if (page.hasValue) _shown = page.value;
+    // Nothing to show if the first page fails: the empty state still
+    // offers to log.
+    final sessions = _shown ?? (page.hasError ? const <Session>[] : null);
+    if (sessions == null) return const SizedBox.shrink();
+    if (sessions.isEmpty) {
+      return _TabScreen(
+        header: const Align(
+          alignment: Alignment.centerLeft,
+          child: _Wordmark(),
+        ),
+        empty: _EmptyState(
+          icon: LucideIcons.mountainSnow,
+          title: l10n.feedEmptyTitle,
+          body: l10n.feedEmptyBody,
+          actionLabel: l10n.logButton,
+          onAction: () => context.push(Routes.log),
         ),
       );
     }
-    return _TabScreen(
-      header: const Align(alignment: Alignment.centerLeft, child: _Wordmark()),
-      empty: _EmptyState(
-        icon: LucideIcons.mountainSnow,
-        title: l10n.feedEmptyTitle,
-        body: l10n.feedEmptyBody,
-        actionLabel: l10n.logButton,
-        onAction: () => context.push(Routes.log),
-      ),
-    );
-  }
-}
-
-class _SessionRow extends ConsumerWidget {
-  const new({required this.session});
-
-  final Session session;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final climbs = ref.watch(sessionAscentsProvider(session.id)).value;
-    final weather = ref.watch(sessionWeatherProvider(session.id)).value;
-    final weatherText = weather == null ? '' : weatherLine(l10n, weather);
-    final day = formatDay(l10n, session.localDate);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: SvaSpace.sm),
-      child: Card(
-        child: InkWell(
-          onTap: () => context.push(Routes.session(session.id)),
-          borderRadius: const BorderRadius.all(SvaRadius.card),
-          child: Padding(
-            padding: const EdgeInsets.all(SvaSpace.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(session.title ?? day, style: context.svaText.headline),
-                const SizedBox(height: SvaSpace.xxs),
-                Text(
-                  [
-                    if (session.title != null) day,
-                    if (climbs != null) l10n.logClimbCount(climbs.length),
-                  ].join(' · '),
-                  style: context.svaText.caption.copyWith(
-                    color: context.svaColors.textMuted,
-                  ),
-                ),
-                if (weatherText.isNotEmpty)
-                  Text(
-                    weatherText,
-                    style: context.svaText.caption.copyWith(
-                      color: context.svaColors.textMuted,
-                    ),
-                  ),
-              ],
-            ),
-          ),
+    return SafeArea(
+      bottom: false,
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(
+          SvaSpace.screen,
+          SvaSpace.lg,
+          SvaSpace.screen,
+          SvaSpace.xl,
         ),
+        itemCount: sessions.length + 1,
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return const Padding(
+              padding: EdgeInsets.only(bottom: SvaSpace.md),
+              child: Align(alignment: Alignment.centerLeft, child: _Wordmark()),
+            );
+          }
+          // A full page may have more behind it: ask for the next one
+          // when its last card is built.
+          if (index == sessions.length && sessions.length == _limit) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted && _limit == sessions.length) {
+                setState(() => _limit += _page);
+              }
+            });
+          }
+          final session = sessions[index - 1];
+          return Padding(
+            key: ValueKey(session.id),
+            padding: const EdgeInsets.only(bottom: SvaSpace.sm),
+            child: FeedCard(session: session),
+          );
+        },
       ),
     );
   }

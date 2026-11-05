@@ -140,6 +140,54 @@ abstract class AppLocalizations {
   /// **'Log your first session and it appears in your feed. Friends\' sessions join it later.'**
   String get feedEmptyBody;
 
+  /// No description provided for @feedOpenSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Open session'**
+  String get feedOpenSession;
+
+  /// Where a session was, when its climbs have no crag.
+  ///
+  /// In en, this message translates to:
+  /// **'{setting, select, outdoor{Outdoors} indoor{Indoors} other{}}'**
+  String feedSetting(String setting);
+
+  /// After the day on a feed card, such as '17 Oct 2026 · with Kari'.
+  ///
+  /// In en, this message translates to:
+  /// **'with {names}'**
+  String feedWith(String names);
+
+  /// No description provided for @feedMoreClimbs.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{+1 more climb} other{+{count} more climbs}}'**
+  String feedMoreClimbs(int count);
+
+  /// No description provided for @feedStatPitches.
+  ///
+  /// In en, this message translates to:
+  /// **'Pitches'**
+  String get feedStatPitches;
+
+  /// Under the metres climbed in a session.
+  ///
+  /// In en, this message translates to:
+  /// **'Climbed'**
+  String get feedStatClimbed;
+
+  /// No description provided for @feedStatElevation.
+  ///
+  /// In en, this message translates to:
+  /// **'Elevation gain'**
+  String get feedStatElevation;
+
+  /// Unit after a number of metres in a stat.
+  ///
+  /// In en, this message translates to:
+  /// **'m'**
+  String get feedStatMetres;
+
   /// No description provided for @historyTitle.
   ///
   /// In en, this message translates to:

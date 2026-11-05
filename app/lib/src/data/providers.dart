@@ -45,6 +45,31 @@ final StreamProvider<List<Session>> mySessionsProvider = StreamProvider(
       .watchMine(userId: ref.watch(currentUserIdProvider)),
 );
 
+/// One page of the user's sessions for the feed: the newest `limit`,
+/// newest first, live.
+final StreamProviderFamily<List<Session>, int> feedSessionsProvider =
+    StreamProvider.autoDispose.family(
+      (ref, limit) => ref
+          .watch(sessionRepositoryProvider)
+          .watchMine(userId: ref.watch(currentUserIdProvider), limit: limit),
+    );
+
+/// The features, holds and tags of one session's climbs as value keys,
+/// in climb order without repeats. Follows the climbs.
+final FutureProviderFamily<List<String>, String> sessionTagsProvider =
+    FutureProvider.autoDispose.family((ref, sessionId) async {
+      final climbs = await ref.watch(sessionAscentsProvider(sessionId).future);
+      final attributes = ref.watch(attributeRepositoryProvider);
+      final tags = <String>{};
+      for (final climb in climbs) {
+        final values = await attributes.resolvedForAscent(climb.id);
+        for (final key in const ['feature', 'hold', 'tag']) {
+          tags.addAll(values[key] ?? const []);
+        }
+      }
+      return tags.toList();
+    });
+
 /// One session, or `null` once it is deleted, live.
 final StreamProviderFamily<Session?, String> sessionProvider = StreamProvider
     .autoDispose

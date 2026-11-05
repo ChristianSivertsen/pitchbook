@@ -3,12 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:sva/l10n/app_localizations.dart';
 import 'package:sva/main.dart' as app;
+import 'package:sva/src/feed/feed_card.dart';
 import 'package:sva/src/places/labels.dart';
 import 'package:sva/src/places/route_search_screen.dart';
 import 'package:sva/src/sessions/session_screen.dart';
 import 'package:sva/src/shell/app_shell.dart';
 import 'package:sva/src/shell/log_sheet.dart';
 import 'package:sva/src/shell/tab_screens.dart';
+import 'package:sva_ui/sva_ui.dart';
 
 /// Flows: journeys across screens on a real device or emulator. See
 /// docs/TESTING.md, layer 5. Texts come from the app's translations, so
@@ -79,8 +81,8 @@ void main() {
     final l10n = AppLocalizations.of(tester.element(find.byType(AppShell)));
     final (:inSheet, :reveal, :tap) = _sheetHelpers(tester);
 
-    // An example session from October. Its feed row says how many climbs
-    // it has; rows build lazily, so scroll to it first.
+    // An example session from October. Its feed card lists its climbs,
+    // each with a style tag; cards build lazily, so scroll to it first.
     final day = formatDay(l10n, '2026-10-17');
     final feed = find
         .descendant(
@@ -88,21 +90,23 @@ void main() {
           matching: find.byType(Scrollable),
         )
         .first;
-    final row = find.descendant(
-      of: find.byType(FeedScreen),
-      matching: find.textContaining('$day · '),
+    final card = find.ancestor(
+      of: find.text('After-work laps'),
+      matching: find.byType(FeedCard),
     );
     Future<int> climbsInRow() async {
-      await tester.scrollUntilVisible(row, 200, scrollable: feed);
-      final line = (row.evaluate().single.widget as Text).data!;
-      return [
-        for (var n = 1; n < 100; n++)
-          if (line.endsWith(l10n.logClimbCount(n))) n,
-      ].single;
+      await tester.scrollUntilVisible(card, 200, scrollable: feed);
+      await tester.pumpAndSettle();
+      return find
+          .descendant(of: card, matching: find.byType(SvaStyleTag))
+          .evaluate()
+          .length;
     }
 
     final before = await climbsInRow();
-    await tester.tap(find.text('After-work laps'));
+    await tester.tap(
+      find.descendant(of: card, matching: find.text('After-work laps')),
+    );
     await tester.pumpAndSettle();
     expect(find.textContaining(day), findsOneWidget);
 
