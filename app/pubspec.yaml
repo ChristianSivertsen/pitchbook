@@ -1,7 +1,7 @@
 name: sva
 description: Climbing logbook, insights and climbing CV.
 publish_to: none
-version: 0.0.1+1
+version: 0.2.0+2
 resolution: workspace
 
 environment:
