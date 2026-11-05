@@ -52,6 +52,7 @@ RouteHit _hit(String id, String name, {String discipline = 'sport'}) => (
     status: 'open',
   ),
   grade: '7-',
+  gradeSystem: 'nor',
   crag: 'Kolsås',
   lastClimbed: null,
   distanceKm: null,
@@ -68,6 +69,7 @@ void main() {
     WidgetTester tester, {
     Map<String, List<LoggedAscent>> log = const {},
     String? lastSetting,
+    Settings settings = const Settings(),
   }) async {
     tester.view.physicalSize = const Size(1200, 8000);
     tester.view.devicePixelRatio = 1;
@@ -89,6 +91,7 @@ void main() {
         routeLogProvider.overrideWith((ref, id) async => [...?log[id]]),
         gradeSystemsProvider.overrideWith((ref) async => gradeSystems),
         mySessionsProvider.overrideWith((ref) => Stream.value(const [])),
+        settingsProvider.overrideWith((ref) => Stream.value(settings)),
       ],
     );
     addTearDown(() async {
@@ -124,6 +127,21 @@ void main() {
     expect(climb.tries, 1);
     expect(climb.ascentType, 'lead');
     expect(find.text('Session saved'), findsOneWidget);
+  });
+
+  testWidgets('M2-8: a new session gets the visibility chosen in settings', (
+    tester,
+  ) async {
+    await start(tester, settings: const Settings(defaultVisibility: 'friends'));
+    await tester.tap(find.byKey(logButtonKey));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Hjemmebane'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Onsight'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save session'));
+    await tester.pumpAndSettle();
+    expect(logger.saved!.visibility, 'friends');
   });
 
   testWidgets('M2-3: the sheet opens on the last indoor or outdoor choice', (

@@ -30,6 +30,7 @@ RouteHit _hit(
     status: 'open',
   ),
   grade: grade,
+  gradeSystem: 'nor',
   crag: 'Kolsås',
   lastClimbed: lastClimbed,
   distanceKm: null,
@@ -73,7 +74,9 @@ void main() {
                       date: '2026-10-01',
                       ascent: _ascent('attempt', 1, feel: 'feel.hard'),
                       officialGrade: null,
+                      officialSystem: 'nor',
                       personalGrade: null,
+                      personalSystem: 'nor',
                     ),
                   ]
                 : id == 'r1'
@@ -82,13 +85,17 @@ void main() {
                       date: '2026-10-30',
                       ascent: _ascent('redpoint', 3),
                       officialGrade: '7-',
+                      officialSystem: 'nor',
                       personalGrade: '7',
+                      personalSystem: 'nor',
                     ),
                     (
                       date: '2026-05-01',
                       ascent: _ascent('attempt', 2),
                       officialGrade: '6+',
+                      officialSystem: 'nor',
                       personalGrade: null,
+                      personalSystem: 'nor',
                     ),
                   ]
                 : const [],

@@ -127,7 +127,16 @@ class CvScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return _TabScreen(
-      header: _ScreenTitle(l10n.cvTitle),
+      header: Row(
+        children: [
+          Expanded(child: _ScreenTitle(l10n.cvTitle)),
+          IconButton(
+            tooltip: l10n.settingsOpen,
+            onPressed: () => context.push(Routes.settings),
+            icon: Icon(LucideIcons.settings, color: context.svaColors.text),
+          ),
+        ],
+      ),
       empty: _EmptyState(
         icon: LucideIcons.idCard,
         title: l10n.cvEmptyTitle,

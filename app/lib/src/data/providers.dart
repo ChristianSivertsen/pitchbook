@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:sva_core/sva_core.dart'
-    show AttributeValues, GradeSystem, LoggedAscent;
+    show AttributeValues, GradeSystem, LoggedAscent, convertGrade;
 import 'package:sva_data/sva_data.dart';
 
 /// The local database. `main` opens it on the device; tests override it
@@ -285,3 +285,35 @@ final StreamProviderFamily<WeatherSnapshot?, String> sessionWeatherProvider =
       (ref, sessionId) =>
           ref.watch(sessionRepositoryProvider).watchWeather(sessionId),
     );
+
+final Provider<SettingsRepository> settingsRepositoryProvider = Provider(
+  (ref) => SettingsRepository(ref.watch(databaseProvider)),
+);
+
+/// The user's settings, live: theme, language, default visibility and
+/// grade systems.
+final StreamProvider<Settings> settingsProvider = StreamProvider(
+  (ref) => ref
+      .watch(settingsRepositoryProvider)
+      .watch(ref.watch(currentUserIdProvider)),
+);
+
+/// Shows a grade label from system `systemKey` in the system the user
+/// chose for its grade type. The stored grade never changes; a label that
+/// cannot be converted, or one without a known system, shows as stored.
+final Provider<String Function(String label, String? systemKey)>
+gradeDisplayProvider = Provider((ref) {
+  final systems = {
+    for (final system
+        in ref.watch(gradeSystemsProvider).value ?? const <GradeSystem>[])
+      system.key: system,
+  };
+  final settings = ref.watch(settingsProvider).value ?? const Settings();
+  return (label, systemKey) {
+    final from = systems[systemKey];
+    if (from == null) return label;
+    final to = systems[settings.gradeSystemFor(from.gradeType)];
+    if (to == null) return label;
+    return convertGrade(label, from, to)?.label ?? label;
+  };
+});

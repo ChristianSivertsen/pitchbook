@@ -43,6 +43,7 @@ RouteHit _hit(String id, String name, {String discipline = 'sport'}) => (
     status: 'open',
   ),
   grade: '7-',
+  gradeSystem: 'nor',
   crag: 'Kolsås',
   lastClimbed: null,
   distanceKm: null,

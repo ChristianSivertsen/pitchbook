@@ -126,6 +126,17 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _languageMeta = const VerificationMeta(
+    'language',
+  );
+  @override
+  late final GeneratedColumn<String> language = GeneratedColumn<String>(
+    'language',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _quietHoursMeta = const VerificationMeta(
     'quietHours',
   );
@@ -150,6 +161,7 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
     rackVisibility,
     gradePrefs,
     theme,
+    language,
     quietHours,
   ];
   @override
@@ -254,6 +266,12 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
     } else if (isInserting) {
       context.missing(_themeMeta);
     }
+    if (data.containsKey('language')) {
+      context.handle(
+        _languageMeta,
+        language.isAcceptableOrUnknown(data['language']!, _languageMeta),
+      );
+    }
     if (data.containsKey('quiet_hours')) {
       context.handle(
         _quietHoursMeta,
@@ -313,6 +331,10 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
         DriftSqlType.string,
         data['${effectivePrefix}theme'],
       )!,
+      language: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}language'],
+      ),
       quietHours: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}quiet_hours'],
@@ -346,6 +368,9 @@ class Profile extends DataClass implements Insertable<Profile> {
   /// `system`, `midnight` or `daylight`.
   final String theme;
 
+  /// `nb` or `en`; `null` follows the phone's language.
+  final String? language;
+
   /// JSON: start and end of quiet hours for notifications.
   final String? quietHours;
   const Profile({
@@ -360,6 +385,7 @@ class Profile extends DataClass implements Insertable<Profile> {
     required this.rackVisibility,
     this.gradePrefs,
     required this.theme,
+    this.language,
     this.quietHours,
   });
   @override
@@ -386,6 +412,9 @@ class Profile extends DataClass implements Insertable<Profile> {
       map['grade_prefs'] = Variable<String>(gradePrefs);
     }
     map['theme'] = Variable<String>(theme);
+    if (!nullToAbsent || language != null) {
+      map['language'] = Variable<String>(language);
+    }
     if (!nullToAbsent || quietHours != null) {
       map['quiet_hours'] = Variable<String>(quietHours);
     }
@@ -415,6 +444,9 @@ class Profile extends DataClass implements Insertable<Profile> {
           ? const Value.absent()
           : Value(gradePrefs),
       theme: Value(theme),
+      language: language == null && nullToAbsent
+          ? const Value.absent()
+          : Value(language),
       quietHours: quietHours == null && nullToAbsent
           ? const Value.absent()
           : Value(quietHours),
@@ -438,6 +470,7 @@ class Profile extends DataClass implements Insertable<Profile> {
       rackVisibility: serializer.fromJson<String>(json['rackVisibility']),
       gradePrefs: serializer.fromJson<String?>(json['gradePrefs']),
       theme: serializer.fromJson<String>(json['theme']),
+      language: serializer.fromJson<String?>(json['language']),
       quietHours: serializer.fromJson<String?>(json['quietHours']),
     );
   }
@@ -456,6 +489,7 @@ class Profile extends DataClass implements Insertable<Profile> {
       'rackVisibility': serializer.toJson<String>(rackVisibility),
       'gradePrefs': serializer.toJson<String?>(gradePrefs),
       'theme': serializer.toJson<String>(theme),
+      'language': serializer.toJson<String?>(language),
       'quietHours': serializer.toJson<String?>(quietHours),
     };
   }
@@ -472,6 +506,7 @@ class Profile extends DataClass implements Insertable<Profile> {
     String? rackVisibility,
     Value<String?> gradePrefs = const Value.absent(),
     String? theme,
+    Value<String?> language = const Value.absent(),
     Value<String?> quietHours = const Value.absent(),
   }) => Profile(
     id: id ?? this.id,
@@ -487,6 +522,7 @@ class Profile extends DataClass implements Insertable<Profile> {
     rackVisibility: rackVisibility ?? this.rackVisibility,
     gradePrefs: gradePrefs.present ? gradePrefs.value : this.gradePrefs,
     theme: theme ?? this.theme,
+    language: language.present ? language.value : this.language,
     quietHours: quietHours.present ? quietHours.value : this.quietHours,
   );
   Profile copyWithCompanion(ProfilesCompanion data) {
@@ -514,6 +550,7 @@ class Profile extends DataClass implements Insertable<Profile> {
           ? data.gradePrefs.value
           : this.gradePrefs,
       theme: data.theme.present ? data.theme.value : this.theme,
+      language: data.language.present ? data.language.value : this.language,
       quietHours: data.quietHours.present
           ? data.quietHours.value
           : this.quietHours,
@@ -534,6 +571,7 @@ class Profile extends DataClass implements Insertable<Profile> {
           ..write('rackVisibility: $rackVisibility, ')
           ..write('gradePrefs: $gradePrefs, ')
           ..write('theme: $theme, ')
+          ..write('language: $language, ')
           ..write('quietHours: $quietHours')
           ..write(')'))
         .toString();
@@ -552,6 +590,7 @@ class Profile extends DataClass implements Insertable<Profile> {
     rackVisibility,
     gradePrefs,
     theme,
+    language,
     quietHours,
   );
   @override
@@ -569,6 +608,7 @@ class Profile extends DataClass implements Insertable<Profile> {
           other.rackVisibility == this.rackVisibility &&
           other.gradePrefs == this.gradePrefs &&
           other.theme == this.theme &&
+          other.language == this.language &&
           other.quietHours == this.quietHours);
 }
 
@@ -584,6 +624,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
   final Value<String> rackVisibility;
   final Value<String?> gradePrefs;
   final Value<String> theme;
+  final Value<String?> language;
   final Value<String?> quietHours;
   final Value<int> rowid;
   const ProfilesCompanion({
@@ -598,6 +639,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     this.rackVisibility = const Value.absent(),
     this.gradePrefs = const Value.absent(),
     this.theme = const Value.absent(),
+    this.language = const Value.absent(),
     this.quietHours = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -613,6 +655,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     required String rackVisibility,
     this.gradePrefs = const Value.absent(),
     required String theme,
+    this.language = const Value.absent(),
     this.quietHours = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -633,6 +676,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     Expression<String>? rackVisibility,
     Expression<String>? gradePrefs,
     Expression<String>? theme,
+    Expression<String>? language,
     Expression<String>? quietHours,
     Expression<int>? rowid,
   }) {
@@ -648,6 +692,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
       if (rackVisibility != null) 'rack_visibility': rackVisibility,
       if (gradePrefs != null) 'grade_prefs': gradePrefs,
       if (theme != null) 'theme': theme,
+      if (language != null) 'language': language,
       if (quietHours != null) 'quiet_hours': quietHours,
       if (rowid != null) 'rowid': rowid,
     });
@@ -665,6 +710,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     Value<String>? rackVisibility,
     Value<String?>? gradePrefs,
     Value<String>? theme,
+    Value<String?>? language,
     Value<String?>? quietHours,
     Value<int>? rowid,
   }) {
@@ -680,6 +726,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
       rackVisibility: rackVisibility ?? this.rackVisibility,
       gradePrefs: gradePrefs ?? this.gradePrefs,
       theme: theme ?? this.theme,
+      language: language ?? this.language,
       quietHours: quietHours ?? this.quietHours,
       rowid: rowid ?? this.rowid,
     );
@@ -721,6 +768,9 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     if (theme.present) {
       map['theme'] = Variable<String>(theme.value);
     }
+    if (language.present) {
+      map['language'] = Variable<String>(language.value);
+    }
     if (quietHours.present) {
       map['quiet_hours'] = Variable<String>(quietHours.value);
     }
@@ -744,6 +794,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
           ..write('rackVisibility: $rackVisibility, ')
           ..write('gradePrefs: $gradePrefs, ')
           ..write('theme: $theme, ')
+          ..write('language: $language, ')
           ..write('quietHours: $quietHours, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -26924,6 +26975,7 @@ typedef $$ProfilesTableCreateCompanionBuilder = ProfilesCompanion Function({
   required String rackVisibility,
   Value<String?> gradePrefs,
   required String theme,
+  Value<String?> language,
   Value<String?> quietHours,
   Value<int> rowid,
 });
@@ -26939,6 +26991,7 @@ typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
   Value<String> rackVisibility,
   Value<String?> gradePrefs,
   Value<String> theme,
+  Value<String?> language,
   Value<String?> quietHours,
   Value<int> rowid,
 });
@@ -27004,6 +27057,11 @@ class $$ProfilesTableFilterComposer
 
   ColumnFilters<String> get theme => $composableBuilder(
     column: $table.theme,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get language => $composableBuilder(
+    column: $table.language,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -27077,6 +27135,11 @@ class $$ProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get language => $composableBuilder(
+    column: $table.language,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get quietHours => $composableBuilder(
     column: $table.quietHours,
     builder: (column) => ColumnOrderings(column),
@@ -27137,6 +27200,9 @@ class $$ProfilesTableAnnotationComposer
   GeneratedColumn<String> get theme =>
       $composableBuilder(column: $table.theme, builder: (column) => column);
 
+  GeneratedColumn<String> get language =>
+      $composableBuilder(column: $table.language, builder: (column) => column);
+
   GeneratedColumn<String> get quietHours => $composableBuilder(
     column: $table.quietHours,
     builder: (column) => column,
@@ -27182,6 +27248,7 @@ class $$ProfilesTableTableManager
                 Value<String> rackVisibility = const Value.absent(),
                 Value<String?> gradePrefs = const Value.absent(),
                 Value<String> theme = const Value.absent(),
+                Value<String?> language = const Value.absent(),
                 Value<String?> quietHours = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProfilesCompanion(
@@ -27196,6 +27263,7 @@ class $$ProfilesTableTableManager
                 rackVisibility: rackVisibility,
                 gradePrefs: gradePrefs,
                 theme: theme,
+                language: language,
                 quietHours: quietHours,
                 rowid: rowid,
               ),
@@ -27212,6 +27280,7 @@ class $$ProfilesTableTableManager
                 required String rackVisibility,
                 Value<String?> gradePrefs = const Value.absent(),
                 required String theme,
+                Value<String?> language = const Value.absent(),
                 Value<String?> quietHours = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProfilesCompanion.insert(
@@ -27226,6 +27295,7 @@ class $$ProfilesTableTableManager
                 rackVisibility: rackVisibility,
                 gradePrefs: gradePrefs,
                 theme: theme,
+                language: language,
                 quietHours: quietHours,
                 rowid: rowid,
               ),

@@ -58,6 +58,9 @@ void main() {
     ).watchOnRoute(route, userId: 'me').first).single;
     expect(climb.officialGrade, '6');
     expect(climb.personalGrade, '6+');
+    // Their systems, so screens can show them in the user's (M2-8).
+    expect(climb.officialSystem, 'nor');
+    expect(climb.personalSystem, 'nor');
     expect(climb.ascent.feel, 'feel.hard');
     expect(climb.ascent.difficultyScore, isNotNull);
     expect((await RouteRepository(db).hit(route, userId: 'me'))?.grade, '7');

@@ -8,6 +8,7 @@ import 'package:sva/src/places/route_form_screen.dart';
 import 'package:sva/src/places/route_search_screen.dart';
 import 'package:sva/src/routes.dart';
 import 'package:sva/src/sessions/session_screen.dart';
+import 'package:sva/src/settings/settings_screen.dart';
 import 'package:sva/src/shell/app_shell.dart';
 import 'package:sva/src/shell/log_sheet.dart';
 import 'package:sva/src/shell/not_found_screen.dart';
@@ -101,6 +102,12 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: Routes.cv,
                 builder: (context, state) => const CvScreen(),
+                routes: [
+                  GoRoute(
+                    path: Routes.settingsSegment,
+                    builder: (context, state) => const SettingsScreen(),
+                  ),
+                ],
               ),
             ],
           ),

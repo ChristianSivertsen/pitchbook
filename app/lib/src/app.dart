@@ -20,7 +20,8 @@ Locale resolveLocale(List<Locale>? device, Iterable<Locale> supported) {
   return const Locale('en');
 }
 
-/// Root widget: the Sva themes, following the system or the user's choice.
+/// Root widget: the Sva themes and language, following the phone or the
+/// user's choice in settings.
 class SvaApp extends ConsumerWidget {
   const new({super.key});
 
@@ -31,6 +32,7 @@ class SvaApp extends ConsumerWidget {
       theme: SvaTheme.daylight(),
       darkTheme: SvaTheme.midnight(),
       themeMode: ref.watch(themeModeProvider),
+      locale: ref.watch(appLocaleProvider),
       routerConfig: ref.watch(routerProvider),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

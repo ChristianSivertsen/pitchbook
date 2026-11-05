@@ -48,6 +48,10 @@ abstract final class Routes {
   /// Path segment of [logLink] below [feed].
   static const logLinkSegment = 'log';
 
+  /// Settings, from the CV tab.
+  static const settings = '$cv/$settingsSegment';
+  static const settingsSegment = 'settings';
+
   /// Debug builds only: every design token.
   static const tokenPreview = '/debug/tokens';
 }

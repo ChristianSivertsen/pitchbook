@@ -9,6 +9,7 @@ import 'package:sva/l10n/app_localizations.dart';
 import 'package:sva/src/data/providers.dart';
 import 'package:sva/src/logging/climb_editor.dart';
 import 'package:sva/src/places/form_parts.dart';
+import 'package:sva/src/places/grade_badge.dart';
 import 'package:sva/src/places/labels.dart';
 import 'package:sva/src/routes.dart';
 import 'package:sva/src/sessions/session_screen.dart';
@@ -224,8 +225,9 @@ class _LogSheetState extends ConsumerState<LogSheet> {
             SessionDraft(
               localDate: DateFormat('yyyy-MM-dd').format(_date),
               tz: deviceTimeZone(DateTime.now().timeZoneOffset),
-              // Private until the settings screen offers a default (M2-8).
-              visibility: 'private',
+              visibility:
+                  ref.read(settingsProvider).value?.defaultVisibility ??
+                  const Settings().defaultVisibility,
               climbs: [for (final c in _toSave) c.draft],
               title: _title.text,
               description: _description.text,
@@ -611,7 +613,8 @@ class _PendingRow extends StatelessWidget {
             style: context.svaText.body,
           ),
         ),
-        if (climb.hit.grade case final grade?) SvaGradeBadge(grade),
+        if (climb.hit.grade case final grade?)
+          GradeBadge(grade, system: climb.hit.gradeSystem),
         IconButton(
           tooltip: l10n.logRemoveClimb(name),
           onPressed: onRemove,
@@ -690,7 +693,8 @@ class _ExistingRow extends ConsumerWidget {
                 : style,
           ),
         ),
-        if (hit?.grade case final grade? when !gone) SvaGradeBadge(grade),
+        if (hit?.grade case final grade? when !gone)
+          GradeBadge(grade, system: hit?.gradeSystem),
         IconButton(
           tooltip: gone ? l10n.logEditKeep(name) : l10n.logRemoveClimb(name),
           onPressed: onToggle,

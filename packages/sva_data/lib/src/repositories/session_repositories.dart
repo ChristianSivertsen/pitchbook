@@ -223,7 +223,9 @@ typedef RouteClimb = ({
   String date,
   Ascent ascent,
   String? officialGrade,
+  String? officialSystem,
   String? personalGrade,
+  String? personalSystem,
 });
 
 /// One live ascent in a route's log, with its id and session.
@@ -359,7 +361,9 @@ class AscentRepository extends Repository<$AscentsTable, Ascent> {
             date: row.readTable(db.sessions).localDate,
             ascent: row.readTable(db.ascents),
             officialGrade: row.readTableOrNull(official)?.label,
+            officialSystem: row.readTableOrNull(official)?.systemKey,
             personalGrade: row.readTableOrNull(personal)?.label,
+            personalSystem: row.readTableOrNull(personal)?.systemKey,
           ),
       ],
     );
