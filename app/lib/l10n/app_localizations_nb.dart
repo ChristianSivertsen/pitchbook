@@ -135,7 +135,7 @@ class AppLocalizationsNb extends AppLocalizations {
   String settingsGradeType(String type) {
     String _temp0 = intl.Intl.selectLogic(type, {
       'free_route': 'Ruter',
-      'boulder': 'Buldre',
+      'boulder': 'Buldring',
       'ice': 'Is',
       'mixed': 'Mixed',
       'aid': 'Aid',

@@ -30,6 +30,8 @@ class SettingsScreen extends ConsumerWidget {
     void change(Future<void> Function(SettingsRepository settings) save) {
       final messenger = ScaffoldMessenger.of(context);
       unawaited(
+        // Inside a Future, so a value the repository refuses at once
+        // (an ArgumentError) is caught like a failed write.
         Future(() => save(ref.read(settingsRepositoryProvider)))
             .catchError((Object _) {
               messenger.showSnackBar(

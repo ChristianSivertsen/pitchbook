@@ -87,6 +87,8 @@ class SvaDatabase extends _$SvaDatabase {
         await m.createIndex(routeGradesRoute);
         await fillNameKeys();
       }
+      // Checks `to` as well, so a test that migrates only to an earlier
+      // version gets exactly that schema.
       if (from < 3 && to >= 3) {
         // The app language, chosen in settings (M2-8).
         await m.addColumn(profiles, profiles.language);

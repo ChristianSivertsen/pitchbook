@@ -203,7 +203,7 @@ All motion respects the system's reduce-motion setting: transitions become fades
 ## Languages
 
 - Text lives in ARB files (JSON) in `app/lib/l10n/`: `app_en.arb` (English, the template) and `app_nb.arb` (Norwegian Bokmål). Flutter generates typed accessors (`AppLocalizations.of(context).logButton`).
-- The app follows the phone's language. Norwegian phones (Bokmål, Nynorsk or plain Norwegian) get Bokmål; any other language falls back to English. A manual language choice comes with the settings screen.
+- The app follows the phone's language. Norwegian phones (Bokmål, Nynorsk or plain Norwegian) get Bokmål; any other language falls back to English. Settings lets the user pick Bokmål or English instead; following the phone stays the default.
 - Add a language: copy `app_en.arb` to `app_<code>.arb`, translate it, and add the code to the language test.
 - Never hard-code user-facing text in widgets. The brand name "sva" is the only exception.
 - Plurals, numbers, dates and units use the ARB plural and placeholder syntax with the locale's formats, never string concatenation.

@@ -31,7 +31,7 @@
   "settingsLanguageEn": "English",
   "settingsGrades": "Grader",
   "settingsGradesNote": "Gradene vises i disse systemene. Det du har logget, beholdes slik du logget det.",
-  "settingsGradeType": "{type, select, free_route{Ruter} boulder{Buldre} ice{Is} mixed{Mixed} aid{Aid} alpine{Alpint} other{}}",
+  "settingsGradeType": "{type, select, free_route{Ruter} boulder{Buldring} ice{Is} mixed{Mixed} aid{Aid} alpine{Alpint} other{}}",
   "gradeSystemName": "{system, select, nor{Norsk} french{Fransk} yds{YDS} uiaa{UIAA} font{Font} v{V-skala} other{}}",
   "settingsVisibility": "Nye økter er synlige for",
   "settingsVisibilityOption": "{visibility, select, private{Bare deg} friends{Venner} public{Alle} other{}}",
