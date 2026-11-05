@@ -314,6 +314,156 @@ abstract class AppLocalizations {
   /// **'Nothing leaves this phone until you sign in.'**
   String get settingsVisibilityNote;
 
+  /// No description provided for @settingsGyms.
+  ///
+  /// In en, this message translates to:
+  /// **'Gyms'**
+  String get settingsGyms;
+
+  /// No description provided for @settingsGymsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up the gyms you climb in once, so logging there is quick.'**
+  String get settingsGymsNote;
+
+  /// No description provided for @settingsGymAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a gym'**
+  String get settingsGymAdd;
+
+  /// No description provided for @gymFormNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New gym'**
+  String get gymFormNew;
+
+  /// No description provided for @gymFormEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit gym'**
+  String get gymFormEdit;
+
+  /// No description provided for @gymFormNameMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the gym a name.'**
+  String get gymFormNameMissing;
+
+  /// No description provided for @gymFormMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Map. Tap to place the gym.'**
+  String get gymFormMap;
+
+  /// No description provided for @gymFormGrading.
+  ///
+  /// In en, this message translates to:
+  /// **'Grading'**
+  String get gymFormGrading;
+
+  /// No description provided for @gymGrading.
+  ///
+  /// In en, this message translates to:
+  /// **'{grading, select, colour{Colour scale} standard{Standard grades} none{Ungraded} other{}}'**
+  String gymGrading(String grading);
+
+  /// No description provided for @gymFormWalls.
+  ///
+  /// In en, this message translates to:
+  /// **'Walls'**
+  String get gymFormWalls;
+
+  /// No description provided for @gymFormWallsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Each climb you log on a wall gets its height and starts with its angle. You can change the angle per climb.'**
+  String get gymFormWallsNote;
+
+  /// No description provided for @gymFormWallAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a wall'**
+  String get gymFormWallAdd;
+
+  /// No description provided for @gymFormWallName.
+  ///
+  /// In en, this message translates to:
+  /// **'Wall name'**
+  String get gymFormWallName;
+
+  /// No description provided for @gymFormWallNameMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the wall a name.'**
+  String get gymFormWallNameMissing;
+
+  /// No description provided for @gymFormWallHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Height in metres'**
+  String get gymFormWallHeight;
+
+  /// No description provided for @gymFormWallHeightInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a height from 1 to 60 m, or leave it empty.'**
+  String get gymFormWallHeightInvalid;
+
+  /// No description provided for @gymFormWallKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get gymFormWallKind;
+
+  /// No description provided for @gymWallKind.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind, select, rope{Rope} boulder{Boulder} other{}}'**
+  String gymWallKind(String kind);
+
+  /// No description provided for @gymFormWallAngle.
+  ///
+  /// In en, this message translates to:
+  /// **'Angle'**
+  String get gymFormWallAngle;
+
+  /// No description provided for @gymFormWallRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}'**
+  String gymFormWallRemove(String name);
+
+  /// No description provided for @gymFormWallDefaultRope.
+  ///
+  /// In en, this message translates to:
+  /// **'Main wall'**
+  String get gymFormWallDefaultRope;
+
+  /// No description provided for @gymFormWallDefaultBoulder.
+  ///
+  /// In en, this message translates to:
+  /// **'Boulder area'**
+  String get gymFormWallDefaultBoulder;
+
+  /// No description provided for @gymFormWallDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Wall {number}'**
+  String gymFormWallDefault(int number);
+
+  /// No description provided for @gymFormSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save gym'**
+  String get gymFormSave;
+
+  /// No description provided for @gymFormNotYours.
+  ///
+  /// In en, this message translates to:
+  /// **'This gym is shared, so only your walls can be changed here.'**
+  String get gymFormNotYours;
+
   /// No description provided for @settingsAbout.
   ///
   /// In en, this message translates to:

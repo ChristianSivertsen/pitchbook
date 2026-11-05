@@ -224,6 +224,18 @@ final Provider<RouteEditor> routeEditorProvider = Provider(
   (ref) => RouteEditor(ref.watch(databaseProvider)),
 );
 
+/// Sets up gyms and their walls from the gym form.
+final Provider<GymEditor> gymEditorProvider = Provider(
+  (ref) => GymEditor(ref.watch(databaseProvider)),
+);
+
+/// The gyms the user can see, by name, live.
+final StreamProvider<List<Area>> gymsProvider = StreamProvider.autoDispose(
+  (ref) => ref.watch(areaRepositoryProvider).watchOfTypes({
+    'gym',
+  }, userId: ref.watch(currentUserIdProvider)),
+);
+
 /// The crags and sectors a route can be added to, by name, live.
 final StreamProvider<List<Area>> routePlacesProvider =
     StreamProvider.autoDispose(
