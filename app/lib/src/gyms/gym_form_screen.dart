@@ -108,9 +108,19 @@ class _GymFormScreenState extends ConsumerState<GymFormScreen> {
 
   Future<void> _load(String id) async {
     final userId = ref.read(currentUserIdProvider);
-    final setup = await ref.read(gymEditorProvider).setup(id, userId: userId);
+    GymSetup? setup;
+    try {
+      setup = await ref.read(gymEditorProvider).setup(id, userId: userId);
+    } on Object {
+      setup = null;
+    }
     if (!mounted) return;
     if (setup == null) {
+      // Looked up after the await: the screen can't read its context
+      // while initState runs.
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).gymFormNotFound)),
+      );
       context.pop();
       return;
     }
@@ -152,12 +162,19 @@ class _GymFormScreenState extends ConsumerState<GymFormScreen> {
     // A new wall copies the kind of the last one: gyms list their walls
     // of a kind together.
     final last = _walls.lastOrNull;
+    // The next number no wall is named after yet, so removing a wall and
+    // adding one never gives two walls the same name.
+    final names = {for (final w in _walls) w.name.text.trim()};
+    var number = _walls.length + 1;
+    while (names.contains(l10n.gymFormWallDefault(number))) {
+      number++;
+    }
     setState(
       () => _walls.add(
         _Wall(
-          name: l10n.gymFormWallDefault(_walls.length + 1),
+          name: l10n.gymFormWallDefault(number),
           kind: last?.kind ?? 'rope',
-          heightM: last == null ? null : double.tryParse(last.height.text),
+          heightM: last == null ? null : parseDecimal(last.height.text),
           angle: 'angle.vertical',
         ),
       ),
@@ -194,7 +211,10 @@ class _GymFormScreenState extends ConsumerState<GymFormScreen> {
     final editor = ref.read(gymEditorProvider);
     final userId = ref.read(currentUserIdProvider);
     try {
-      if (widget.gymId case final id?) {
+      if (widget.gymId case final id? when !_ownGym) {
+        // A shared gym: only the user's walls are theirs to change.
+        await editor.saveWalls(id, walls: walls, userId: userId);
+      } else if (widget.gymId case final id?) {
         await editor.updateGym(id, gym, walls: walls, userId: userId);
       } else {
         await editor.addGym(gym, walls: walls, userId: userId);
@@ -362,10 +382,15 @@ class _WallCard extends StatelessWidget {
                   ),
                 ),
                 if (onRemove != null)
-                  IconButton(
-                    tooltip: l10n.gymFormWallRemove(wall.name.text),
-                    onPressed: onRemove,
-                    icon: const Icon(LucideIcons.x),
+                  // Follows the name as it is typed, so a screen reader
+                  // names the right wall.
+                  ListenableBuilder(
+                    listenable: wall.name,
+                    builder: (context, _) => IconButton(
+                      tooltip: l10n.gymFormWallRemove(wall.name.text),
+                      onPressed: onRemove,
+                      icon: const Icon(LucideIcons.x),
+                    ),
                   ),
               ],
             ),
@@ -390,7 +415,7 @@ class _WallCard extends StatelessWidget {
               validator: (v) {
                 if ((v ?? '').trim().isEmpty) return null;
                 final m = parseDecimal(v!);
-                return m == null || m < 1 || m > maxWallHeightM
+                return m == null || m < minWallHeightM || m > maxWallHeightM
                     ? l10n.gymFormWallHeightInvalid
                     : null;
               },

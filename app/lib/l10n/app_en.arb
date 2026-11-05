@@ -108,6 +108,7 @@
   "settingsGymAdd": "Add a gym",
   "gymFormNew": "New gym",
   "gymFormEdit": "Edit gym",
+  "gymFormNotFound": "This gym isn't on this phone. It may have been deleted.",
   "gymFormNameMissing": "Give the gym a name.",
   "gymFormMap": "Map. Tap to place the gym.",
   "gymFormGrading": "Grading",

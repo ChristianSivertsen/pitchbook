@@ -194,6 +194,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gymFormEdit => 'Edit gym';
 
   @override
+  String get gymFormNotFound =>
+      'This gym isn\'t on this phone. It may have been deleted.';
+
+  @override
   String get gymFormNameMissing => 'Give the gym a name.';
 
   @override

@@ -11,17 +11,104 @@ import 'package:sva/src/routes.dart';
 import 'package:sva/src/settings/settings_screen.dart';
 import 'package:sva_data/sva_data.dart';
 
+/// Records what the gym form saves. Storage and its checks are tested in
+/// sva_data.
+class _FakeGyms extends GymEditor {
+  new(super.db, {this.existing, this.fail = false});
+
+  final GymSetup? existing;
+  final bool fail;
+  NewGym? gym;
+  List<WallDraft>? walls;
+  String? called;
+
+  @override
+  Future<String> addGym(
+    NewGym gym, {
+    required List<WallDraft> walls,
+    required String userId,
+  }) async {
+    if (fail) throw StateError('disk full');
+    this.gym = gym;
+    this.walls = walls;
+    called = 'addGym';
+    return 'g1';
+  }
+
+  @override
+  Future<void> updateGym(
+    String gymId,
+    NewGym gym, {
+    required List<WallDraft> walls,
+    required String userId,
+  }) async {
+    this.gym = gym;
+    this.walls = walls;
+    called = 'updateGym';
+  }
+
+  @override
+  Future<void> saveWalls(
+    String gymId, {
+    required List<WallDraft> walls,
+    required String userId,
+  }) async {
+    this.walls = walls;
+    called = 'saveWalls';
+  }
+
+  @override
+  Future<GymSetup?> setup(String gymId, {required String userId}) async =>
+      existing;
+}
+
+Area _gym({String createdBy = localUserId, String visibility = 'private'}) =>
+    Area(
+      id: 'g1',
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026),
+      createdBy: createdBy,
+      visibility: visibility,
+      type: 'gym',
+      name: 'Klatreverket',
+      countryCode: 'NO',
+      locationHidden: false,
+    );
+
+GymWall _wall(String id, String name, String kind, double height) => GymWall(
+  id: id,
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+  ownerId: localUserId,
+  gymId: 'g1',
+  name: name,
+  heightM: height,
+  angle: 'angle.vertical',
+  kind: kind,
+  sort: 0,
+);
+
 void main() {
-  testWidgets('M3-1: a gym with 4 walls is set up in a few steps, and its '
-      'walls can be edited', (tester) async {
+  late _FakeGyms gyms;
+
+  /// Opens settings, and the gym form for [existing] when given.
+  Future<void> open(
+    WidgetTester tester, {
+    GymSetup? existing,
+    bool fail = false,
+  }) async {
     tester.view.physicalSize = const Size(1200, 6000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final db = SvaDatabase.inMemory();
     addTearDown(db.close);
-    await tester.runAsync(() => AttributeRepository(db).seed());
+    gyms = _FakeGyms(db, existing: existing, fail: fail);
     final container = ProviderContainer(
-      overrides: [databaseProvider.overrideWithValue(db)],
+      overrides: [
+        gymEditorProvider.overrideWithValue(gyms),
+        gymsProvider.overrideWith((ref) => Stream.value(const [])),
+        settingsProvider.overrideWith((ref) => Stream.value(const Settings())),
+      ],
     );
     addTearDown(container.dispose);
     await tester.pumpWidget(
@@ -30,84 +117,171 @@ void main() {
     // A page's result is not needed here.
     unawaited(container.read(routerProvider).push(Routes.settings));
     await tester.pumpAndSettle();
-
-    /// Lets the database work in real time, then draws the result.
-    Future<void> settle() async {
-      for (var i = 0; i < 3; i++) {
-        await tester.runAsync(
-          () => Future<void>.delayed(const Duration(milliseconds: 20)),
-        );
-        await tester.pumpAndSettle();
-      }
+    if (existing != null) {
+      unawaited(container.read(routerProvider).push(Routes.gym('g1')));
+      await tester.pumpAndSettle();
     }
+  }
 
-    // Each tap or typed field counts as one step: under 2 minutes is a
-    // handful of them.
+  Finder field(String text) => find.widgetWithText(TextFormField, text);
+
+  testWidgets('M3-1: a gym with 4 walls is set up in under 2 minutes', (
+    tester,
+  ) async {
+    await open(tester);
+    // Each tap or typed field is one step: a handful is well under
+    // 2 minutes.
     var steps = 0;
     Future<void> tap(Finder target) async {
       steps++;
       await tester.ensureVisible(target);
       await tester.tap(target);
-      await settle();
+      await tester.pumpAndSettle();
     }
 
-    Future<void> type(Finder field, String text) async {
+    Future<void> type(Finder target, String text) async {
       steps++;
-      await tester.enterText(field, text);
+      await tester.enterText(target, text);
       await tester.pumpAndSettle();
     }
 
     await tap(find.text('Add a gym'));
     expect(find.byType(GymFormScreen), findsOneWidget);
-    await type(find.widgetWithText(TextFormField, 'Name'), 'Klatreverket');
+    await type(field('Name'), 'Klatreverket');
     await tap(find.text('Add a wall'));
     await tap(find.text('Add a wall'));
-    await type(find.widgetWithText(TextFormField, 'Wall 4'), 'Board');
+    await type(field('Wall 4'), 'Board');
     await tap(find.text('Save gym'));
 
     expect(steps, lessThanOrEqualTo(6));
     expect(find.byType(SettingsScreen), findsOneWidget);
-    final gym = (await tester.runAsync(
-      () =>
-          (db.select(db.areas)..where((a) => a.type.equals('gym'))).getSingle(),
-    ))!;
-    final setup = (await tester.runAsync(
-      () => GymEditor(db).setup(gym.id, userId: localUserId),
-    ))!;
-    expect(setup.gym.name, 'Klatreverket');
-    expect(setup.grading, 'colour');
-    expect(setup.walls.map((w) => (w.name, w.kind, w.heightM, w.angle)), [
+    expect(gyms.called, 'addGym');
+    expect(gyms.gym!.name, 'Klatreverket');
+    expect(gyms.gym!.grading, 'colour');
+    expect(gyms.walls!.map((w) => (w.name, w.kind, w.heightM, w.angle)), [
       ('Main wall', 'rope', 14.0, 'angle.vertical'),
       ('Boulder area', 'boulder', 4.5, 'angle.overhang'),
       ('Wall 3', 'boulder', 4.5, 'angle.vertical'),
       ('Board', 'boulder', 4.5, 'angle.vertical'),
     ]);
+  });
 
-    // Open it again from settings: rename a wall, make it steeper and
-    // remove another.
-    await tap(find.text('Klatreverket'));
-    expect(find.widgetWithText(TextFormField, 'Board'), findsOneWidget);
-    await type(find.widgetWithText(TextFormField, 'Wall 3'), 'Cave');
-    final caveCard = find.ancestor(
-      of: find.widgetWithText(TextFormField, 'Cave'),
-      matching: find.byType(Card),
+  testWidgets('M3-1: the wall editor changes, adds and removes walls', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      existing: (
+        gym: _gym(),
+        grading: 'standard',
+        walls: [
+          _wall('w1', 'Lead wall', 'rope', 15),
+          _wall('w2', 'Cave', 'boulder', 4),
+        ],
+      ),
     );
-    await tap(
+    expect(find.text('Edit gym'), findsOneWidget);
+    expect(field('Lead wall'), findsOneWidget);
+
+    // A height typed with a decimal comma carries over to a new wall.
+    await tester.enterText(field('4'), '4,5');
+    await tester.tap(find.text('Add a wall'));
+    await tester.pumpAndSettle();
+    // The remove button follows the typed name.
+    await tester.enterText(field('Wall 3'), 'Board');
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Remove Board'), findsOneWidget);
+    final cave = find.ancestor(of: field('Cave'), matching: find.byType(Card));
+    await tester.tap(
       find.descendant(
-        of: caveCard,
+        of: cave,
         matching: find.widgetWithText(FilterChip, 'Roof'),
       ),
     );
-    await tap(find.byTooltip('Remove Board'));
-    await tap(find.text('Save gym'));
+    await tester.tap(find.byTooltip('Remove Lead wall'));
+    await tester.pumpAndSettle();
+    // Adding after a removal does not repeat a name.
+    await tester.tap(find.text('Add a wall'));
+    await tester.pumpAndSettle();
+    expect(field('Wall 3'), findsOneWidget);
+    await tester.tap(find.byTooltip('Remove Wall 3'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save gym'));
+    await tester.pumpAndSettle();
 
-    final edited = (await tester.runAsync(
-      () => GymEditor(db).setup(gym.id, userId: localUserId),
-    ))!;
-    expect(edited.walls.map((w) => (w.name, w.angle)), [
-      ('Main wall', 'angle.vertical'),
-      ('Boulder area', 'angle.overhang'),
-      ('Cave', 'angle.roof'),
+    expect(gyms.called, 'updateGym');
+    expect(gyms.gym!.grading, 'standard');
+    expect(gyms.walls!.map((w) => (w.id, w.name, w.heightM, w.angle)), [
+      ('w2', 'Cave', 4.5, 'angle.roof'),
+      (null, 'Board', 4.5, 'angle.vertical'),
     ]);
+  });
+
+  testWidgets('M3-1: the gym form checks its fields and keeps one wall', (
+    tester,
+  ) async {
+    await open(tester);
+    await tester.tap(find.text('Add a gym'));
+    await tester.pumpAndSettle();
+    await tester.enterText(field('Main wall'), ' ');
+    await tester.enterText(field('14'), '0,5');
+    await tester.tap(find.text('Save gym'));
+    await tester.pumpAndSettle();
+    expect(find.text('Give the gym a name.'), findsOneWidget);
+    expect(find.text('Give the wall a name.'), findsOneWidget);
+    expect(
+      find.text('Use a height from 1 to 60 m, or leave it empty.'),
+      findsOneWidget,
+    );
+    expect(gyms.called, isNull, reason: 'nothing saved');
+
+    // With one wall left, it has no remove button.
+    await tester.tap(find.byTooltip('Remove Boulder area'));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(of: find.byType(Card), matching: find.byType(IconButton)),
+      findsNothing,
+    );
+  });
+
+  testWidgets('M3-1: on a shared gym only your walls are saved', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      existing: (
+        gym: _gym(createdBy: 'someone else', visibility: 'public'),
+        grading: 'colour',
+        walls: const [],
+      ),
+    );
+    expect(
+      find.text('This gym is shared, so only your walls can be changed here.'),
+      findsOneWidget,
+    );
+    expect(
+      tester.widget<TextFormField>(field('Klatreverket')).enabled,
+      isFalse,
+    );
+    await tester.tap(find.text('Add a wall'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save gym'));
+    await tester.pumpAndSettle();
+    expect(gyms.called, 'saveWalls');
+    expect(gyms.walls!.single.name, 'Wall 1');
+  });
+
+  testWidgets('M3-1: a gym that cannot be saved says so', (tester) async {
+    await open(tester, fail: true);
+    await tester.tap(find.text('Add a gym'));
+    await tester.pumpAndSettle();
+    await tester.enterText(field('Name'), 'Klatreverket');
+    await tester.tap(find.text('Save gym'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text("Couldn't save. Check the fields and try again."),
+      findsOneWidget,
+    );
+    expect(find.byType(GymFormScreen), findsOneWidget);
   });
 }

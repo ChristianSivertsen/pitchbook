@@ -194,6 +194,10 @@ class AppLocalizationsNb extends AppLocalizations {
   String get gymFormEdit => 'Rediger klatresenter';
 
   @override
+  String get gymFormNotFound =>
+      'Klatresenteret finnes ikke på denne telefonen. Det kan ha blitt slettet.';
+
+  @override
   String get gymFormNameMissing => 'Gi klatresenteret et navn.';
 
   @override

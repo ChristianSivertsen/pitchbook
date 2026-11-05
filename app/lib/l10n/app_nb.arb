@@ -41,6 +41,7 @@
   "settingsGymAdd": "Legg til klatresenter",
   "gymFormNew": "Nytt klatresenter",
   "gymFormEdit": "Rediger klatresenter",
+  "gymFormNotFound": "Klatresenteret finnes ikke på denne telefonen. Det kan ha blitt slettet.",
   "gymFormNameMissing": "Gi klatresenteret et navn.",
   "gymFormMap": "Kart. Trykk for å plassere klatresenteret.",
   "gymFormGrading": "Gradering",

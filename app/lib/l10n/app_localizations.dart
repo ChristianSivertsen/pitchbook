@@ -344,6 +344,12 @@ abstract class AppLocalizations {
   /// **'Edit gym'**
   String get gymFormEdit;
 
+  /// No description provided for @gymFormNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This gym isn\'t on this phone. It may have been deleted.'**
+  String get gymFormNotFound;
+
   /// No description provided for @gymFormNameMissing.
   ///
   /// In en, this message translates to:
