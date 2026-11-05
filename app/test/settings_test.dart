@@ -6,11 +6,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sva/src/app.dart';
 import 'package:sva/src/app_version.dart';
 import 'package:sva/src/data/providers.dart';
+import 'package:sva/src/places/route_search_screen.dart';
 import 'package:sva/src/router.dart';
 import 'package:sva/src/routes.dart';
 import 'package:sva/src/settings/settings_screen.dart';
 import 'package:sva/src/shell/app_shell.dart';
-import 'package:sva_core/sva_core.dart';
 import 'package:sva_data/sva_data.dart';
 import 'package:sva_ui/sva_ui.dart';
 
@@ -27,7 +27,24 @@ void main() {
     addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
     final db = SvaDatabase.inMemory();
     addTearDown(db.close);
-    await tester.runAsync(() => GradeRepository(db).seed());
+    await tester.runAsync(() async {
+      await GradeRepository(db).seed();
+      await AttributeRepository(db).seed();
+      final editor = RouteEditor(db);
+      final crag = await editor.addCrag(
+        const NewCrag(name: 'Kolsås', countryCode: 'NO'),
+        userId: localUserId,
+      );
+      await editor.addRoute(
+        NewRoute(
+          areaId: crag,
+          name: 'Hjemmebane',
+          discipline: 'sport',
+          gradeId: seedId('grade:nor:7-'),
+        ),
+        userId: localUserId,
+      );
+    });
 
     var container = ProviderContainer(
       overrides: [databaseProvider.overrideWithValue(db)],
@@ -45,14 +62,30 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    // Grades show in the system picked for their type.
-    String show(String label, String system) =>
-        container.read(gradeDisplayProvider)(label, system);
-    expect(show('7-', 'nor'), '7-');
+    // Grades show in the system picked for their type, here in route
+    // search.
+    final hjemmebane = find.descendant(
+      of: find.widgetWithText(RouteHitTile, 'Hjemmebane'),
+      matching: find.byType(SvaGradeBadge),
+    );
+    Future<String> searchedGrade() async {
+      unawaitedPush(container, Routes.routeSearch);
+      // Search runs real queries on the database: give them real time.
+      for (var i = 0; i < 5 && hjemmebane.evaluate().isEmpty; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 50)),
+        );
+        await tester.pumpAndSettle();
+      }
+      final grade = tester.widget<SvaGradeBadge>(hjemmebane).label;
+      container.read(routerProvider).pop();
+      await tester.pumpAndSettle();
+      return grade;
+    }
+
+    final asLogged = await searchedGrade();
     await pick('French');
-    final nor = gradeSystems.firstWhere((s) => s.key == 'nor');
-    final french = gradeSystems.firstWhere((s) => s.key == 'french');
-    expect(show('7-', 'nor'), convertGrade('7-', nor, french)!.label);
+    expect(await searchedGrade(), isNot(asLogged));
     await pick('V scale');
 
     await pick('Friends');
@@ -90,6 +123,24 @@ void main() {
     await tester.tap(find.widgetWithText(FilterChip, 'Følg telefonen').last);
     await tester.pumpAndSettle();
     expect(find.text('Settings'), findsOneWidget);
+  });
+
+  testWidgets('M2-8: a setting that cannot be saved says so', (tester) async {
+    final container = ProviderContainer(
+      overrides: [
+        settingsProvider.overrideWith((ref) => Stream.value(const Settings())),
+        settingsRepositoryProvider.overrideWithValue(_FailingSettings()),
+      ],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(container: container, child: const SvaApp()),
+    );
+    unawaitedPush(container, Routes.settings);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilterChip, 'Midnight sun'));
+    await tester.pumpAndSettle();
+    expect(find.text("Couldn't save the setting. Try again."), findsOneWidget);
   });
 
   testWidgets('M2-8: the licence page lists Fraunces and Inter', (
@@ -131,4 +182,13 @@ void unawaitedPush(ProviderContainer container, String path) {
   // A pushed page's result is not needed here.
   // ignore: discarded_futures
   container.read(routerProvider).push(path);
+}
+
+/// Settings whose saves fail, as a full disk would.
+class _FailingSettings extends SettingsRepository {
+  new() : super(SvaDatabase.inMemory());
+
+  @override
+  Future<void> setTheme(String userId, String theme) async =>
+      throw StateError('disk full');
 }
